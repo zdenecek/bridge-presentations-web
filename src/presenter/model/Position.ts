@@ -7,22 +7,28 @@ enum Position {
 
 class Positions {
 
-    static nextPosition(position: Position): Position {
+    static nextPosition(position: Position, count = 1): Position {
 
+        if(count == 0) return position;
+        let pos: Position;
         switch(position) {
-            case Position.North: return Position.East;
-            case Position.East: return Position.South;
-            case Position.South: return Position.West;
-            case Position.West: return Position.North;
+            case Position.North: pos = Position.East; break;
+            case Position.East: pos = Position.South; break;
+            case Position.South: pos = Position.West; break;
+            case Position.West: pos = Position.North; break;
         }
+
+        return Positions.nextPosition(pos, count - 1);
     }
+
+    
 
     static NS(position: Position): boolean {
         return position === Position.North || position === Position.East ;
     }
 
     static toString(position: Position): string {
-        return Object.keys(Position)[Object.values(Position).indexOf(position)];;
+        return Object.keys(Position)[Object.values(Position).indexOf(position)];
     }
 
     static all(): Array<Position> {

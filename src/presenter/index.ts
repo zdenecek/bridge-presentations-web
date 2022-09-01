@@ -1,6 +1,6 @@
 import GameView from "./gui/GameView";
 import { Card, Value } from "./model/Card"
-import GameManager from "./model/GameManager";
+import Game from "./model/Game";
 import { Position } from "./model/Position";
 import { Suit } from "./model/Suit"
 import './styles/style.scss';
@@ -11,7 +11,7 @@ import { runLater } from "./utils/runLater";
 
 jQuery( function () { 
 
-    const gm = new GameManager();
+    const gm = new Game();
     
     const gameView = new GameView();
     jQuery(window).on('resize', () => gameView.updatePositions());

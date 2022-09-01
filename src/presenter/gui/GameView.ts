@@ -1,98 +1,77 @@
 import * as $ from "jquery";
 import { Card } from "../model/Card";
 import CardView from "./CardView";
-import GameManager from "../model/GameManager";
+import Game from "../model/Game";
 import { Position, Positions } from "../model/Position";
-import { Player, PresentationPlayer } from "../model/Player";
+import { PresentationPlayer } from "../model/Player";
 import { Point } from "./Point";
 import Hand from "../model/Hand";
 
 export default class GameView {
-    root!: JQuery<HTMLElement>;
+    private root?: JQuery<HTMLElement>;
     cardViews = new Map<Card, CardView>();
 
-    gm: GameManager | undefined;
+    _game?: Game;
 
-    private cardWidth = 0;
-    private cardHeight = 0;
-    private width = 0;
-    private height = 0;
-    private cardSpace = 30;
-    private padding = 20;
-    private trickOffset = 0;
-    private trickSecondaryOffsetNS = 0;
-    private trickSecondaryOffsetEW = 0;
-
-    private calculatePositions() {
-        const cardView = this.cardViews.values().next().value;
-
-        const newWidth = this.root.width()! - 2 * this.padding;
-        const newHeight = this.root.height()! - 2 * this.padding;
-
-        if (newWidth === this.width && newHeight === this.height) return;
-
-        this.width = newWidth;
-        this.height = newHeight;
-        this.cardWidth = cardView.element?.width();
-        this.cardHeight = cardView.element?.height();
-        this.trickOffset = this.cardHeight * 0.2;
-        this.trickSecondaryOffsetNS = this.cardHeight * 0.08;
-        this.trickSecondaryOffsetEW = this.cardHeight * 0.1;
-        this.cardSpace = this.cardWidth * 0.25;
-        console.log(this.cardWidth);
-    }
-
-    private point(x: number, y: number): Point {
-        return new Point(x + this.padding, y + this.padding);
-    }
-
-    attach(gm: GameManager, root?: HTMLElement , selector?: string): void {
-        
+    public attach(root?: HTMLElement, selector?: string): void {
         this.root = root ? $.default(root) : $.default(selector ?? "#cards").first();
-        this.gm = gm;
+    }
 
-        gm.allPlayers.forEach((player) => {
-            player.hand.cards.forEach((card) => {
+    public get game(): Game | undefined {
+        return this._game;
+    }
+
+    public set game(game: Game | undefined) {
+        if(!this.root) throw new Error("root not attached");
+        this._game = game;
+        if (!game) return;
+
+        this.cardViews.forEach((cardView) => cardView.element.detach());
+        this.cardViews = new Map<Card, CardView>();
+
+        game.allPlayers.forEach((player) => {
+            player.hand?.cards.forEach((card) => {
                 const view = new CardView(card);
                 view.onclick = () => (player as PresentationPlayer).playCard(card);
                 this.cardViews.set(card, view);
-                this.root.append(view.element);
+                this.root!.append(view.element);
             });
         });
 
-        const trick_cards = gm.tricks.flatMap((trick) => trick.cards);
+        const trick_cards = game.tricks.flatMap((trick) => trick.cards);
         trick_cards.forEach((card) => {
             const view = new CardView(card);
             this.cardViews.set(card, view);
-            this.root.append(view.element);
+            this.root!.append(view.element);
         });
 
-        gm.cardPlayed.sub(() => {
+        game.cardPlayed.sub(() => {
             this.updatePositions();
         });
 
         this.updatePositions();
     }
 
+
     updatePositions(): void {
-        if (this.gm === undefined) return;
+        if (this.game === undefined) return;
 
         console.debug("update");
         this.calculatePositions();
 
         for (const pos of Positions.all()) {
-            const currentPosition = this.calculateHandPosition(this.gm.player(pos).hand);
+            const currentPosition = this.calculateHandPosition(this.game.player(pos).hand);
 
-            for (const card of this.gm.player(pos).hand.cards) {
+            for (const card of this.game.player(pos).hand.cards) {
                 this.cardViews.get(card)!.position = currentPosition;
                 currentPosition.x += this.cardSpace;
             }
         }
 
-        const currentTrick = this.gm.currentTrick;
+        const currentTrick = this.game.currentTrick;
         const cardPositions = currentTrick ? this.calculateCardInTrickPositions() : undefined;
 
-        for (const trick of this.gm.tricks) {
+        for (const trick of this.game.tricks) {
             if (trick === currentTrick) {
                 currentTrick.cards.forEach((c, index) => {
                     this.cardViews.get(c)!.element.css("z-index", index);
@@ -113,15 +92,55 @@ export default class GameView {
         }
     }
 
+    toggleVisible(position: Position) {
+        this.game?.player(position).hand?.cards.forEach((card) => {
+            this.cardViews.get(card)!.toggleVisible();
+        });
+    }
+
+    private cardWidth = 0;
+    private cardHeight = 0;
+    private width = 0;
+    private height = 0;
+    private cardSpace = 30;
+    private padding = 20;
+    private trickOffset = 0;
+    private trickSecondaryOffsetNS = 0;
+    private trickSecondaryOffsetEW = 0;
+
+    private calculatePositions() {
+        if(!this.root) return;
+        const cardView = this.cardViews.values().next().value;
+        if(!cardView) return;
+
+        const newWidth = this.root.width()! - 2 * this.padding;
+        const newHeight = this.root.height()! - 2 * this.padding;
+
+        if (newWidth === this.width && newHeight === this.height) return;
+
+        this.width = newWidth;
+        this.height = newHeight;
+        this.cardWidth = cardView.element?.width();
+        this.cardHeight = cardView.element?.height();
+        this.trickOffset = this.cardHeight * 0.2;
+        this.trickSecondaryOffsetNS = this.cardHeight * 0.08;
+        this.trickSecondaryOffsetEW = this.cardHeight * 0.1;
+        this.cardSpace = this.cardWidth * 0.25;
+    }
+
+    private point(x: number, y: number): Point {
+        return new Point(x + this.padding, y + this.padding);
+    }
+
     updateHandPosition(start: Point, hand: Hand, position: Position): Point {
         const currentPosition = start;
         for (const card of hand.cards) {
-            this.cardViews.get(card)!.element.offset(start.asCoords());
-            if (Positions.NS(position)) start.x += this.cardSpace;
-            else start.y += this.cardSpace;
+            this.cardViews.get(card)!.element.offset(currentPosition.asCoords());
+            if (Positions.NS(position)) currentPosition.x += this.cardSpace;
+            else currentPosition.y += this.cardSpace;
         }
 
-        return start;
+        return currentPosition;
     }
 
     calculateHandPosition(hand: Hand): Point {
