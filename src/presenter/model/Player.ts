@@ -1,32 +1,78 @@
+import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import { runLater } from "../utils/runLater";
-import { Bid, PassBid } from "./Bid";
+import { Bid } from "./Bid";
 import { Card } from "./Card";
 import Game from "./Game";
 import Hand from "./Hand";
-import { Position, Positions } from "./Position";
+import { Position } from "./Position";
 import Trick from "./Trick";
 
-export interface Player {
-    position: Position;
-    hand: Hand;
-
-    requestPlay(game: Game, toTrick: Trick, addCard: (player: Player, card: Card) => boolean): void;
-    cancelRequestToPlay(): void;
-
-    requestBid(game: Game, addBid: (player: Player, bid: Bid) => boolean): void;
-    cancelRequestToBid(): void;
+export interface PlayRequestedEvent {
+    player: Player;
+    game: Game;
+    trick: Trick;
 }
 
-export class PresentationPlayer implements Player {
+export interface BidRequestedEvent {
+    player: Player;
+    game: Game;
+}
+
+export interface PlayerEvent {
+    player: Player;
+    game: Game;
+}
+
+export interface CardEvent {
+    player: Player;
+    game: Game;
+    card: Card;
+}
+
+export interface BidEvent {
+    player: Player;
+    game: Game;
+    bid: Bid;
+}
+
+export class Player {
     position: Position;
     private _hand!: Hand;
-    callback: ((player: Player, card: Card) => boolean) | undefined;
-    currentTrick?: Trick;
+    private game!: Game;
+    private playCallback: ((player: Player, card: Card) => boolean) | undefined;
+    private bidCallback: ((player: Player, bid: Bid) => boolean) | undefined;
+
+    private _playRequested = new SimpleEventDispatcher<PlayRequestedEvent>();
+    private _playRequestCancelled = new SimpleEventDispatcher<PlayerEvent>();
+    private _bidRequested = new SimpleEventDispatcher<BidRequestedEvent>();
+    private _bidRequestCancelled = new SimpleEventDispatcher<PlayerEvent>();
+    private _bidMade = new SimpleEventDispatcher<BidEvent>();
+    private _cardPlayer = new SimpleEventDispatcher<CardEvent>();
 
     constructor(position: Position) {
         this.position = position;
     }
-    
+
+    get bidMade(): ISimpleEvent<BidEvent> {
+        return this._bidMade.asEvent();
+    }
+    get cardPlayed(): ISimpleEvent<CardEvent> {
+        return this._cardPlayer.asEvent();
+    }
+
+    get playRequested(): ISimpleEvent<PlayRequestedEvent> {
+        return this._playRequested.asEvent();
+    }
+    get playRequestCancelled(): ISimpleEvent<PlayerEvent> {
+        return this._playRequestCancelled.asEvent();
+    }
+    get bidRequested(): ISimpleEvent<BidRequestedEvent> {
+        return this._bidRequested.asEvent();
+    }
+    get bidRequestCancelled(): ISimpleEvent<PlayerEvent> {
+        return this._bidRequestCancelled.asEvent();
+    }
+
     set hand(hand: Hand) {
         this._hand = hand;
         this._hand.position = this.position;
@@ -37,43 +83,44 @@ export class PresentationPlayer implements Player {
     }
 
     cancelRequestToBid(): void {
-        return;
+        this.bidCallback = undefined;
+        runLater(() => this._bidRequestCancelled.dispatch({ player: this, game: this.game }));
     }
 
     cancelRequestToPlay(): void {
-        this.callback = undefined;
+        this.playCallback = undefined;
+        runLater(() => this._playRequestCancelled.dispatch({ player: this, game: this.game }));
     }
 
     requestBid(game: Game, addBid: (player: Player, bid: Bid) => boolean): void {
-        runLater(() => addBid(this, new PassBid()));
+        this.game = game;
+        this.bidCallback = addBid;
+        runLater(() => this._bidRequested.dispatch({ player: this, game: game }));
     }
 
     requestPlay(game: Game, toTrick: Trick, addCard: (player: Player, card: Card) => boolean): void {
-        console.debug("Card has been requested from player sitting " + Positions.toString(this.position));
+        this.game = game;
+        this.playCallback = addCard;
 
-        this.currentTrick = toTrick;
-        this.callback = addCard;
-
-        let playables = this.hand.cards;
-        if (toTrick.cards.length > 0) playables = playables.filter((c) => c.suit == toTrick.cards[0]?.suit);
-        if (playables.length == 0) playables = this.hand.cards;
-
-        console.debug(`Cards ${this.hand.cards.length}, playable ${playables.length}`);
-
-        playables.forEach((c) => (c.playable = true));
+        runLater(() => this._playRequested.dispatch({ player: this, game: game, trick: toTrick }));
     }
 
-    playCard(card: Card): void {
-        if (!card.playable) return;
-
-        const successfullyPlayed = this.callback?.(this, card);
+    protected playCard(card: Card): void {
+        const successfullyPlayed = this.playCallback?.(this, card);
         if (!successfullyPlayed) return;
 
-        console.debug(Positions.toString(this.position) + " plays " + card.toString());
-
-        this.callback = undefined;
-
-        this.hand.cards.forEach((c) => (c.playable = false));
+        this.playCallback = undefined;
         this.hand.cards.splice(this.hand.cards.indexOf(card), 1);
+
+        runLater(() => this._cardPlayer.dispatch({ player: this, game: this.game, card: card }));
+    }
+
+    protected bid(bid: Bid): void {
+        const successfullyPlayed = this.bidCallback?.(this, bid);
+        if (!successfullyPlayed) return;
+
+        this.bidCallback = undefined;
+
+        runLater(() => this._bidMade.dispatch({ player: this, game: this.game, bid: bid }));
     }
 }

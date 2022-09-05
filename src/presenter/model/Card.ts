@@ -1,5 +1,4 @@
 import { Suit, Suits } from "./Suit";
-import { ISimpleEvent, SimpleEventDispatcher } from "strongly-typed-events";
 
 enum Value {
     Other = 1,
@@ -27,28 +26,10 @@ class Values {
 class Card {
     public suit: Suit;
     public value: Value;
-    public _playable = false;
-
-    private _playableChanged = new SimpleEventDispatcher<Card>();
 
     constructor(suit: Suit = Suit.Notrump, value: Value = Value.Two) {
         this.suit = suit;
         this.value = value;
-    }
-
-    public get playableChanged(): ISimpleEvent<Card> {
-        return this._playableChanged.asEvent();
-    }
-
-    public set playable(value: boolean) {
-        if (value === this.playable) return;
-        console.debug(`setting playable on ${this.toString()} to ${value}`);
-        this._playable = value;
-        this._playableChanged.dispatch(this);
-    }
-
-    public get playable(): boolean {
-        return this._playable;
     }
 
     public toString(): string {

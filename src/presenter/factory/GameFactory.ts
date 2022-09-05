@@ -1,9 +1,10 @@
-import { Player, PresentationPlayer } from "../model/Player";
+import { Player } from "../model/Player";
 import { PositionList, Position, Positions } from "../model/Position";
 import Game from "../model/Game";
 import Hand from "../model/Hand";
 import { Card, Value } from "../model/Card";
 import { Suit } from "../model/Suit";
+import { PresentationPlayer } from "../model/PresentationPlayer";
 
 export default class GameFactory {
     static makeTestGame(): Game {
@@ -27,13 +28,13 @@ export default class GameFactory {
         game.cardPlayed.sub((e) => {console.debug(`card played: ${e.card}`)});
         game.trickEnded.sub((e) => {console.debug(`trick ended: ${e.trick}`)});
         game.trickStarted.sub((e) => {console.debug(`trick started: ${e.trick}`)})
-        game.biddingStarted.sub((e) => {console.debug(`bidding started`)})
+        game.biddingStarted.sub(() => {console.debug(`bidding started`)})
         game.biddingEnded.sub((e) => {console.debug(`bidding ended: ${e.game.auction?.finalContract}`)})
         game.bidMade.sub((e) => {console.debug(`bid made: ${e.bid}`)})
-        game.cardplayStarted.sub((e) => {console.debug(`cardplay started`)})
-        game.cardplayEnded.sub((e) => {console.debug(`cardplay ended`)})
-        game.gameStarted.sub((e) => {console.debug(`game started`)})
-        game.gameEnded.sub((e) => {console.debug(`game ended`)})
+        game.cardplayStarted.sub(() => {console.debug(`cardplay started`)})
+        game.cardplayEnded.sub(() => {console.debug(`cardplay ended`)})
+        game.gameStarted.sub(() => {console.debug(`game started`)})
+        game.gameEnded.sub(() => {console.debug(`game ended`)})
 
         return game;
     }

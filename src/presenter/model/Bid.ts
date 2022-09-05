@@ -1,11 +1,10 @@
 import { ContractLevel } from "./Contract";
-import { Suit } from "./Suit";
+import { Suit, Suits } from "./Suit";
+
 
 
 export abstract class Bid {
-
     alerted = false;
-
 }
 
 export class ContractBid extends Bid {
@@ -18,16 +17,30 @@ export class ContractBid extends Bid {
         this.suit = suit;
         this.level = level;
     }
+
+    isGreaterThan(other: ContractBid): boolean {
+        return this.level > other.level || this.suit > other.suit;
+    }
+
+    toString(): string {
+        return `${this.level}${Suits.toSymbol(this.suit)}`;
+    }
 }
 
 export class DoubleBid extends Bid {
-
+    toString(): string {
+        return "X";
+    }
 }
 
 export class RedoubleBid extends Bid {
-
+    toString(): string {
+        return "XX";
+    }
 }
 
 export class PassBid extends Bid {
-
+    toString(): string {
+        return "Pass";
+    }
 }

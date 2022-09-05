@@ -50,4 +50,8 @@ export default class Trick {
     suit(suit: Suit): Array<Card> {
         return this.cards.filter((c) => c.suit == suit);
     }
+
+    toString(): string {
+        return `(${this.cards.map((c) => c.toString()).join(" ")}) ${this.firstToPlay} first`;
+    }
 }

@@ -130,10 +130,10 @@ export default class Game {
 
         runLater(() => this._biddingEnded.dispatch({ game: this }));
 
-        if (this.finalContract === 'passed')  runLater(() => this.end());
+        if (this.finalContract === "passed") runLater(() => this.end());
         else {
-            const contract = this.finalContract; 
-            runLater(() => this.startPlay(Positions.nextPosition(contract.declarer, 3)));
+            const contract = this.finalContract;
+            runLater(() => this.startPlay(Positions.nextPosition(contract.declarer)));
         }
     }
 
@@ -176,14 +176,29 @@ export default class Game {
         if (trick.isFinished) runLater(() => this.endTrick());
         else {
             const nextPlayer = this.players[Positions.nextPosition(player.position)];
-            nextPlayer.requestPlay(this, trick, (player: Player, card: Card) => this.addCard(trick, card, nextPlayer));
+            runLater(() =>
+                nextPlayer.requestPlay(this, trick, (player: Player, card: Card) =>
+                    this.addCard(trick, card, nextPlayer)
+                )
+            );
         }
         return true;
     }
 
     private addBid(bid: Bid, player: Player): boolean {
-
+        if (!this.auction) throw Error("No auction");
         // todo check correct player, correct bid
+
+        const success = this.auction.addBid(bid, player.position);
+        if (!success) return false;
+
+        runLater(() => this._bidMade.dispatch({ bid, player, game: this }));
+        if (this.auction.isFinished) runLater(() => this.endBidding());
+        else {
+            const nextPlayer = this.players[Positions.nextPosition(player.position)];
+            runLater(() => nextPlayer.requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, nextPlayer)));
+        }
+
         return true;
     }
 }

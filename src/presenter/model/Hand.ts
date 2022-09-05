@@ -10,4 +10,8 @@ export default class Hand {
         this.cards = cards.sort((a, b) => (a.suit - b.suit) !== 0 ? a.suit - b.suit : b.value - a.value);
         this.position = position;
     }
+
+    toString(): string {
+        return `(${this.cards.map(card => card.toString()).join(' ')})`;
+    }
 }

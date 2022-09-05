@@ -2,19 +2,29 @@ import * as $ from "jquery";
 import { Card } from "../model/Card";
 import CardView from "./CardView";
 import Game from "../model/Game";
-import { Position, Positions } from "../model/Position";
-import { PresentationPlayer } from "../model/Player";
+import { Position, Positions, Side } from "../model/Position";
 import { Point } from "./Point";
 import Hand from "../model/Hand";
+import BiddingBoxView from "./BiddingBoxView";
+import { PresentationPlayer } from "../model/PresentationPlayer";
+import { BiddingView } from "./BiddingView";
 
 export default class GameView {
     private root?: JQuery<HTMLElement>;
-    cardViews = new Map<Card, CardView>();
+    private cardViews = new Map<Card, CardView>();
+    private biddingBox: BiddingBoxView;
+    private biddingView: BiddingView;
+    private _game?: Game;
 
-    _game?: Game;
+    constructor() {
+        this.biddingBox = new BiddingBoxView();
+        this.biddingView = new BiddingView();
+    }
 
     public attach(root?: HTMLElement, selector?: string): void {
         this.root = root ? $.default(root) : $.default(selector ?? "#cards").first();
+        this.root.append(this.biddingBox.root);
+        this.biddingView.attach(this.root);
     }
 
     public get game(): Game | undefined {
@@ -22,9 +32,13 @@ export default class GameView {
     }
 
     public set game(game: Game | undefined) {
-        if(!this.root) throw new Error("root not attached");
+        if (!this.root) throw new Error("root not attached");
         this._game = game;
+        this.biddingView.game = game;
         if (!game) return;
+
+        this.biddingBox.visible = false;
+        this.biddingView.visible = false;
 
         this.cardViews.forEach((cardView) => cardView.element.detach());
         this.cardViews = new Map<Card, CardView>();
@@ -32,9 +46,47 @@ export default class GameView {
         game.allPlayers.forEach((player) => {
             player.hand?.cards.forEach((card) => {
                 const view = new CardView(card);
-                view.onclick = () => (player as PresentationPlayer).playCard(card);
                 this.cardViews.set(card, view);
                 this.root!.append(view.element);
+            });
+
+            player.playRequested.sub((e) => {
+                let playables = e.player.hand.cards;
+                if (e.trick.cards.length > 0) playables = playables.filter((c) => c.suit == e.trick.cards[0]?.suit);
+                if (playables.length == 0) playables = e.player.hand.cards;
+
+                playables.forEach((card) => {
+                    const cardView = this.cardViews.get(card)!;
+                    cardView.playable = true;
+                    cardView.onclick = () => (player as PresentationPlayer).playCard(card);
+                });
+            });
+
+            player.playRequestCancelled.sub((e) => {
+                e.player.hand.cards.forEach((card) => (this.cardViews.get(card)!.playable = false));
+            });
+
+            player.cardPlayed.sub((e) => {
+                e.player.hand.cards.forEach((card) => {
+                    const cardView = this.cardViews.get(card)!;
+                    cardView.playable = false;
+                    cardView.onclick = undefined;
+                });
+                const cardView = this.cardViews.get(e.card)!;
+                cardView.playable = false;
+                cardView.onclick = undefined;
+            });
+
+            player.bidRequested.sub(() => {
+                this.biddingBox.callback = (bid) => (player as PresentationPlayer).bid(bid);
+            });
+
+            player.bidRequestCancelled.sub(() => {
+                this.biddingBox.callback = undefined;
+            });
+
+            player.bidMade.sub(() => {
+                this.biddingBox.callback = undefined;
             });
         });
 
@@ -49,14 +101,17 @@ export default class GameView {
             this.updatePositions();
         });
 
+        game.biddingStarted.sub(() => {
+            this.biddingBox.visible = true;
+            this.biddingView.visible = true;
+        });
+        game.biddingEnded.sub(() => (this.biddingBox.visible = false));
+
         this.updatePositions();
     }
 
-
     updatePositions(): void {
         if (this.game === undefined) return;
-
-        console.debug("update");
         this.calculatePositions();
 
         for (const pos of Positions.all()) {
@@ -74,7 +129,7 @@ export default class GameView {
         for (const trick of this.game.tricks) {
             if (trick === currentTrick) {
                 currentTrick.cards.forEach((c, index) => {
-                    this.cardViews.get(c)!.element.css("z-index", index);
+                    this.cardViews.get(c)!.element.css("z-index", index + 10);
                 });
                 Positions.all().forEach((pos) => {
                     const card = trick.getCards()[pos];
@@ -92,7 +147,7 @@ export default class GameView {
         }
     }
 
-    toggleVisible(position: Position) {
+    toggleVisible(position: Position): void {
         this.game?.player(position).hand?.cards.forEach((card) => {
             this.cardViews.get(card)!.toggleVisible();
         });
@@ -109,9 +164,9 @@ export default class GameView {
     private trickSecondaryOffsetEW = 0;
 
     private calculatePositions() {
-        if(!this.root) return;
+        if (!this.root) return;
         const cardView = this.cardViews.values().next().value;
-        if(!cardView) return;
+        if (!cardView) return;
 
         const newWidth = this.root.width()! - 2 * this.padding;
         const newHeight = this.root.height()! - 2 * this.padding;
@@ -136,7 +191,7 @@ export default class GameView {
         const currentPosition = start;
         for (const card of hand.cards) {
             this.cardViews.get(card)!.element.offset(currentPosition.asCoords());
-            if (Positions.NS(position)) currentPosition.x += this.cardSpace;
+            if (Positions.side(position) === Side.NS) currentPosition.x += this.cardSpace;
             else currentPosition.y += this.cardSpace;
         }
 

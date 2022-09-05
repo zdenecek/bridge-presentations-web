@@ -4,6 +4,11 @@
         <div id="configurator-content">
             <div class="tab" ref="tabCards">
                 <h2>Cards and play</h2>
+                <div class="vertical-controls">
+                    <button tabindex="-1" @click="clear">Clear cards</button>
+                    <button tabindex="-1" @click="null" disabled>Save</button>
+                    <button tabindex="-1" @click="null" disabled>Load</button>
+                </div>
                 <div class="fields">
                     <template v-for="(label, pos) in positions" :key="pos">
                         <label :for="pos">{{ label }}</label>
@@ -12,7 +17,7 @@
                 </div>
                 <div class="fields">
                     <label for="enable-bidding">Enable bidding</label>
-                    <input type="checkbox"  class="checkbox" id="enable-bidding" v-model="options.bidding" />
+                    <input type="checkbox" class="checkbox" id="enable-bidding" v-model="options.bidding" />
 
                     <label for="first">{{ options.bidding ? "Dealer" : "First to play" }}</label>
                     <select id="first" v-model="options.firstPlayer">
@@ -32,7 +37,15 @@
                     <div>Start game</div>
                     <div class="key">Ctrl+M</div>
                     <div>Toggle this menu</div>
-                    <div><span class="key">&larr;</span>, <span class="key">&uarr;</span>, <span class="key">&darr;</span>, <span class="key">&rarr;</span></div>
+                    <div>
+                        <span class="key">&larr;</span>
+                        ,
+                        <span class="key">&uarr;</span>
+                        ,
+                        <span class="key">&darr;</span>
+                        ,
+                        <span class="key">&rarr;</span>
+                    </div>
                     <div>Toggle visibility for a hand</div>
                 </div>
             </div>
@@ -46,6 +59,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Suit } from "@/presenter/model/Suit";
+
+
 export default defineComponent({
     name: "Presenter",
     props: {
@@ -63,6 +78,14 @@ export default defineComponent({
         submit() {
             this.onSubmit(this.options);
         },
+        clear() {
+            this.options.cards = {
+                north: "",
+                east: "",
+                west: "",
+                south: "",
+            };
+        },
     },
     data() {
         return {
@@ -74,7 +97,7 @@ export default defineComponent({
                     west: "3 AKJT 964 QJ952",
                 },
                 firstPlayer: "north",
-                bidding: false,
+                bidding: true,
                 trumps: Suit.Notrump,
             },
 
@@ -107,11 +130,6 @@ export default defineComponent({
     flex-direction: column;
 }
 
-button {
-    padding: 5px 30px;
-    font-size: 1.2rem;
-}
-
 #configurator-tabs {
     display: flex;
 }
@@ -131,7 +149,6 @@ button {
         gap: 20px;
     }
 
-
     .fields {
         display: grid;
         grid-template-columns: 1fr 2fr;
@@ -144,6 +161,16 @@ button {
         label {
             text-align: right;
         }
+
+        .span {
+            grid-column: span 2;
+        }
+    }
+
+    .vertical-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
     }
 
     #controls-tab {
@@ -155,7 +182,7 @@ button {
             text-align: left;
             margin: auto 0;
         }
-        
+
         .key {
             margin: auto;
             border: solid gray 1px;
@@ -171,5 +198,10 @@ button {
 #configurator-buttons {
     display: flex;
     justify-content: flex-end;
+
+    button {
+        padding: 5px 30px;
+        font-size: 1.2rem;
+    }
 }
 </style>

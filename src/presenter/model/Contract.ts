@@ -1,5 +1,5 @@
 import { Position } from "./Position";
-import { Suit } from "./Suit";
+import { Suit, Suits } from "./Suit";
 
 
 export type ContractDoubledState = 'undoubled' | 'doubled' | 'redoubled';
@@ -19,6 +19,11 @@ export class NonPassedContract {
         this.level = level;
         this.declarer = declarer;
         this.dbl = dbl;
+    }
+
+    toString(): string {
+        const doubled = this.dbl === 'doubled' ? 'x' : this.dbl === 'redoubled' ? 'xx' : '';
+        return `${this.level}${Suits.toSymbol(this.suit)}${doubled} ${this.declarer}`;
     }
 
 }

@@ -15,7 +15,6 @@ export default class CardView {
 
     constructor(model: Card) {
         this.model = model;
-        model.playableChanged.sub(this.updatePlayable.bind(this));
         this.cardPath = this.getCardPath();
         this.element = $(`
             <div class="card">
@@ -47,8 +46,8 @@ export default class CardView {
         this.element.on("click.cardplayed",() => value());
     }
 
-    private updatePlayable() {
-        if (this.model.playable) {
+    public set playable(value: boolean) {
+        if (value) {
             this.element.addClass("playable");
         } else {
             this.element.removeClass("playable");

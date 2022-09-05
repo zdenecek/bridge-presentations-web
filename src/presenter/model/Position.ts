@@ -5,6 +5,11 @@ enum Position {
     West = 'west',
 }
 
+enum Side {
+    NS =  'ns',
+    EW = 'ew',
+}
+
 class Positions {
 
     static nextPosition(position: Position, count = 1): Position {
@@ -21,11 +26,10 @@ class Positions {
         return Positions.nextPosition(pos, count - 1);
     }
 
-    
-
-    static NS(position: Position): boolean {
-        return position === Position.North || position === Position.East ;
+    static side(position: Position): Side  {
+        return position === Position.North || position === Position.South  ? Side.NS : Side.EW;
     }
+
 
     static toString(position: Position): string {
         return Object.keys(Position)[Object.values(Position).indexOf(position)];
@@ -45,4 +49,4 @@ class Positions {
 type PositionList<T> = { [key in Position]: T }
 type PartialPositionList<T> = { [key in Position]?: T }
 
-export { Position, Positions, PositionList, PartialPositionList};
+export { Position, Positions, PositionList, PartialPositionList, Side};
