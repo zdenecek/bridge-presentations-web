@@ -1,0 +1,32 @@
+
+.bidding-box {
+    outline: red 1px solid;
+}
+
+.bidding {
+    background-color: aquamarine;
+}
+
+.bid-stack {
+    .bid {
+        outline: red 1px solid;
+    }
+}
+
+.bid-stack-north {
+    background-color: lightblue;
+}
+
+.bid-stack-east {
+    background-color: lightgoldenrodyellow;
+
+    
+}
+.bid-stack-south {
+    background-color: lightgreen;
+}
+
+.bid-stack-west {
+    background-color: lightpink;
+
+}

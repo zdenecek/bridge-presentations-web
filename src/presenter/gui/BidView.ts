@@ -1,6 +1,5 @@
 import $ from "jquery";
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../model/Bid";
-import { Position } from "../model/Position";
 import { Suits } from "../model/Suit";
 import { Point } from "./Point";
 
@@ -9,12 +8,10 @@ export class BidView {
 
     element: JQuery<HTMLElement>;
     bid: Bid;
-    bidPosition: Position;
 
-    constructor(bid: Bid, position: Position) {
-        this.bidPosition = position;
+    constructor(bid: Bid) {
         this.bid = bid;
-        this.element = $(`<div class='bid bid-${position}'>
+        this.element = $(`<div class='bid'>
             <img src='${this.getImagePath()}' alt='${bid}'/>
             </div>`);
     }
@@ -25,16 +22,17 @@ export class BidView {
         } else if (this.bid instanceof PassBid) {
             return BidView.images(`./pass.png`);
         } else if (this.bid instanceof DoubleBid) {
-            return BidView.images(`./double.png`);
+            return BidView.images(`./x.png`);
         } else if (this.bid instanceof RedoubleBid) {
-            return BidView.images(`./redouble.png`);
+            return BidView.images(`./xx.png`);
         }
         throw new Error("Unknown bid type");
     }
+
 
     public set position(value: Point) {
         this.element.css("transition", "ease 1s")
         this.element.css(value.asCoords());
     }
-    
+
 }

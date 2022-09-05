@@ -1,0 +1,53 @@
+import $ from "jquery";
+import { Bid } from "../model/Bid";
+import { Position, PositionList } from "../model/Position";
+import { BidStack } from "./BidStack";
+import { ISimpleEvent } from "ste-simple-events";
+import { GameChangedEvent } from "./GameView";
+
+export class AuctionView {
+    private root: JQuery<HTMLElement>;
+    private bidStacks: PositionList<BidStack>;
+
+    constructor(parent: JQuery<HTMLElement>, gameChanged: ISimpleEvent<GameChangedEvent>) {
+        this.root = $(`<div class='bidding'></div>`);
+        // TODO add class for bidstack?
+        this.bidStacks = {
+            north: new BidStack(this.root, Position.North),
+            east: new BidStack(this.root, Position.East),
+            south: new BidStack(this.root, Position.South),
+            west: new BidStack(this.root, Position.West),
+        };
+
+        parent.append(this.root);
+
+        this.visible = false;
+
+        gameChanged.sub((e) => {
+            this.visible = false;
+            e.game?.biddingStarted.sub(() => (this.visible = true));
+            e.game?.cardPlayed.sub(() => (this.visible = false));
+        });
+
+        gameChanged.sub((e) => {
+            this.reset();
+            e.game?.bidMade.sub((e) => this.addBid(e.player.position, e.bid));
+        });
+    }
+
+    public set visible(visible: boolean) {
+        this.root.toggle(visible);
+    }
+
+    public update(): void {
+        Object.values(this.bidStacks).forEach((bidStack) => bidStack.updateSpacing());
+    }
+
+    private reset(): void {
+        Object.values(this.bidStacks).forEach((bidStack) => bidStack.reset());
+    }
+
+    private addBid(player: Position, bid: Bid): void {
+        this.bidStacks[player].addBid(bid);
+    }
+}

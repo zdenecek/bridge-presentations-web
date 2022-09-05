@@ -19,7 +19,7 @@ export class ContractBid extends Bid {
     }
 
     isGreaterThan(other: ContractBid): boolean {
-        return this.level > other.level || this.suit > other.suit;
+        return this.level > other.level || ( this.level === other.level && this.suit > other.suit);
     }
 
     toString(): string {

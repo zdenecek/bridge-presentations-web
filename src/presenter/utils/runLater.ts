@@ -1,6 +1,6 @@
 
 
-export function runLater(callback: Function, delay: number = 0) {
+export function runLater(callback: () => void, delay = 0): void {
 
     window.setTimeout(callback, delay);
 

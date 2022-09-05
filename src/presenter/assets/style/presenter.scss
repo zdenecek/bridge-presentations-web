@@ -1,0 +1,172 @@
+.presenter-app {
+    background-color: blanchedalmond;
+
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+
+    ::selection {
+        color: none;
+        background: none;
+    }
+}
+
+.card {
+    height: 20%;
+    aspect-ratio: 530/800;
+    display: inline-block;
+    position: absolute;
+
+    &.playable {
+        img {
+            transition: ease-in-out 0.2s;
+        }
+
+        &:hover img {
+            transform: translateY(-10%);
+        }
+    }
+
+    &:not(.reverse) img.front {
+        z-index: 1;
+        display: initial;
+    }
+
+    &.reverse img.back {
+        z-index: 0;
+        display: initial;
+    }
+
+    img {
+        z-index: -1;
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        object-fit: fill;
+    }
+}
+
+.bidding-box {
+    display: inline-grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 20px;
+
+    .bidding-box-bid {
+        padding: 2px 4px;
+        outline: solid 1px;
+        border-radius: 4px;
+        cursor: pointer;
+
+        .level {
+            color: black;
+        }
+
+        &.suit-clubs {
+            color: #3575af;
+            background-color: lighten($color: #3575af, $amount: 50%);
+        }
+        &.suit-diamonds {
+            color: #d26d2a;
+            background-color: lighten($color: #d26d2a, $amount: 50%);
+        }
+        &.suit-hearts {
+            color: #e90202;
+            background-color: lighten($color: #e90202, $amount: 50%);
+        }
+        &.suit-spades {
+            color: black;
+            background-color: gainsboro;
+        }
+
+        &.suit-notrump {
+            color: black;
+            background-color: lightgray;
+        }
+    }
+
+    .pass {
+        grid-column: span 3;
+        background-color: green;
+        color: white;
+    }
+
+    .double {
+        background-color: red;
+        color: white;
+    }
+
+    .redouble {
+        background-color: blue;
+        color: white;
+    }
+}
+
+.bidding {
+    transition: all 1s ease;
+
+    height: 40%;
+    aspect-ratio: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+}
+
+$bid-card-height: 10vh;
+
+.bid-stack {
+    height: $bid-card-height;
+    width: calc(100% - $bid-card-height);
+    position: absolute;
+    overflow: visible;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 200% 100%, 200% 200%,  0 200%);
+    transition: all 1s ease;
+
+
+    .bid {
+        overflow: visible;
+        position: absolute;
+        top: 0;
+        height: $bid-card-height;
+        transition: 0.1s ease;
+
+        img {
+            height: 100%;
+        }
+    }
+}
+
+.bid-stack-north {
+    top: 0;
+    right: 0;
+    transform: rotate(180deg);
+}
+
+.bid-stack-east {
+    left: calc(100% - $bid-card-height);
+    bottom: 0;
+    transform: rotate(270deg);
+    transform-origin: calc($bid-card-height / 2) 50%;
+}
+.bid-stack-south {
+    left: 0;
+    bottom: 0;
+}
+
+.bid-stack-west {
+    top: 0;
+    left: 0;
+    transform-origin: calc($bid-card-height / 2) 50%;
+
+    transform: rotate(90deg);
+}

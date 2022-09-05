@@ -9,6 +9,8 @@ import { Bid } from "./Bid";
 import { Auction } from "./Auction";
 import { Contract } from "./Contract";
 
+type GameState = "notStarted" | "bidding" | "play" | "finished";
+
 export interface CardPlayedEvent {
     card: Card;
     game: Game;
@@ -38,9 +40,11 @@ export default class Game {
     trumps: Suit = Suit.Notrump;
     auction: Auction | undefined;
     finalContract: Contract | undefined;
+    state: GameState;
 
     constructor(players: PositionList<Player>) {
         this.players = players;
+        this.state = "notStarted";
     }
 
     private _cardPlayed = new SimpleEventDispatcher<CardPlayedEvent>();
@@ -95,17 +99,22 @@ export default class Game {
         return Object.values(this.players);
     }
 
-    public start(firstToPlay: Position, bidding = true): void {
+    public start(firstToPlay: Position, bidding = true, trumps?: Suit): void {
         runLater(() => this._gameStarted.dispatch({ game: this }));
         if (bidding) runLater(() => this.startBidding(firstToPlay));
-        else runLater(() => this.startPlay(firstToPlay));
+        else {
+            this.trumps = trumps || Suit.Notrump;
+            runLater(() => this.startPlay(firstToPlay));
+        }
     }
 
     private end(): void {
+        this.state = "finished";
         runLater(() => this._gameEnded.dispatch({ game: this }));
     }
 
     private startPlay(firstToPlay: Position): void {
+        this.state = "play";
         runLater(() => this._cardplayStarted.dispatch({ game: this }));
         runLater(() => this.startNewTrick(firstToPlay));
     }
@@ -117,6 +126,7 @@ export default class Game {
 
     private startBidding(dealer: Position): void {
         this.auction = new Auction(dealer);
+        this.state = "bidding";
         const player = this.players[dealer];
 
         runLater(() => this._biddingStarted.dispatch({ game: this }));
@@ -125,14 +135,15 @@ export default class Game {
 
     private endBidding(): void {
         if (!this.auction) throw Error("No auction");
-        if (!this.auction.isFinished) throw Error("Bidding not finished");
-        this.finalContract = this.auction.finalContract!;
+        if (!this.auction.isFinished || !this.auction.finalContract) throw Error("Bidding not finished");
+        this.finalContract = this.auction.finalContract;
 
         runLater(() => this._biddingEnded.dispatch({ game: this }));
 
         if (this.finalContract === "passed") runLater(() => this.end());
         else {
             const contract = this.finalContract;
+            this.trumps = this.finalContract.suit;
             runLater(() => this.startPlay(Positions.nextPosition(contract.declarer)));
         }
     }
@@ -162,7 +173,7 @@ export default class Game {
         if (this.players[Position.North].hand.cards.length > 0) {
             runLater((() => this.startNewTrick(winner)).bind(this));
         } else {
-            runLater(() => this.end());
+            runLater(() => this.endPlay());
         }
     }
 

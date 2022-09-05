@@ -7,24 +7,34 @@ import { Point } from "./Point";
 import Hand from "../model/Hand";
 import BiddingBoxView from "./BiddingBoxView";
 import { PresentationPlayer } from "../model/PresentationPlayer";
-import { BiddingView } from "./BiddingView";
+import { AuctionView } from "./AuctionView";
+import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
+
+
+export interface GameChangedEvent { game?: Game; }
+
 
 export default class GameView {
-    private root?: JQuery<HTMLElement>;
+    
+    private root: JQuery<HTMLElement>;
     private cardViews = new Map<Card, CardView>();
     private biddingBox: BiddingBoxView;
-    private biddingView: BiddingView;
+    private auctionView: AuctionView;
     private _game?: Game;
 
     constructor() {
-        this.biddingBox = new BiddingBoxView();
-        this.biddingView = new BiddingView();
+        this.root = $.default("<div class='presenter-app'></div>");
+        this.auctionView = new AuctionView(this.root, this.gameChanged);
+        this.biddingBox = new BiddingBoxView(this.root,  this.gameChanged);
     }
 
-    public attach(root?: HTMLElement, selector?: string): void {
-        this.root = root ? $.default(root) : $.default(selector ?? "#cards").first();
-        this.root.append(this.biddingBox.root);
-        this.biddingView.attach(this.root);
+    private _gameChanged = new SimpleEventDispatcher<GameChangedEvent>();
+    private get gameChanged(): ISimpleEvent<GameChangedEvent> {
+        return this._gameChanged.asEvent();
+    }
+
+    public attach(parent: HTMLElement): void {
+        $.default(parent).append(this.root);
     }
 
     public get game(): Game | undefined {
@@ -34,11 +44,10 @@ export default class GameView {
     public set game(game: Game | undefined) {
         if (!this.root) throw new Error("root not attached");
         this._game = game;
-        this.biddingView.game = game;
+        this._gameChanged.dispatch({ game });
         if (!game) return;
 
-        this.biddingBox.visible = false;
-        this.biddingView.visible = false;
+
 
         this.cardViews.forEach((cardView) => cardView.element.detach());
         this.cardViews = new Map<Card, CardView>();
@@ -100,12 +109,6 @@ export default class GameView {
         game.cardPlayed.sub(() => {
             this.updatePositions();
         });
-
-        game.biddingStarted.sub(() => {
-            this.biddingBox.visible = true;
-            this.biddingView.visible = true;
-        });
-        game.biddingEnded.sub(() => (this.biddingBox.visible = false));
 
         this.updatePositions();
     }

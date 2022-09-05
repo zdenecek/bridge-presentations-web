@@ -1,4 +1,5 @@
 import { Position } from "./presenter/model/Position";
+import { Suit } from "./presenter/model/Suit";
 
 export type configuratorOptions = {
     cards: {
@@ -9,4 +10,5 @@ export type configuratorOptions = {
     };
     firstPlayer: Position;
     bidding: boolean;
+    trumps?: Suit;
 };
