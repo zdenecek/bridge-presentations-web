@@ -34,16 +34,26 @@ export default class Trick {
         if (!this.isFinished) return undefined;
         if (this._winner) return this._winner;
 
-        let winningCard = this.cards[0];
-        this._winner = this.firstToPlay;
-        for (const pos of Positions.all()) {
-            const card = this.cardsByPosition[pos];
-            if (!card) continue;
-            if (card.value > winningCard.value && (card.suit == winningCard.suit || card.suit == trumps)) {
-                winningCard = card;
-                this._winner = pos;
+        // const winningCard = this.cards.reduce((current, next) => {
+        //     if (current.suit == next.suit) {
+        //         return current.value >= next.value ? current : next;
+        //     } else {
+        //         return next.suit == trumps ? next : current;
+        //     }
+        // });
+
+        const [pos, card] = Object.entries(this.cardsByPosition).reduce(([currentPos, current], [nextPos, next]) => 
+        {
+            if(!current) return [nextPos, next];
+            if(!next) return [currentPos, current];
+            if (current.suit == next.suit) {
+                return current.value >= next.value ? [currentPos, current] : [nextPos, next];
+            } else {
+                return next.suit == trumps ? [nextPos, next] : [currentPos, current];
             }
-        }
+        });
+
+        this._winner = pos as Position;
         return this._winner;
     }
 
@@ -52,6 +62,6 @@ export default class Trick {
     }
 
     toString(): string {
-        return `(${this.cards.map((c) => c.toString()).join(" ")}) ${this.firstToPlay} first`;
+        return `(${this.firstToPlay} leads; ${this.cards.map((c) => c.toString()).join(", ")})`;
     }
 }
