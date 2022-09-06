@@ -12,6 +12,7 @@ export default class CardView {
     private _onclick: (() => void) | undefined;
     private cardPath: string;
     private backPath = CardView.images("./back.png");	
+    private _visible = true;
 
     constructor(model: Card) {
         this.model = model;
@@ -43,7 +44,9 @@ export default class CardView {
     public set onclick(value: (() => void)  | undefined) {
         this.element.off("click.cardplayed");
         if(!value) return;
-        this.element.on("click.cardplayed",() => value());
+        this.element.on("click.cardplayed",() => {
+            if(this._visible) value();
+        });
     }
 
     public set playable(value: boolean) {
@@ -54,7 +57,6 @@ export default class CardView {
         }
     }
 
-    private _visible = true;
 
     get visible(): boolean {
         return this._visible;
