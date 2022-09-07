@@ -110,7 +110,7 @@ export class Player {
         if (!successfullyPlayed) return;
 
         this.playCallback = undefined;
-        this.hand.cards.splice(this.hand.cards.indexOf(card), 1);
+        this.hand.removeCard(card);
 
         runLater(() => this._cardPlayer.dispatch({ player: this, game: this.game, card: card }));
     }

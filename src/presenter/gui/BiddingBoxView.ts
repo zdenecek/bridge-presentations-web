@@ -70,6 +70,10 @@ export default class BiddingBoxView {
     }
 
     public set visible(visible: boolean) {
-        this.root.toggle(visible);
+        if(visible) 
+        this.root.slideDown();
+        else 
+        this.root.slideUp()
     }
+
 }

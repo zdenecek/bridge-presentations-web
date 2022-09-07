@@ -19,13 +19,13 @@ export default class PlayerFactory {
         const players = PlayerFactory.makePlayers();
 
         Object.values(players).forEach((player) => {
-            // player.bidRequested.sub((e) => console.debug(`A bid has been requested from player ${player.position}`, e));
+            player.bidRequested.sub((e) => console.debug(`A bid has been requested from player ${player.position}`, e));
             player.bidRequestCancelled.sub(() =>
                 console.debug(`A bid request has been cancelled from player ${player.position}`)
             );
-            // player.playRequested.sub((e) =>
-            //     console.debug(`A play has been requested from player ${player.position}`, e)
-            // );
+            player.playRequested.sub((e) =>
+                console.debug(`A play has been requested from player ${player.position}`, e)
+            );
             player.playRequestCancelled.sub(() =>
                 console.debug(`A play request has been cancelled from player ${player.position}`)
             );

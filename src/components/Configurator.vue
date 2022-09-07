@@ -4,7 +4,7 @@
         <div id="configurator-content">
             <div class="tab" ref="tabCards">
                 <h2>Cards and play</h2>
-                <div class="vertical-controls">
+                <div class="vertical">
                     <button tabindex="-1" @click="clear">Clear cards</button>
                     <button tabindex="-1" @click="null" disabled>Save</button>
                     <button tabindex="-1" @click="null" disabled>Load</button>
@@ -27,6 +27,21 @@
                     <select id="trumps" v-model="options.trumps" v-show="!options.bidding">
                         <option :value="suit" v-for="(label, suit) in suits" :key="suit">{{ label }}</option>
                     </select>
+                    <label for="trumps" v-show="!options.bidding">{{ "Dummy" }}</label>
+                    <div class="dummy-choice">
+                        <select id="trumps" v-model="options.dummy" v-show="!options.bidding">
+                            <option value="auto" selected>Show after lead</option>
+                            <option value="static">Static</option>
+                            <option value="none">None</option>
+                        </select>
+                        <select
+                            id="trumps"
+                            v-model="options.staticDummyPosition"
+                            v-show="!options.bidding && options.dummy === 'static'"
+                        >
+                            <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="tab">
@@ -35,7 +50,7 @@
                 <div id="controls-tab">
                     <div class="key">Enter</div>
                     <div>Start game</div>
-                    <div class="key">Ctrl+M</div>
+                    <div class="key">M</div>
                     <div>Toggle this menu</div>
                     <div>
                         <span class="key">&larr;</span>
@@ -47,6 +62,8 @@
                         <span class="key">&rarr;</span>
                     </div>
                     <div>Toggle visibility for a hand</div>
+                    <div class="key">Z</div>
+                    <div>Undo</div>
                 </div>
             </div>
         </div>
@@ -59,7 +76,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Suit } from "@/presenter/model/Suit";
-
 
 export default defineComponent({
     name: "Presenter",
@@ -96,9 +112,11 @@ export default defineComponent({
                     east: "542 82 QJT532 T7",
                     west: "3 AKJT 964 QJ952",
                 },
-                firstPlayer: "north",
+                firstPlayer: "west",
                 bidding: true,
                 trumps: Suit.Notrump,
+                dummy: "auto",
+                staticDummyPosition: "north",
             },
 
             positions: {
@@ -167,10 +185,19 @@ export default defineComponent({
         }
     }
 
-    .vertical-controls {
+    .vertical {
         display: flex;
         gap: 10px;
         justify-content: center;
+    }
+
+    .dummy-choice {
+        display: flex;
+        gap: 10px;
+
+        select {
+            flex-grow: 1;
+        }
     }
 
     #controls-tab {

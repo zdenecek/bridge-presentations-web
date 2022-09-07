@@ -12,7 +12,7 @@ export default class CardView {
     private _onclick: (() => void) | undefined;
     private cardPath: string;
     private backPath = CardView.images("./back.png");	
-    private _visible = true;
+    private _reverse = true;
 
     constructor(model: Card) {
         this.model = model;
@@ -37,7 +37,6 @@ export default class CardView {
     }
 
     public set position(value: Point) {
-        this.element.css("transition", "ease 1s")
         this.element.css(value.asCoords());
     }
 
@@ -45,7 +44,7 @@ export default class CardView {
         this.element.off("click.cardplayed");
         if(!value) return;
         this.element.on("click.cardplayed",() => {
-            if(this._visible) value();
+            if(this._reverse) value();
         });
     }
 
@@ -57,22 +56,32 @@ export default class CardView {
         }
     }
 
-
-    get visible(): boolean {
-        return this._visible;
+    private _hidden = false;
+    
+    get hidden(): boolean {
+        return this._hidden;
     }
 
-    set visible(value: boolean) {
-        if(this.visible === value) return;
-        this._visible = value;
+    set hidden(value: boolean) {
+        if(this.hidden === value) return;
+        this._hidden = value;
+        if(value) this.element.hide()
+        else this.element.show()
+    }
+
+    get reverse(): boolean {
+        return this._reverse;
+    }
+
+
+    set reverse(value: boolean) {
+        this.hidden = false;
+        if(this.reverse === value) return;
+        this._reverse = value;
         if(!value) {
             this.element.addClass('reverse')
         } else {
             this.element.removeClass('reverse')
         }
-    }
-
-    toggleVisible(): void {
-        this.visible = !this.visible;
     }
 }

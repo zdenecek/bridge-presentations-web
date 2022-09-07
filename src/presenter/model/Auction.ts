@@ -13,10 +13,10 @@ export class PositionedBid {
 }
 
 export class Auction {
-    private _bids = new Array<PositionedBid>();
-    private _dealer: Position;
-    private _isFinished = false;
-    private _finalContract: Contract | undefined;
+    protected _bids = new Array<PositionedBid>();
+    protected _dealer: Position;
+    protected _isFinished = false;
+    protected _finalContract: Contract | undefined;
 
     public get bids(): Array<PositionedBid> {
         return this._bids;
@@ -31,10 +31,10 @@ export class Auction {
         return this._finalContract;
     }
 
-    private _standingBid: ContractBid | undefined;
-    private _standingBidPosition: Position | undefined;
-    private _standingContractState: ContractDoubledState | undefined;
-    private _standingPassCount = 0;
+    protected _standingBid: ContractBid | undefined;
+    protected _standingBidPosition: Position | undefined;
+    protected _standingContractState: ContractDoubledState | undefined;
+    protected _standingPassCount = 0;
 
     public get standingBid(): ContractBid | undefined {
         return this._standingBid;
@@ -56,29 +56,31 @@ export class Auction {
     addBid(bid: Bid, position: Position): boolean {
         if (!this.isLegal(bid, position)) return false;
 
-        this.bids.push(new PositionedBid(position, bid));
+        const positionedBid = new PositionedBid(position, bid);
+        this.bids.push(positionedBid);
+        this.updateStanding(positionedBid);
+        if (this._standingPassCount >= 3 && this.bids.length >= 4) this.finalize();
+        
+        return true;
+    }
+
+    protected updateStanding( {bid, position}: PositionedBid): void {
         if (bid instanceof PassBid) {
             this._standingPassCount++;
-            if (this._standingPassCount >= 3 && this.bids.length >= 4) this.finalize();
-            return true;
+            return;
         }
         this._standingPassCount = 0;
         if (bid instanceof DoubleBid) {
             this._standingContractState = "doubled";
-            return true;
         }
         if (bid instanceof RedoubleBid) {
             this._standingContractState = "redoubled";
-            return true;
         }
         if (bid instanceof ContractBid) {
             this._standingBid = bid;
             this._standingBidPosition = position;
             this._standingContractState = "undoubled";
-            return true;
         }
-
-        return false;
     }
 
     public isLegal(bid: Bid, position: Position): boolean {
@@ -101,7 +103,7 @@ export class Auction {
         return false;
     }
 
-    private finalize(): void {
+    protected finalize(): void {
         if (this._standingPassCount === 4) this._finalContract = "passed";
         else {
             const lastBid = this._standingBid!;

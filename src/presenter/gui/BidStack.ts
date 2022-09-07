@@ -21,11 +21,18 @@ export class BidStack {
         bidView.element.css("top", "10vh").animate({ top: "0px" });
         this.updateSpacing();
     }
+    
+    removeLastBid(): void {
+        if(this.bidViews.length === 0) return;
+        const bidView = this.bidViews.pop()!;
+        bidView.element.animate({ top: "10vh" }, () => bidView.element.remove());
+    }
 
     updateSpacing(): void {
         const newWidth = Math.min(Math.max(20, (this.root.width() || 200) / this.bidViews.length), 40);
         this.bidViews.forEach((bidView, index) => bidView.element.css('left', `${newWidth * index}px`))
     }
+
 
     reset(): void {
         this.bidViews.forEach((bidView) => bidView.element.remove());

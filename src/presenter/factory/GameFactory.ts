@@ -1,13 +1,13 @@
 import { Player } from "../model/Player";
 import { PositionList, Position, Positions } from "../model/Position";
-import Game from "../model/Game";
 import Hand from "../model/Hand";
 import { Card, Value } from "../model/Card";
 import { Suit } from "../model/Suit";
 import { PresentationPlayer } from "../model/PresentationPlayer";
+import { UndoableGame } from "../model/UndoableGame";
 
 export default class GameFactory {
-    static makeTestGame(): Game {
+    static makeTestGame(): UndoableGame {
         const players = {} as PositionList<Player>;
         Positions.all().forEach((position) => {
             players[position] = new PresentationPlayer(position);
@@ -23,18 +23,41 @@ export default class GameFactory {
         return GameFactory.makeObservableGame(players);
     }
 
-    static makeObservableGame(players: PositionList<Player>): Game {
-        const game = new Game(players);
-        game.cardPlayed.sub((e) => {console.debug(`card played: ${e.card}`)});
-        game.trickEnded.sub((e) => {console.debug(`trick ended: ${e.trick}`)});
-        game.trickStarted.sub((e) => {console.debug(`trick started: ${e.trick}`)})
-        game.biddingStarted.sub(() => {console.debug(`bidding started`)})
-        game.biddingEnded.sub((e) => {console.debug(`bidding ended: ${e.game.auction?.finalContract}`)})
-        game.bidMade.sub((e) => {console.debug(`bid made: ${e.bid}`)})
-        game.cardplayStarted.sub(() => {console.debug(`cardplay started`)})
-        game.cardplayEnded.sub(() => {console.debug(`cardplay ended`)})
-        game.gameStarted.sub(() => {console.debug(`game started`)})
-        game.gameEnded.sub(() => {console.debug(`game ended`)})
+    static makeObservableGame(players: PositionList<Player>, bidding = true): UndoableGame {
+        const game = new UndoableGame(players, bidding);
+        game.cardPlayed.sub((e) => {
+            console.debug(`card played: ${e.card}`);
+        });
+        game.trickEnded.sub((e) => {
+            console.debug(`trick ended: ${e.trick}`);
+        });
+        game.trickStarted.sub((e) => {
+            console.debug(`trick started: ${e.trick}`);
+        });
+        game.biddingStarted.sub(() => {
+            console.debug(`bidding started`);
+        });
+        game.biddingEnded.sub((e) => {
+            console.debug(`bidding ended: ${e.game.auction?.finalContract}`);
+        });
+        game.bidMade.sub((e) => {
+            console.debug(`bid made: ${e.bid}`);
+        });
+        game.cardplayStarted.sub(() => {
+            console.debug(`cardplay started`);
+        });
+        game.cardplayEnded.sub(() => {
+            console.debug(`cardplay ended`);
+        });
+        game.gameStarted.sub(() => {
+            console.debug(`game started`);
+        });
+        game.gameEnded.sub(() => {
+            console.debug(`game ended`);
+        });
+        game.undoMade.sub(() => {
+            console.debug(`undo made`);
+        });
 
         return game;
     }

@@ -2,12 +2,18 @@ import { Card } from "./Card";
 import { Position, PartialPositionList, Positions } from "./Position";
 import { Suit } from "./Suit";
 
+export interface CardInTrick {
+    card: Card;
+    player: Position;
+    trick: Trick;
+}
+
 export default class Trick {
     firstToPlay: Position;
     currentToPlay?: Position;
-    cards: Array<Card> = [];
-    _winner: Position | undefined;
-    private cardsByPosition: PartialPositionList<Card> = {};
+    _winner: CardInTrick | undefined;
+    cardsByPosition: PartialPositionList<CardInTrick> = {};
+    cards: Array<CardInTrick> = [];
 
     constructor(firstToPlay: Position) {
         this.firstToPlay = firstToPlay;
@@ -16,21 +22,27 @@ export default class Trick {
 
     addCard(card: Card): void {
         if (this.currentToPlay === undefined) throw Error("Cannot add a card to finished trick");
-        this.cards.push(card);
-        this.cardsByPosition[this.currentToPlay] = card;
+
+        const c =  {card, player: this.currentToPlay, trick: this};
+
+        this.cardsByPosition[this.currentToPlay] = c;
+        this.cards.push(c);
 
         this.currentToPlay = this.isFinished ? undefined : Positions.nextPosition(this.currentToPlay);
     }
 
-    getCards(): PartialPositionList<Card> {
+    getCards(): PartialPositionList<CardInTrick> {
         return this.cardsByPosition;
     }
+
+    // TODO Move to undoableTrick ?
+ 
 
     get isFinished(): boolean {
         return this.cards.length == 4;
     }
 
-    winner(trumps: Suit): Position | undefined {
+    winner(trumps: Suit): CardInTrick | undefined {
         if (!this.isFinished) return undefined;
         if (this._winner) return this._winner;
 
@@ -42,26 +54,25 @@ export default class Trick {
         //     }
         // });
 
-        const [pos, card] = Object.entries(this.cardsByPosition).reduce(([currentPos, current], [nextPos, next]) => 
+        this._winner = Object.values(this.cardsByPosition).reduce((current, next) => 
         {
-            if(!current) return [nextPos, next];
-            if(!next) return [currentPos, current];
-            if (current.suit == next.suit) {
-                return current.value >= next.value ? [currentPos, current] : [nextPos, next];
+            if(!current) return next;
+            if(!next) return current;
+            if (current.card.suit == next.card.suit) {
+                return current.card.value >= next.card.value ? current : next;
             } else {
-                return next.suit == trumps ? [nextPos, next] : [currentPos, current];
+                return next.card.suit == trumps ? next : current;
             }
         });
 
-        this._winner = pos as Position;
         return this._winner;
     }
 
-    suit(suit: Suit): Array<Card> {
-        return this.cards.filter((c) => c.suit == suit);
+    suit(suit: Suit): Array<CardInTrick> {
+        return this.cards.filter((c) => c.card.suit == suit);
     }
 
     toString(): string {
-        return `(${this.firstToPlay} leads; ${this.cards.map((c) => c.toString()).join(", ")})`;
+        return `(${this.firstToPlay} leads; ${this.cards.map((c) => c.card.toString()).join(", ")})`;
     }
 }

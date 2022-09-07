@@ -11,4 +11,8 @@ export type configuratorOptions = {
     firstPlayer: Position;
     bidding: boolean;
     trumps?: Suit;
+    dummy?: DummyOptions;
+    staticDummyPosition?: Position;
 };
+
+export type DummyOptions = 'static' | 'auto' | 'none';

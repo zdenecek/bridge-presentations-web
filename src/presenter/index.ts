@@ -14,7 +14,7 @@ jQuery( function () {
     const gm = new Game();
     
     const gameView = new GameView();
-    jQuery(window).on('resize', () => gameView.updatePositions());
+    jQuery(window).on('resize', () => gameView.update());
 
     gameView.attach(gm)
 

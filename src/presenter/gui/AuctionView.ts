@@ -4,6 +4,7 @@ import { Position, PositionList } from "../model/Position";
 import { BidStack } from "./BidStack";
 import { ISimpleEvent } from "ste-simple-events";
 import { GameChangedEvent } from "./GameView";
+import { UndoableAuction } from "../model/UndoableAuction";
 
 export class AuctionView {
     private root: JQuery<HTMLElement>;
@@ -25,11 +26,16 @@ export class AuctionView {
 
         gameChanged.sub((e) => {
             this.visible = false;
-            e.game?.biddingStarted.sub(() => (this.visible = true));
+            e.game?.biddingStarted.sub((f) => {
+                this.visible = true;
+                if (e.game?.auction instanceof UndoableAuction) {
+                    e.game.auction.bidRemoved.sub(({ position }) => {
+                        this.bidStacks[position].removeLastBid();
+                        this.update();
+                    });
+                }
+            });
             e.game?.cardPlayed.sub(() => (this.visible = false));
-        });
-
-        gameChanged.sub((e) => {
             this.reset();
             e.game?.bidMade.sub((e) => this.addBid(e.player.position, e.bid));
         });
