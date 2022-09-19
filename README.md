@@ -1,5 +1,17 @@
 # bridge-presentations-web
 
+Web application for creating presentations for the game of contract bridge.
+
+## Todo
+
+- Separate out presenter package
+- Add tests
+- Add more complex controls, auto players
+
+## How to use
+
+Set up the presentation and click play.
+
 ## Project setup
 ```
 npm install
