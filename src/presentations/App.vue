@@ -5,8 +5,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Presenter from  '@/components/Presenter.vue';
-import Configurator from  '@/components/Configurator.vue';
+import Presenter from  '@/presentations/components/Presenter.vue';
+import Configurator from  '@/presentations/components/Configurator.vue';
 import { configuratorOptions } from './types';
 
 export default defineComponent({

@@ -6,7 +6,7 @@ import { ISimpleEvent } from "ste-simple-events";
 import { GameChangedEvent } from "./GameView";
 import { UndoableAuction } from "../model/UndoableAuction";
 
-export class AuctionView {
+export default class AuctionView {
     private root: JQuery<HTMLElement>;
     private bidStacks: PositionList<BidStack>;
 

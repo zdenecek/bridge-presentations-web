@@ -1,6 +1,6 @@
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "./Bid";
 import { Contract, ContractDoubledState, NonPassedContract } from "./Contract";
-import { Position, Positions } from "./Position";
+import { Position, PositionHelper } from "./Position";
 
 export class PositionedBid {
     position: Position;
@@ -91,11 +91,11 @@ export class Auction {
         } else if (bid instanceof DoubleBid) {
             return (
                 this._standingContractState === "undoubled" &&
-                Positions.side(position) !== Positions.side(this.standingBidPosition!)
+                PositionHelper.side(position) !== PositionHelper.side(this.standingBidPosition!)
             );
         } else if (bid instanceof RedoubleBid) {
             return this._standingContractState === "doubled"  &&
-            Positions.side(position) === Positions.side(this.standingBidPosition!)
+            PositionHelper.side(position) === PositionHelper.side(this.standingBidPosition!)
         } else if (bid instanceof ContractBid) {
             return this._standingBid === undefined || bid.isGreaterThan(this._standingBid);
         }
@@ -107,10 +107,10 @@ export class Auction {
         if (this._standingPassCount === 4) this._finalContract = "passed";
         else {
             const lastBid = this._standingBid!;
-            const side = Positions.side(this._standingBidPosition!);
+            const side = PositionHelper.side(this._standingBidPosition!);
             const declarer = this.bids.filter(
                 (b) =>
-                    b.bid instanceof ContractBid && b.bid.suit === lastBid.suit && Positions.side(b.position) === side
+                    b.bid instanceof ContractBid && b.bid.suit === lastBid.suit && PositionHelper.side(b.position) === side
             )[0].position;
             this._finalContract = new NonPassedContract(
                 lastBid.suit,

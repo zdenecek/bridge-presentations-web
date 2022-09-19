@@ -1,5 +1,5 @@
 import { Card } from "./Card";
-import { Position, PartialPositionList, Positions } from "./Position";
+import { Position, PartialPositionList, PositionHelper  } from "./Position";
 import { Suit } from "./Suit";
 
 export interface CardInTrick {
@@ -8,7 +8,7 @@ export interface CardInTrick {
     trick: Trick;
 }
 
-export default class Trick {
+export class Trick {
     firstToPlay: Position;
     currentToPlay?: Position;
     _winner: CardInTrick | undefined;
@@ -28,7 +28,7 @@ export default class Trick {
         this.cardsByPosition[this.currentToPlay] = c;
         this.cards.push(c);
 
-        this.currentToPlay = this.isFinished ? undefined : Positions.nextPosition(this.currentToPlay);
+        this.currentToPlay = this.isFinished ? undefined : PositionHelper.nextPosition(this.currentToPlay);
     }
 
     getCards(): PartialPositionList<CardInTrick> {

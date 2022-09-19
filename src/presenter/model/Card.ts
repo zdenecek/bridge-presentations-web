@@ -1,6 +1,6 @@
-import { Suit, Suits } from "./Suit";
+import { Suit, SuitHelper } from "./Suit";
 
-enum Value {
+enum CardValue {
     Other = 1,
     Two = 2,
     Three = 3,
@@ -17,24 +17,24 @@ enum Value {
     Ace = 14,
 }
 
-class Values {
-    static toString(value: Value): string {
-        return Value[value];
+class CardValueHelper {
+    static toString(value: CardValue): string {
+        return CardValue[value];
     }
 }
 
 class Card {
     public suit: Suit;
-    public value: Value;
+    public value: CardValue;
 
-    constructor(suit: Suit = Suit.Notrump, value: Value = Value.Two) {
+    constructor(suit: Suit = Suit.Notrump, value: CardValue = CardValue.Two) {
         this.suit = suit;
         this.value = value;
     }
 
     public toString(): string {
-        return `${Values.toString(this.value)} of ${Suits.toString(this.suit)}`;
+        return `${CardValueHelper.toString(this.value)} of ${SuitHelper.toString(this.suit)}`;
     }
 }
 
-export { Value, Values, Card };
+export { CardValue, CardValueHelper, Card };

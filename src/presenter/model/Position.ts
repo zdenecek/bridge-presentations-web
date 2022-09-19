@@ -10,7 +10,7 @@ enum Side {
     EW = 'ew',
 }
 
-class Positions {
+class PositionHelper {
 
     static nextPosition(position: Position, count = 1): Position {
 
@@ -23,7 +23,7 @@ class Positions {
             case Position.West: pos = Position.North; break;
         }
 
-        return Positions.nextPosition(pos, count - 1);
+        return PositionHelper.nextPosition(pos, count - 1);
     }
 
     static side(position: Position): Side  {
@@ -49,4 +49,4 @@ class Positions {
 type PositionList<T> = { [key in Position]: T }
 type PartialPositionList<T> = { [key in Position]?: T }
 
-export { Position, Positions, PositionList, PartialPositionList, Side};
+export { Position, PositionHelper, PositionList, PartialPositionList, Side};

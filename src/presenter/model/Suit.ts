@@ -6,7 +6,7 @@ enum Suit {
     Notrump = 5,
 }
 
-class Suits {
+class SuitHelper {
     static toString(suit: Suit): string {
         return Suit[suit];
     }
@@ -46,4 +46,4 @@ class Suits {
     }
 }
 
-export { Suit, Suits };
+export { Suit, SuitHelper };

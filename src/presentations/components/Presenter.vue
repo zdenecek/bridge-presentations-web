@@ -8,7 +8,7 @@ import { Position } from "@/presenter/model/Position";
 import PlayerFactory from "@/presenter/factory/PlayerFactory";
 import { defineComponent } from "vue";
 import $ from "jquery";
-import { configuratorOptions } from "@/types";
+import { configuratorOptions } from "@/presentations/types";
 import GameFactory from "@/presenter/factory/GameFactory";
 import { UndoableGame } from "@/presenter/model/UndoableGame";
 
@@ -27,7 +27,7 @@ export default defineComponent({
         startGame(options: configuratorOptions) {
             this.game = GameFactory.makeObservableGame(this.players, options.bidding);
             PlayerFactory.putHands(this.players, options.cards);
-            this.gameView.attachGame(this.game, options) ;
+            this.gameView.attachGame(this.game, options.dummy, options.staticDummyPosition) ;
 
             this.$nextTick(() => this.game.start(options.firstPlayer as Position,  options.trumps));
         },

@@ -1,12 +1,12 @@
 import { Card } from "../model/Card";
-import Hand from "../model/Hand";
+import { Hand } from "../model/Hand";
 import { Position } from "../model/Position";
 import { Suit } from "../model/Suit";
 import CardView from "./CardView";
 import { GameViewMetadata } from "./GameView";
 import { Point } from "./Point";
 
-export class HandView {
+export default class HandView {
     position: Position;
     private _dummy = false;
     private _hidden = false;

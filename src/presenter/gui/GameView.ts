@@ -1,17 +1,16 @@
 import * as $ from "jquery";
 import CardView from "./CardView";
-import Game from "../model/Game";
-import Trick from "../model/Trick";
+import {Game} from "../model/Game";
+import {Trick} from "../model/Trick";
 import { Card } from "../model/Card";
-import { Position, PositionList, Positions } from "../model/Position";
+import { Position, PositionList, PositionHelper } from "../model/Position";
 import { Point } from "./Point";
 import { PresentationPlayer } from "../model/PresentationPlayer";
-import { AuctionView } from "./AuctionView";
+import  AuctionView from "./AuctionView";
 import BiddingBoxView from "./BiddingBoxView";
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
-import { HandView } from "./HandView";
+import HandView from "./HandView";
 import { UndoableGame } from "../model/UndoableGame";
-import { configuratorOptions as ConfiguratorOptions } from "@/types";
 
 export interface GameChangedEvent {
     game?: Game;
@@ -50,9 +49,8 @@ export class GameViewMetadata {
     }
 }
 
-/**
- * This class is a mess.
- */
+export type DummyOptions = 'static' | 'auto' | 'none';
+
 export default class GameView {
     private root: JQuery<HTMLElement>;
     private cardViews = new Map<Card, CardView>();
@@ -69,7 +67,7 @@ export default class GameView {
     }
 
     public set dummy(value: Position | undefined) {
-        console.log(value ? Positions.toString(value) :  'none');
+        console.log(value ? PositionHelper.toString(value) :  'none');
         if (this._dummy === value) return;
         if (this._dummy) this.handViews[this._dummy].dummy = false;
         this._dummy = value;
@@ -82,7 +80,7 @@ export default class GameView {
         this.auctionView = new AuctionView(this.root, this.gameChanged);
         this.biddingBox = new BiddingBoxView(this.root, this.gameChanged);
         this.handViews = {} as PositionList<HandView>;
-        Positions.all().forEach((position) => {
+        PositionHelper.all().forEach((position) => {
             this.handViews[position] = new HandView(position);
         });
     }
@@ -100,7 +98,7 @@ export default class GameView {
         return this._game;
     }
 
-    public attachGame(game: Game | undefined, options: ConfiguratorOptions) {
+    public attachGame(game: Game | undefined, dummy: DummyOptions = 'auto', staticDummyPosition?: Position): void {
         if (!this.root) throw new Error("root not attached");
         this._game = game;
         this._gameChanged.dispatch({ game });
@@ -115,7 +113,7 @@ export default class GameView {
                 }
                 this.update();
             });
-
+        
         this.cardViews.forEach((cardView) => cardView.element.detach());
         this.cardViews = new Map<Card, CardView>();
 
@@ -123,13 +121,15 @@ export default class GameView {
             handView.hidden = false;
         });
 
-        if (options.dummy === "auto" || options.bidding) {
+        this.dummy = undefined;
+
+        if (dummy === "auto" || game.bidding) {
             game.leadMade.sub((e) => {
                 //TODO
-                this.dummy = Positions.nextPosition(e.player.position);
+                this.dummy = PositionHelper.nextPosition(e.player.position);
             });
-        } else if (options.dummy === "static" && options.staticDummyPosition) {
-            this.dummy = options.staticDummyPosition;
+        } else if (dummy === "static" && staticDummyPosition) {
+            this.dummy = staticDummyPosition;
         }
 
         const trick_cards = game.tricks.flatMap((trick) => trick.cards);
@@ -242,18 +242,18 @@ export default class GameView {
     }
 
     private positionTrick(tricks: Array<Trick>, trick: Trick) {
-        const cardPositions = trick ? this.calculateCardInTrickPositions() : undefined;
+        const cardPositionHelper = trick ? this.calculateCardInTrickPositionHelper() : undefined;
 
         for (const t of tricks) {
             if (t === trick) {
                 trick.cards.forEach(({ card }, index) => {
                     this.cardViews.get(card)!.element.css("z-index", index + 100);
                 });
-                Positions.all().forEach((pos) => {
+                PositionHelper.all().forEach((pos) => {
                     const card = trick.getCards()[pos]?.card;
                     if (card !== undefined) {
                         const view = this.cardViews.get(card)!;
-                        const coord = cardPositions![pos];
+                        const coord = cardPositionHelper![pos];
                         view.position = coord;
                         view.hidden = false;
                     }
@@ -266,7 +266,7 @@ export default class GameView {
         }
     }
 
-    calculateCardInTrickPositions(): { [key in Position]: Point } {
+    calculateCardInTrickPositionHelper(): { [key in Position]: Point } {
         const m = this.metadata;
         return {
             north: m.point(

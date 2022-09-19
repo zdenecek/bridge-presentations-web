@@ -1,6 +1,6 @@
 import { Parser } from "../utils/Parser";
-import Hand from "../model/Hand";
-import { Position, PositionList, Positions } from "../model/Position";
+import {Hand} from "../model/Hand";
+import { Position, PositionList, PositionHelper } from "../model/Position";
 import { PresentationPlayer } from "../model/PresentationPlayer";
 import { Player } from "../model/Player";
 
@@ -35,7 +35,7 @@ export default class PlayerFactory {
     }
 
     static putHands(players: PositionList<Player>, cards: PositionList<string>): void {
-        Positions.all().forEach((position) => {
+        PositionHelper.all().forEach((position) => {
             const _cards = Parser.parseHandString(cards[position]);
             players[position].hand = new Hand(_cards);
         });

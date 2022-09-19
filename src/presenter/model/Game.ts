@@ -1,13 +1,13 @@
-import { runLater } from "../utils/runLater";
 import { Card } from "./Card";
 import { Player } from "./Player";
-import { Position, Positions, PositionList } from "./Position";
+import { Position, PositionHelper, PositionList } from "./Position";
 import { Suit } from "./Suit";
-import Trick from "./Trick";
-import { ISimpleEvent, SimpleEventDispatcher } from "strongly-typed-events";
+import { Trick } from "./Trick";
 import { Bid } from "./Bid";
 import { Auction } from "./Auction";
 import { Contract } from "./Contract";
+import { ISimpleEvent, SimpleEventDispatcher } from "strongly-typed-events";
+import { runLater } from "../utils/runLater";
 
 type GameState = "notStarted" | "bidding" | "cardplay" | "finished";
 
@@ -33,7 +33,7 @@ export interface BidMadeEvent {
     player: Player;
 }
 
-export default class Game {
+export class Game {
     players: PositionList<Player>;
     tricks: Array<Trick> = [];
     trumps: Suit = Suit.Notrump;
@@ -43,7 +43,7 @@ export default class Game {
     bidding: boolean;
     currentlyRequestedPlayer: Player | undefined;
 
-    constructor(players: PositionList<Player>, bidding = true,) {
+    constructor(players: PositionList<Player>, bidding = true) {
         this.players = players;
         this.state = "notStarted";
         this.bidding = bidding;
@@ -129,7 +129,7 @@ export default class Game {
         runLater(() => this.startNewTrick(firstToPlay));
     }
 
-    protected endPlay() : void {
+    protected endPlay(): void {
         runLater(() => this._cardplayEnded.dispatch({ game: this }));
         runLater(() => this.end());
     }
@@ -161,7 +161,7 @@ export default class Game {
         else {
             const contract = this.finalContract;
             this.trumps = this.finalContract.suit;
-            runLater(() => this.startPlay(Positions.nextPosition(contract.declarer)));
+            runLater(() => this.startPlay(PositionHelper.nextPosition(contract.declarer)));
         }
     }
 
@@ -183,7 +183,6 @@ export default class Game {
         const winner = trick.winner(this.trumps)?.player;
         if (!winner) throw Error(`Cannot end unfinished trick: ${trick}`);
 
-
         runLater(() => this._trickEnded.dispatch({ game: this, trick }));
 
         if (this.players[Position.North].hand.cards.length > 0) {
@@ -204,7 +203,7 @@ export default class Game {
 
         if (trick.isFinished) runLater(() => this.endTrick());
         else {
-            const nextPlayer = this.players[Positions.nextPosition(player.position)];
+            const nextPlayer = this.players[PositionHelper.nextPosition(player.position)];
             runLater(() => {
                 this.currentlyRequestedPlayer = nextPlayer;
                 nextPlayer.requestPlay(this, trick, (player: Player, card: Card) =>
@@ -225,7 +224,7 @@ export default class Game {
         runLater(() => this._bidMade.dispatch({ bid, player, game: this }));
         if (this.auction.isFinished) runLater(() => this.endBidding());
         else {
-            const nextPlayer = this.players[Positions.nextPosition(player.position)];
+            const nextPlayer = this.players[PositionHelper.nextPosition(player.position)];
             this.currentlyRequestedPlayer = nextPlayer;
             runLater(() => nextPlayer.requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, nextPlayer)));
         }

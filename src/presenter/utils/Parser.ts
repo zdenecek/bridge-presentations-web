@@ -1,9 +1,9 @@
-import { Card, Value } from "../model/Card";
+import { Card, CardValue } from "../model/Card";
 import { Suit } from "../model/Suit";
 
 export class Parser {
     static parseHandString(input: string): Array<Card> {
-        const chars = input.trim().replace(/ +/g, " ").replace("10", "T").split("");
+        const chars = input.trim().replace(/ +/g, " ").replace(/10/g, "T").split("");
         const cards = new Array<Card>();
         let suit = Suit.Spades;
 
@@ -19,37 +19,37 @@ export class Parser {
         return cards;
     }
 
-    static parseCardValue(input: string): Value {
+    static parseCardValue(input: string): CardValue {
         switch (input.toUpperCase()) {
             case "2":
-                return Value.Two;
+                return CardValue.Two;
             case "3":
-                return Value.Three;
+                return CardValue.Three;
             case "4":
-                return Value.Four;
+                return CardValue.Four;
             case "5":
-                return Value.Five;
+                return CardValue.Five;
             case "6":
-                return Value.Six;
+                return CardValue.Six;
             case "7":
-                return Value.Seven;
+                return CardValue.Seven;
             case "8":
-                return Value.Eight;
+                return CardValue.Eight;
             case "9":
-                return Value.Nine;
+                return CardValue.Nine;
             case "T":
             case "10":
-                return Value.Ten;
+                return CardValue.Ten;
             case "J":
-                return Value.Jack;
+                return CardValue.Jack;
             case "Q":
-                return Value.Queen;
+                return CardValue.Queen;
             case "K":
-                return Value.King;
+                return CardValue.King;
             case "A":
-                return Value.Ace;
+                return CardValue.Ace;
             default:
-                return Value.Other;
+                return CardValue.Other;
         }
     }
 }

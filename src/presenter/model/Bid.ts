@@ -1,7 +1,5 @@
 import { ContractLevel } from "./Contract";
-import { Suit, Suits } from "./Suit";
-
-
+import { Suit, SuitHelper } from "./Suit";
 
 export abstract class Bid {
     alerted = false;
@@ -23,7 +21,7 @@ export class ContractBid extends Bid {
     }
 
     toString(): string {
-        return `${this.level}${Suits.toSymbol(this.suit)}`;
+        return `${this.level}${SuitHelper.toSymbol(this.suit)}`;
     }
 }
 

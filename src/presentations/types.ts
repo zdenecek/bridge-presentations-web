@@ -1,5 +1,6 @@
-import { Position } from "./presenter/model/Position";
-import { Suit } from "./presenter/model/Suit";
+import { DummyOptions } from "@/presenter";
+import { Position } from "@/presenter/model/Position";
+import { Suit } from "@/presenter/model/Suit";
 
 export type configuratorOptions = {
     cards: {
@@ -15,4 +16,3 @@ export type configuratorOptions = {
     staticDummyPosition?: Position;
 };
 
-export type DummyOptions = 'static' | 'auto' | 'none';

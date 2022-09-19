@@ -3,10 +3,10 @@ import { runLater } from "../utils/runLater";
 import { Auction } from "./Auction";
 import { Bid } from "./Bid";
 import { Card } from "./Card";
-import Game, { GameEvent } from "./Game";
+import { Game, GameEvent } from "./Game";
 import { Player } from "./Player";
-import { Position, Positions } from "./Position";
-import Trick, { CardInTrick } from "./Trick";
+import { Position, PositionHelper } from "./Position";
+import { Trick, CardInTrick } from "./Trick";
 import { UndoableAuction } from "./UndoableAuction";
 
 export class UndoableGame extends Game {
@@ -86,8 +86,14 @@ export class UndoableGame extends Game {
 
     private undoGameEnded(): void {
         //TODO check if passed
-        this.state = "cardplay";
-        this.undoCardplay();
+        if(this.finalContract == 'passed') {
+            this.state = 'bidding';
+            this.undoBidding();
+        }
+        else {
+            this.state = "cardplay";
+            this.undoCardplay();
+        }
     }
 
     private popCard(trick: Trick): CardInTrick | undefined {

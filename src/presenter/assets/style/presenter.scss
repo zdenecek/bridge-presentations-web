@@ -130,22 +130,42 @@ $bid-card-height: 10vh;
     width: calc(100% - $bid-card-height);
     position: absolute;
     overflow: visible;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 200% 100%, 200% 200%,  0 200%);
+    clip-path: polygon(-10% -10%, 100% -10%, 100% 100%, 200% 100%, 200% 200%,  -10% 200%);
     transition: all 1s ease;
-
-
+    
+    
     .bid {
         overflow: visible;
         position: absolute;
         top: 0;
         height: $bid-card-height;
         transition: 0.1s ease;
-
+        
+        
         img {
             height: 100%;
         }
     }
 }
+
+$shadow: 0.5px;
+
+.bid.clubs img {
+    filter: drop-shadow(0 0 $shadow #3574af67);
+}
+.bid.hearts img {
+    filter: drop-shadow(0 0 $shadow #e9020262);
+}
+.bid.spades img {
+    filter: drop-shadow(0 0 $shadow rgba(10, 0, 0, 0.489));
+}
+.bid.diamonds img {
+    filter: drop-shadow(0 0 $shadow #d26d2a7c);
+}
+.bid.notrump img {
+    filter: drop-shadow(0 0 $shadow rgba(128, 128, 128, 0.432));
+}
+
 
 .bid-stack-north {
     top: 0;

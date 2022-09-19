@@ -1,7 +1,7 @@
-import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import { Auction, PositionedBid } from "./Auction";
 import { Bid } from "./Bid";
 import { Position } from "./Position";
+import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 
 export interface BidEvent {
     position: Position;

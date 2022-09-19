@@ -2,10 +2,10 @@ import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import { runLater } from "../utils/runLater";
 import { Bid } from "./Bid";
 import { Card } from "./Card";
-import Game from "./Game";
-import Hand from "./Hand";
+import { Game } from "./Game";
+import { Hand } from "./Hand";
 import { Position } from "./Position";
-import Trick from "./Trick";
+import { Trick } from "./Trick";
 
 export interface PlayRequestedEvent {
     player: Player;

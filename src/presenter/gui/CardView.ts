@@ -1,5 +1,5 @@
-import { Card, Value, Values } from "../model/Card";
-import { Suits } from "../model/Suit";
+import { Card, CardValue, CardValueHelper } from "../model/Card";
+import { SuitHelper } from "../model/Suit";
 import $ from "jquery";
 import { Point } from "./Point";
 
@@ -27,12 +27,12 @@ export default class CardView {
     }
 
     private getCardPath() {
-        if(this.model.value === Value.Other)  return CardView.images('./O.png');
-        const s = Suits.toString(this.model.suit).charAt(0).toUpperCase();
+        if(this.model.value === CardValue.Other)  return CardView.images('./O.png');
+        const s = SuitHelper.toString(this.model.suit).charAt(0).toUpperCase();
         const v =
             this.model.value <= 9
                 ? this.model.value.toString()
-                : Values.toString(this.model.value).charAt(0).toUpperCase();
+                : CardValueHelper.toString(this.model.value).charAt(0).toUpperCase();
         return CardView.images(`./${s}-${v}.png`);
     }
 
@@ -84,4 +84,4 @@ export default class CardView {
             this.element.removeClass('reverse')
         }
     }
-}
+}                                                                                      

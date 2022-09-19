@@ -2,7 +2,7 @@ import $ from "jquery";
 import { ISimpleEvent } from "ste-simple-events";
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../model/Bid";
 import { ContractLevel } from "../model/Contract";
-import { Suit, Suits } from "../model/Suit";
+import { Suit, SuitHelper } from "../model/Suit";
 import { GameChangedEvent } from "./GameView";
 
 export default class BiddingBoxView {
@@ -28,10 +28,10 @@ export default class BiddingBoxView {
         });
 
         for (let level = 1; level <= 7; level++) {
-            for (const suit of Suits.all()) {
+            for (const suit of SuitHelper.all()) {
                 const element = $(
-                    `<div class="bidding-box-bid  level-${level} suit-${Suits.toString(suit).toLowerCase()}">
-                    <span class="level">${level}</span><span class="suit">${Suits.toSymbol(suit)}</span>
+                    `<div class="bidding-box-bid  level-${level} suit-${SuitHelper.toString(suit).toLowerCase()}">
+                    <span class="level">${level}</span><span class="suit">${SuitHelper.toSymbol(suit)}</span>
                     </div>`
                 );
                 element.on("click", () => {

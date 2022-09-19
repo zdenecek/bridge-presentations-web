@@ -1,12 +1,12 @@
-import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import { Card } from "./Card";
 import { Position } from "./Position";
+import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 
 export interface HandEvent {
     hand: Hand;
 }
 
-export default class Hand {
+export class Hand {
     cards: Array<Card> = [];
     position?: Position;
 
