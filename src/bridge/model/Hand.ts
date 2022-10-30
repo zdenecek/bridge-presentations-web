@@ -6,18 +6,23 @@ export interface HandEvent {
     hand: Hand;
 }
 
+export interface HandCardEvent {
+    hand: Hand;
+    card: Card;
+}
+
 export class Hand {
     cards: Array<Card> = [];
     position?: Position;
 
-    protected _cardAdded = new SimpleEventDispatcher<HandEvent>();
-    protected _cardRemoved = new SimpleEventDispatcher<HandEvent>();
+    protected _cardAdded = new SimpleEventDispatcher<HandCardEvent>();
+    protected _cardRemoved = new SimpleEventDispatcher<HandCardEvent>();
 
-    public get cardAdded(): ISimpleEvent<HandEvent> {
+    public get cardAdded(): ISimpleEvent<HandCardEvent> {
         return this._cardAdded.asEvent();
     }
 
-    public get cardRemoved(): ISimpleEvent<HandEvent> {
+    public get cardRemoved(): ISimpleEvent<HandCardEvent> {
         return this._cardRemoved.asEvent();
     }
 
@@ -34,14 +39,14 @@ export class Hand {
     public addCard(card: Card): void {
         this.cards.push(card);
         this.sortCards();
-        this._cardAdded.dispatch({ hand: this });
+        this._cardAdded.dispatch({ hand: this , card: card });
     }
 
     public removeCard(card: Card): boolean {
         const index = this.cards.indexOf(card);
         if (index === -1) return false;
         this.cards.splice(index, 1);
-        this._cardRemoved.dispatch({ hand: this });
+        this._cardRemoved.dispatch({ hand: this, card: card });
         return true;
     }
 

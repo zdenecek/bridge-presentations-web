@@ -2,6 +2,7 @@ import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
 import { SuitHelper } from "../../bridge/model/Suit";
 import $ from "jquery";
 import { Point } from "../classes/Point";
+import { Rotation } from "../classes/Rotation";
 
 export default class CardView {
     static images = require.context("@/presenter/assets/cards", false, /\.(png|jpe?g|svg)$/);
@@ -13,6 +14,7 @@ export default class CardView {
     private cardPath: string;
     private backPath = CardView.images("./back.png");	
     private _reverse = true;
+
 
     constructor(model: Card) {
         this.model = model;
@@ -69,10 +71,16 @@ export default class CardView {
         else this.element.show()
     }
 
+    set rotation(value: Rotation) {
+        this.element.removeClass("horizontal-left horizontal-rigth vertical-upside")
+        if(value ===Rotation.Left) this.element.addClass("horizontal-left");
+        else if(value ===Rotation.Right) this.element.addClass("horizontal-right");
+        else if(value ===Rotation.Upside) this.element.addClass("vertical-upside");
+    }
+
     get reverse(): boolean {
         return this._reverse;
     }
-
 
     set reverse(value: boolean) {
         this.hidden = false;

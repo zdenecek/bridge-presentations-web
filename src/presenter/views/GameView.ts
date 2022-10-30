@@ -1,16 +1,20 @@
 import * as $ from "jquery";
 import CardView from "./CardView";
-import {Game} from "../../bridge/model/Game";
-import {Trick} from "../../bridge/model/Trick";
+import { Game } from "../../bridge/model/Game";
+import { Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";
 import { Position, PositionList, PositionHelper } from "../../bridge/model/Position";
 import { Point } from "../classes/Point";
 import { PresentationPlayer } from "../../bridge/model/PresentationPlayer";
-import  AuctionView from "./AuctionView";
+import AuctionView from "./AuctionView";
 import BiddingBoxView from "./BiddingBoxView";
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import HandView from "./HandView";
 import { UndoableGame } from "../../bridge/model/UndoableGame";
+import OneDimensionalHandView, {
+    OneDimensionalHandViewMetadataByPositionFactory,
+    OneDimensionalHandViewMetadataFactory,
+} from "./OneDimensionalHandView";
 
 export interface GameChangedEvent {
     game?: Game;
@@ -23,13 +27,10 @@ export class GameViewMetadata {
     cardHeight = 0;
     width = 0;
     height = 0;
-    cardSpace = 30;
-    padding = 20;
     trickOffset = 0;
     trickSecondaryOffsetNS = 0;
     trickSecondaryOffsetEW = 0;
-    dummyCardSpace = 0;
-    dummyGap = 0;
+    viewDataFactory: OneDimensionalHandViewMetadataByPositionFactory;
 
     constructor(width = 0, height = 0, cardWidth = 0, cardHeight = 0) {
         this.width = width;
@@ -39,35 +40,55 @@ export class GameViewMetadata {
         this.trickOffset = this.cardHeight * 0.2;
         this.trickSecondaryOffsetNS = this.cardHeight * 0.08;
         this.trickSecondaryOffsetEW = this.cardHeight * 0.1;
-        this.cardSpace = this.cardWidth * 0.25;
-        this.dummyGap = this.cardWidth * 0.1;
-        this.dummyCardSpace = this.cardSpace;
+
+        const offset = this.cardHeight;
+
+        const starts = {
+            north: new Point(this.cardHeight, 0),
+            west: new Point(0, this.cardHeight),
+            east: new Point(this.width - this.cardHeight, this.cardHeight),
+            south: new Point(this.cardHeight, this.height - this.cardHeight),
+        };
+
+        this.viewDataFactory = new OneDimensionalHandViewMetadataByPositionFactory(
+            cardWidth,
+            cardHeight,
+            width - 2 * offset,
+            height - 2 * offset,
+            starts
+        );
     }
 
-    point(x: number, y: number): Point {
-        return new Point(x + this.padding, y + this.padding);
-    }
+    
 }
 
-export type DummyOptions = 'static' | 'auto' | 'none';
+export type DummyOptions = "static" | "auto" | "none";
 
 export default class GameView {
     private root: JQuery<HTMLElement>;
     private cardViews = new Map<Card, CardView>();
     private biddingBox: BiddingBoxView;
     private auctionView: AuctionView;
-    private handViews: PositionList<HandView>;
+    private handViews: PositionList<OneDimensionalHandView>;
     private _game?: Game;
     private _dummy?: Position | undefined;
+    private _metadata: GameViewMetadata;
 
-    private _metadata?: GameViewMetadata;
+    constructor() {
+        this.root = $.default("<div class='presenter-app'></div>");
+        this.auctionView = new AuctionView(this.root, this.gameChanged);
+        this.biddingBox = new BiddingBoxView(this.root, this.gameChanged);
+        this.handViews = {} as PositionList<OneDimensionalHandView>;
+        this._metadata = GameViewMetadata.default;
+    }
+
 
     public get dummy(): Position | undefined {
         return this._dummy;
     }
 
     public set dummy(value: Position | undefined) {
-        console.log(value ? PositionHelper.toString(value) :  'none');
+        console.log(value ? PositionHelper.toString(value) : "none");
         if (this._dummy === value) return;
         if (this._dummy) this.handViews[this._dummy].dummy = false;
         this._dummy = value;
@@ -75,15 +96,6 @@ export default class GameView {
         this.handViews[value].dummy = true;
     }
 
-    constructor() {
-        this.root = $.default("<div class='presenter-app'></div>");
-        this.auctionView = new AuctionView(this.root, this.gameChanged);
-        this.biddingBox = new BiddingBoxView(this.root, this.gameChanged);
-        this.handViews = {} as PositionList<HandView>;
-        PositionHelper.all().forEach((position) => {
-            this.handViews[position] = new HandView(position);
-        });
-    }
 
     private _gameChanged = new SimpleEventDispatcher<GameChangedEvent>();
     private get gameChanged(): ISimpleEvent<GameChangedEvent> {
@@ -98,7 +110,7 @@ export default class GameView {
         return this._game;
     }
 
-    public attachGame(game: Game | undefined, dummy: DummyOptions = 'auto', staticDummyPosition?: Position): void {
+    public attachGame(game: Game | undefined, dummy: DummyOptions = "auto", staticDummyPosition?: Position): void {
         if (!this.root) throw new Error("root not attached");
         this._game = game;
         this._gameChanged.dispatch({ game });
@@ -113,13 +125,11 @@ export default class GameView {
                 }
                 this.update();
             });
-        
+
         this.cardViews.forEach((cardView) => cardView.element.detach());
         this.cardViews = new Map<Card, CardView>();
 
-        Object.values(this.handViews).forEach((handView) => {
-            handView.hidden = false;
-        });
+        
 
         this.dummy = undefined;
 
@@ -150,8 +160,15 @@ export default class GameView {
                 this.root.append(view.element);
             });
 
+            this.handViews[player.position] = new OneDimensionalHandView(
+                this.cardViews,
+                player.position,
+                player.hand,
+                this._metadata.viewDataFactory.makeWithPosition(player.position)
+            );
+
             player.hand.cardAdded.sub((e) => {
-                this.handViews[player.position].update(player.hand, this.cardViews, this.metadata);
+                this.handViews[player.position].update();
             });
 
             player.playRequested.sub((e) => {
@@ -203,10 +220,9 @@ export default class GameView {
         this.updateMetadata();
 
         // Hands
-        Object.entries(this.handViews).forEach(([position, handView]) => {
-            const hand = this.game!.player(position as Position).hand;
-            handView.update(hand, this.cardViews, this.metadata!);
-        });
+        Object.values(this.handViews).forEach((handView) =>
+            handView.update(this.metadata.viewDataFactory.makeWithPosition(handView.position))
+        );
 
         // Tricks
         if (this.game.currentTrick) {
@@ -233,12 +249,16 @@ export default class GameView {
         const cardWidth = cardView.element.width() || 0;
         const cardHeight = cardView.element.height() || 0;
 
-        const width = (this.root.width() || 0) - 2 * (this._metadata?.padding || 0);
-        const height = (this.root.height() || 0) - 2 * (this._metadata?.padding || 0);
+        const width = this.root.width() || 0;
+        const height = this.root.height() || 0;
 
         if (this._metadata && width === this._metadata.width && height === this._metadata.height) return;
 
         this._metadata = new GameViewMetadata(width, height, cardWidth, cardHeight);
+
+        Object.entries(this.handViews).forEach(([position, handView]) => {
+            handView.update(this._metadata?.viewDataFactory.makeWithPosition(position as Position));
+        });
     }
 
     private positionTrick(tricks: Array<Trick>, trick: Trick) {
@@ -269,19 +289,19 @@ export default class GameView {
     calculateCardInTrickPositionHelper(): { [key in Position]: Point } {
         const m = this.metadata;
         return {
-            north: m.point(
+            north: new Point(
                 (m.width - m.cardWidth) / 2 - m.trickSecondaryOffsetNS,
                 (m.height - m.cardHeight) / 2 - m.trickOffset
             ),
-            east: m.point(
+            east: new Point(
                 (m.width - m.cardWidth) / 2 + m.trickOffset,
                 (m.height - m.cardHeight) / 2 - m.trickSecondaryOffsetEW
             ),
-            south: m.point(
+            south: new Point(
                 (m.width - m.cardWidth) / 2 + m.trickSecondaryOffsetNS,
                 (m.height - m.cardHeight) / 2 + m.trickOffset
             ),
-            west: m.point(
+            west: new Point(
                 (m.width - m.cardWidth) / 2 - m.trickOffset,
                 (m.height - m.cardHeight) / 2 + m.trickSecondaryOffsetEW
             ),

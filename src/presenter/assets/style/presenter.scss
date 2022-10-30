@@ -49,6 +49,18 @@
         width: 100%;
         object-fit: fill;
     }
+
+    &.horizontal-right {
+        transform-origin: 0 0;
+        transform: rotate(90deg) translateY(-100%)
+    }
+    &.horizontal-left {
+        transform-origin: 0 0;
+        transform: rotate(-90deg) translateX(-100%);
+    }
+    &.vertical-upside {
+        transform: rotate(180deg);
+    }
 }
 
 .bidding-box {

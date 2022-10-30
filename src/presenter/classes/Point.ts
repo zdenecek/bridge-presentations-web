@@ -1,6 +1,10 @@
+import { Vector } from "./Vector";
+
 class Point {
-    x: number;
-    y: number;
+    public readonly x: number;
+    public readonly y: number;
+
+    static readonly Origin = new Point(0, 0);
 
     constructor(x: number, y: number) {
         this.x = x;
@@ -15,8 +19,8 @@ class Point {
         return new Point(this.x, this.y);
     }
 
-    add(other: Point | { x: number; y: number }): Point {
-        return new Point(this.x + other.x, this.y + other.y);
+    moveBy(vector: Vector): Point  {
+        return new Point(this.x + vector.x, this.y+ vector.y);
     }
 }
 
