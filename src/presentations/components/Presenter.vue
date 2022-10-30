@@ -3,14 +3,14 @@
 </template>
 
 <script lang="ts">
-import GameView from "@/presenter/gui/GameView";
-import { Position } from "@/presenter/model/Position";
-import PlayerFactory from "@/presenter/factory/PlayerFactory";
+import GameView from "@/presenter/views/GameView";
+import { Position } from "@/bridge/model/Position";
+import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { defineComponent } from "vue";
 import $ from "jquery";
 import { configuratorOptions } from "@/presentations/types";
-import GameFactory from "@/presenter/factory/GameFactory";
-import { UndoableGame } from "@/presenter/model/UndoableGame";
+import GameFactory from "@/bridge/factory/GameFactory";
+import { UndoableGame } from "@/bridge/model/UndoableGame";
 
 
 export default defineComponent({

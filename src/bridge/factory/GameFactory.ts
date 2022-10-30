@@ -1,6 +1,6 @@
 import { Player } from "../model/Player";
 import { PositionList, Position, PositionHelper } from "../model/Position";
-import {Hand} from "../model/Hand";
+import { Hand } from "../model/Hand";
 import { Card, CardValue } from "../model/Card";
 import { Suit } from "../model/Suit";
 import { PresentationPlayer } from "../model/PresentationPlayer";
@@ -13,13 +13,22 @@ export default class GameFactory {
             players[position] = new PresentationPlayer(position);
         });
 
-        players[Position.North].hand = new Hand([new Card(Suit.Clubs, CardValue.Jack), new Card(Suit.Spades, CardValue.Jack)]);
+        players[Position.North].hand = new Hand([
+            new Card(Suit.Clubs, CardValue.Jack),
+            new Card(Suit.Spades, CardValue.Jack),
+        ]);
         players[Position.East].hand = new Hand([
             new Card(Suit.Diamonds, CardValue.Jack),
             new Card(Suit.Spades, CardValue.Queen),
         ]);
-        players[Position.West].hand = new Hand([new Card(Suit.Hearts, CardValue.Jack), new Card(Suit.Spades, CardValue.King)]);
-        players[Position.South].hand = new Hand([new Card(Suit.Spades, CardValue.Jack), new Card(Suit.Spades, CardValue.Ace)]);
+        players[Position.West].hand = new Hand([
+            new Card(Suit.Hearts, CardValue.Jack),
+            new Card(Suit.Spades, CardValue.King),
+        ]);
+        players[Position.South].hand = new Hand([
+            new Card(Suit.Spades, CardValue.Jack),
+            new Card(Suit.Spades, CardValue.Ace),
+        ]);
         return GameFactory.makeObservableGame(players);
     }
 

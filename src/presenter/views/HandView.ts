@@ -1,10 +1,10 @@
-import { Card } from "../model/Card";
-import { Hand } from "../model/Hand";
-import { Position } from "../model/Position";
-import { Suit } from "../model/Suit";
+import { Card } from "../../bridge/model/Card";
+import { Hand } from "../../bridge/model/Hand";
+import { Position } from "../../bridge/model/Position";
+import { Suit } from "../../bridge/model/Suit";
 import CardView from "./CardView";
 import { GameViewMetadata } from "./GameView";
-import { Point } from "./Point";
+import { Point } from "../classes/Point";
 
 export default class HandView {
     position: Position;

@@ -1,6 +1,6 @@
 import { DummyOptions } from "@/presenter";
-import { Position } from "@/presenter/model/Position";
-import { Suit } from "@/presenter/model/Suit";
+import { Position } from "@/bridge/model/Position";
+import { Suit } from "@/bridge/model/Suit";
 
 export type configuratorOptions = {
     cards: {

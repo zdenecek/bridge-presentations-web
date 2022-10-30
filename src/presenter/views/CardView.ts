@@ -1,7 +1,7 @@
-import { Card, CardValue, CardValueHelper } from "../model/Card";
-import { SuitHelper } from "../model/Suit";
+import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
+import { SuitHelper } from "../../bridge/model/Suit";
 import $ from "jquery";
-import { Point } from "./Point";
+import { Point } from "../classes/Point";
 
 export default class CardView {
     static images = require.context("@/presenter/assets/cards", false, /\.(png|jpe?g|svg)$/);

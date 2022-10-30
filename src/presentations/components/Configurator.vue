@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Suit } from "@/presenter/model/Suit";
+import { Suit } from "@/bridge/model/Suit";
 
 export default defineComponent({
     name: "Presenter",

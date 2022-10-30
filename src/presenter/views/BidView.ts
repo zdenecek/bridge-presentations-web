@@ -1,7 +1,7 @@
 import $ from "jquery";
-import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../model/Bid";
-import { SuitHelper } from "../model/Suit";
-import { Point } from "./Point";
+import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
+import { SuitHelper } from "../../bridge/model/Suit";
+import { Point } from "../classes/Point";
 
 export class BidView {
     static images = require.context("@/presenter/assets/bidding", false, /\.(png|jpe?g|svg)$/);

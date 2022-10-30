@@ -1,16 +1,16 @@
 import * as $ from "jquery";
 import CardView from "./CardView";
-import {Game} from "../model/Game";
-import {Trick} from "../model/Trick";
-import { Card } from "../model/Card";
-import { Position, PositionList, PositionHelper } from "../model/Position";
-import { Point } from "./Point";
-import { PresentationPlayer } from "../model/PresentationPlayer";
+import {Game} from "../../bridge/model/Game";
+import {Trick} from "../../bridge/model/Trick";
+import { Card } from "../../bridge/model/Card";
+import { Position, PositionList, PositionHelper } from "../../bridge/model/Position";
+import { Point } from "../classes/Point";
+import { PresentationPlayer } from "../../bridge/model/PresentationPlayer";
 import  AuctionView from "./AuctionView";
 import BiddingBoxView from "./BiddingBoxView";
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import HandView from "./HandView";
-import { UndoableGame } from "../model/UndoableGame";
+import { UndoableGame } from "../../bridge/model/UndoableGame";
 
 export interface GameChangedEvent {
     game?: Game;

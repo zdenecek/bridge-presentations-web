@@ -1,10 +1,10 @@
 import $ from "jquery";
-import { Bid } from "../model/Bid";
-import { Position, PositionList } from "../model/Position";
+import { Bid } from "../../bridge/model/Bid";
+import { Position, PositionList } from "../../bridge/model/Position";
 import { BidStack } from "./BidStack";
 import { ISimpleEvent } from "ste-simple-events";
 import { GameChangedEvent } from "./GameView";
-import { UndoableAuction } from "../model/UndoableAuction";
+import { UndoableAuction } from "../../bridge/model/UndoableAuction";
 
 export default class AuctionView {
     private root: JQuery<HTMLElement>;

@@ -1,8 +1,8 @@
 import $ from "jquery";
 import { ISimpleEvent } from "ste-simple-events";
-import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../model/Bid";
-import { ContractLevel } from "../model/Contract";
-import { Suit, SuitHelper } from "../model/Suit";
+import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
+import { ContractLevel } from "../../bridge/model/Contract";
+import { Suit, SuitHelper } from "../../bridge/model/Suit";
 import { GameChangedEvent } from "./GameView";
 
 export default class BiddingBoxView {

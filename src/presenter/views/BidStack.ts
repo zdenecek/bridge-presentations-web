@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { Bid } from "../model/Bid";
-import { Position } from "../model/Position";
+import { Bid } from "../../bridge/model/Bid";
+import { Position } from "../../bridge/model/Position";
 import { BidView } from "./BidView";
 
 export class BidStack {
