@@ -2,34 +2,34 @@ import $ from "jquery";
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
 import { Point } from "../classes/Point";
+import View from "./View";
 
-export class BidView {
+export class BidView extends View {
     static images = require.context("@/presenter/assets/bidding", false, /\.(png|jpe?g|svg)$/);
 
-    element: JQuery<HTMLElement>;
     bid: Bid;
 
     constructor(bid: Bid) {
+        super(`<div class='bid ${BidView.getClass(bid)}'>
+        <img src='${BidView.getImagePath(bid)}' alt='${bid}'/>
+        </div>`);
         this.bid = bid;
-        this.element = $(`<div class='bid ${this.getClass(bid)}'>
-            <img src='${this.getImagePath()}' alt='${bid}'/>
-            </div>`);
     }
 
-    private getImagePath(): string {
-        if (this.bid instanceof ContractBid) {
-            return BidView.images(`./${this.bid.level}${SuitHelper.toLetter(this.bid.suit)}.png`);
-        } else if (this.bid instanceof PassBid) {
+    static getImagePath(bid: Bid): string {
+        if (bid instanceof ContractBid) {
+            return BidView.images(`./${bid.level}${SuitHelper.toLetter(bid.suit)}.png`);
+        } else if (bid instanceof PassBid) {
             return BidView.images(`./pass.png`);
-        } else if (this.bid instanceof DoubleBid) {
+        } else if (bid instanceof DoubleBid) {
             return BidView.images(`./x.png`);
-        } else if (this.bid instanceof RedoubleBid) {
+        } else if (bid instanceof RedoubleBid) {
             return BidView.images(`./xx.png`);
         }
         throw new Error("Unknown bid type");
     }
 
-    private getClass(bid: Bid): string {
+    static getClass(bid: Bid): string {
         if (bid instanceof ContractBid) {
             return SuitHelper.toString(bid.suit).toLowerCase();
         } else if (bid instanceof PassBid) {
@@ -44,8 +44,8 @@ export class BidView {
 
 
     public set position(value: Point) {
-        this.element.css("transition", "ease 1s")
-        this.element.css(value.asCoords());
+        this.root.css("transition", "ease 1s")
+        this.root.css(value.asCoords());
     }
 
 }

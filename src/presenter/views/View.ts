@@ -2,32 +2,41 @@
 import * as $ from "jquery";
 import { Point } from "../classes/Point";
 
-export default abstract class View {
+export default class View {
 
+    
+    // todo make private
     root: JQuery<HTMLElement>;
-
-    constructor(template: string) {
+    
+    constructor(template: string ) {
         this.root = $.default(template);
     }
     
-    attach(parent: HTMLElement) : void {
+
+    attach(parent: HTMLElement | JQuery<HTMLElement>) : void {
         $.default(parent).append(this.root);
     } 
+
+    addSubView(view: View) : void {
+        view.attach(this.root);
+    }
+
     detach() : void {
         this.root.detach();
     }
 
-    protected get height(): number {
+    public get height(): number {
         return this.root.height() || 0;
     }
 
-    protected get width(): number {
-        return this.root.height() || 0;
+    public get width(): number {
+        return this.root.width() || 0;
     }
 
-    protected get start(): Point {
+    public get start(): Point {
         const c = this.root.offset();
         if(!c) return Point.Origin;
         return new Point(c.left, c.top);
     }
 }
+

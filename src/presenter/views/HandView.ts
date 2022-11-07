@@ -11,15 +11,17 @@ export default abstract class HandView extends View {
     protected _dummy = false;
     protected _hidden = false;
     protected _cardViews: Map<Card, CardView>;
-    protected _hand: Hand;
+    protected _hand?: Hand;
 
-    constructor(cardViews: Map<Card, CardView>, position: Position, hand: Hand) {
+    constructor(cardViews: Map<Card, CardView>, position: Position) {
         super(`<div class="hand hand-${position}"></div>`)
         this.position = position;
         this._cardViews = cardViews;
-        this._hand = hand;
     }
 
+    public set hand(hand: Hand) {
+        this.hand = hand;
+    }
 
     get hidden(): boolean {
         return this._hidden;
@@ -47,6 +49,7 @@ export default abstract class HandView extends View {
     }
 
     update(): void {
+        if(!this._hand) return;
         if(this._dummy) this.updateDummy();
         else this.updateNonDummy();
     }

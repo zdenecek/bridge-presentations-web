@@ -1,6 +1,7 @@
-import { DummyOptions } from "@/presenter";
 import { Position } from "@/bridge/model/Position";
 import { Suit } from "@/bridge/model/Suit";
+import { Vulnerability } from "@/bridge/model/Vulnerability";
+import { DummyOptions } from "@/presenter/views/GameView";
 
 export type configuratorOptions = {
     cards: {
@@ -14,5 +15,6 @@ export type configuratorOptions = {
     trumps?: Suit;
     dummy?: DummyOptions;
     staticDummyPosition?: Position;
+    vulnerability?: Vulnerability;
 };
 

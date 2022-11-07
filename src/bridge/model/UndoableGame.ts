@@ -5,7 +5,7 @@ import { Bid } from "./Bid";
 import { Card } from "./Card";
 import { Game, GameEvent } from "./Game";
 import { Player } from "./Player";
-import { Position, PositionHelper } from "./Position";
+import { Position } from "./Position";
 import { Trick, CardInTrick } from "./Trick";
 import { UndoableAuction } from "./UndoableAuction";
 

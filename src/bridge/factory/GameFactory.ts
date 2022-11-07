@@ -5,6 +5,7 @@ import { Card, CardValue } from "../model/Card";
 import { Suit } from "../model/Suit";
 import { PresentationPlayer } from "../model/PresentationPlayer";
 import { UndoableGame } from "../model/UndoableGame";
+import { Vulnerability } from "../model/Vulnerability";
 
 export default class GameFactory {
     static makeTestGame(): UndoableGame {
@@ -32,8 +33,8 @@ export default class GameFactory {
         return GameFactory.makeObservableGame(players);
     }
 
-    static makeObservableGame(players: PositionList<Player>, bidding = true): UndoableGame {
-        const game = new UndoableGame(players, bidding);
+    static makeObservableGame(players: PositionList<Player>, bidding = true, vulnerability?: Vulnerability): UndoableGame {
+        const game = new UndoableGame(players, bidding, vulnerability);
         game.cardPlayed.sub((e) => {
             console.debug(`card played: ${e.card}`);
         });

@@ -4,28 +4,21 @@ import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/
 import { ContractLevel } from "../../bridge/model/Contract";
 import { Suit, SuitHelper } from "../../bridge/model/Suit";
 import { GameChangedEvent } from "./GameView";
+import View from "./View";
 
-export default class BiddingBoxView {
-    root: JQuery<HTMLElement>;
+export default class BiddingBoxView extends View {
     contractBidElements = new Map<{ suit: Suit; level: ContractLevel }, JQuery<HTMLElement>>();
     otherBidElements: { [key in "pass" | "double" | "redouble"]: JQuery<HTMLElement> };
 
     callback: ((bid: Bid) => void) | undefined;
 
-    constructor(parent: JQuery<HTMLElement>, gameChanged: ISimpleEvent<GameChangedEvent>) {
-        this.root = $(`
-            <div class="bidding-box">
-            </div>
-        `);
+    constructor( ) {
+        super(`
+        <div class="bidding-box">
+        </div>
+        `)
 
-        parent.append(this.root);
         this.visible = false;
-
-        gameChanged.sub((e) => {
-            this.visible = false;
-            e.game?.biddingStarted.sub(() => (this.visible = true));
-            e.game?.biddingEnded.sub(() => (this.visible = false));
-        });
 
         for (let level = 1; level <= 7; level++) {
             for (const suit of SuitHelper.all()) {

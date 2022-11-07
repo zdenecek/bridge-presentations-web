@@ -3,23 +3,49 @@ import { Suit } from "../model/Suit";
 
 export class Parser {
     static parseHandString(input: string): Array<Card> {
-        const chars = input.trim().replace(/ +/g, " ").replace(/10/g, "T").split("");
         const cards = new Array<Card>();
         let suit = Suit.Spades;
+        const strs = input.trim().replace(/ +/g, " ").replace(/10/g, "T").split(" ");
 
-        for (let i = 0; i < chars.length; i++) {
-            if (chars[i] === " ") {
-                if (suit === Suit.Clubs) break;
-                suit--;
-            } else {
-                cards.push(new Card(suit, Parser.parseCardValue(chars[i])));
+        for (const str of strs) {
+            if (str !== "-") {
+                for (const char of str) {
+                    cards.push(new Card(suit, Parser.parseCardValue(char)));
+                }
             }
+            if (suit === Suit.Clubs) break;
+            suit--;
         }
 
         return cards;
     }
 
-    static parseCardValue(input: string): CardValue {
+    static parseHandStringStrict(input: string): [Array<Card>, Array<string>] {
+        const cards = new Array<Card>();
+        let suit = Suit.Spades;
+        const strs = input.trim().replace(/ +/g, " ").replace(/10/g, "T").split(" ");
+
+        const errors = new Array<string>();
+        if (strs.length != 4) errors.push(`Malformed string: ${strs.length} suits`);
+
+        for (const str of strs) {
+            if (str !== "-") {
+                for (const char of str) {
+                    try {
+                        cards.push(new Card(suit, Parser.parseCardValue(char, true)));
+                    } catch (e) {
+                        errors.push((e as Error).message);
+                    }
+                }
+            }
+            if (suit === Suit.Clubs) break;
+            suit--;
+        }
+
+        return [cards, errors];
+    }
+
+    static parseCardValue(input: string, strict = false): CardValue {
         switch (input.toUpperCase()) {
             case "2":
                 return CardValue.Two;
@@ -48,7 +74,10 @@ export class Parser {
                 return CardValue.King;
             case "A":
                 return CardValue.Ace;
+            case "X":
+                return CardValue.Other;
             default:
+                if (strict) throw new Error(`Unknown character: ${input}`);
                 return CardValue.Other;
         }
     }

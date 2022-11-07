@@ -12,15 +12,14 @@
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "webpack-env"
+      "webpack-env",
+      "resize-observer-browser"
     ],
     "paths": {
       "@/*": [
         "src/*"
       ],
-      "presenter": [
-        "src/presenter/index.ts"
-      ],
+
     },
     "lib": [
       "esnext",

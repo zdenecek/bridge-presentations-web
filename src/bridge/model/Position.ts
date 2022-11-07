@@ -46,6 +46,7 @@ class PositionHelper {
     }
 }
 
+// TODO remove
 type PositionList<T> = { [key in Position]: T }
 type PartialPositionList<T> = { [key in Position]?: T }
 

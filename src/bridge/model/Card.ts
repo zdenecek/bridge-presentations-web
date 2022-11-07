@@ -27,7 +27,7 @@ class Card {
     public suit: Suit;
     public value: CardValue;
 
-    constructor(suit: Suit = Suit.Notrump, value: CardValue = CardValue.Two) {
+    constructor(suit: Suit = Suit.Clubs, value: CardValue = CardValue.Two) {
         this.suit = suit;
         this.value = value;
     }

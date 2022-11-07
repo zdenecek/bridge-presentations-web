@@ -1,52 +1,67 @@
-import $ from "jquery";
 import { Bid } from "../../bridge/model/Bid";
 import { Position, PositionList } from "../../bridge/model/Position";
 import { BidStack } from "./BidStack";
-import { ISimpleEvent } from "ste-simple-events";
-import { GameChangedEvent } from "./GameView";
 import { UndoableAuction } from "../../bridge/model/UndoableAuction";
+import View from "./View";
+import { Game } from "@/bridge/model/Game";
+import CenterPanelView from "./CenterPanelView";
+import { runLater } from "@/bridge/utils/runLater";
 
 export default class AuctionView {
-    private root: JQuery<HTMLElement>;
     private bidStacks: PositionList<BidStack>;
+    private centerPanelView: CenterPanelView;
 
-    constructor(parent: JQuery<HTMLElement>, gameChanged: ISimpleEvent<GameChangedEvent>) {
-        this.root = $(`<div class='bidding'></div>`);
-        // TODO add class for bidstack?
+    constructor(centerPanelView: CenterPanelView) {
         this.bidStacks = {
-            north: new BidStack(this.root, Position.North),
-            east: new BidStack(this.root, Position.East),
-            south: new BidStack(this.root, Position.South),
-            west: new BidStack(this.root, Position.West),
+            north: new BidStack(Position.North),
+            east: new BidStack(Position.East),
+            south: new BidStack(Position.South),
+            west: new BidStack(Position.West),
         };
 
-        parent.append(this.root);
+        Object.values(this.bidStacks).forEach((b) => {
+            centerPanelView.addSubView(b);
+        });
+
+        this.centerPanelView = centerPanelView;
 
         this.visible = false;
+    }
 
-        gameChanged.sub((e) => {
-            this.visible = false;
-            e.game?.biddingStarted.sub((f) => {
-                this.visible = true;
-                if (e.game?.auction instanceof UndoableAuction) {
-                    e.game.auction.bidRemoved.sub(({ position }) => {
-                        this.bidStacks[position].removeLastBid();
-                        this.update();
-                    });
-                }
-            });
-            e.game?.cardPlayed.sub(() => (this.visible = false));
-            this.reset();
-            e.game?.bidMade.sub((e) => this.addBid(e.player.position, e.bid));
+    public setGame(game: Game): void {
+        this.visible = false;
+        game?.biddingStarted.sub(() => {
+            this.visible = true;
+            this.centerPanelView.bidding = true;
+            this.update();
+            if (game?.auction instanceof UndoableAuction) {
+                game.auction.bidRemoved.sub(({ position }) => {
+                    this.bidStacks[position].removeLastBid();
+                    this.update();
+                });
+            }
         });
+
+        game?.biddingEnded.sub(() => {
+            runLater(() => { this.visible = false}, 1000)
+        });
+
+        game?.cardPlayed.sub(() => {
+            this.visible = false;
+            this.update();
+        });
+        this.reset();
+        game?.bidMade.sub((e) => this.addBid(e.player.position, e.bid));
     }
 
     public set visible(visible: boolean) {
-        this.root.toggle(visible);
+        Object.values(this.bidStacks).forEach((b) => b.root.toggle(visible));
+        this.centerPanelView.bidding = false;
+
     }
 
     public update(): void {
-        Object.values(this.bidStacks).forEach((bidStack) => bidStack.updateSpacing());
+        Object.values(this.bidStacks).forEach((bidStack) => bidStack.update());
     }
 
     private reset(): void {

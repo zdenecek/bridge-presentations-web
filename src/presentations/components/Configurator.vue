@@ -13,9 +13,19 @@
                     <template v-for="(label, pos) in positions" :key="pos">
                         <label :for="pos">{{ label }}</label>
                         <input :id="pos" type="text" v-model="options.cards[pos]" />
+                        <div class="error-list" v-if="showErrors && cardErrors.has(pos as Position) ">
+                                <div v-for="err in cardErrors.get(pos as Position)" :key="err" >
+                                    {{err}}
+                                </div>
+                        </div>
                     </template>
                 </div>
+
                 <div class="fields">
+                    <label for="first">Vulnerability</label>
+                    <select id="first" v-model="options.vulnerability">
+                        <option :value="vul" v-for="(label, vul) in vulnerabilities" :key="vul">{{ label }}</option>
+                    </select>
                     <label for="enable-bidding">Enable bidding</label>
                     <input type="checkbox" class="checkbox" id="enable-bidding" v-model="options.bidding" />
 
@@ -35,10 +45,9 @@
                             <option value="none">None</option>
                         </select>
                         <select
-                            id="trumps"
-                            v-model="options.staticDummyPosition"
-                            v-show="!options.bidding && options.dummy === 'static'"
-                        >
+                                id="trumps"
+                                v-model="options.staticDummyPosition"
+                                v-show="!options.bidding && options.dummy === 'static'">
                             <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                         </select>
                     </div>
@@ -76,6 +85,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Suit } from "@/bridge/model/Suit";
+import { CardsInputValidator } from "../class/CardsInputValidator";
+import { Position } from "@/bridge/model/Position";
+import { Vulnerability } from "@/bridge/model/Vulnerability";
 
 export default defineComponent({
     name: "Presenter",
@@ -103,6 +115,7 @@ export default defineComponent({
             };
         },
     },
+
     data() {
         return {
             options: {
@@ -117,15 +130,22 @@ export default defineComponent({
                 trumps: Suit.Notrump,
                 dummy: "auto",
                 staticDummyPosition: "north",
+                vulnerability: Vulnerability.None,
             },
 
             positions: {
-                north: "North",
-                east: "East",
-                south: "South",
-                west: "West",
+                [Position.North]: "North",
+                [Position.East]: "East",
+                [Position.South]: "South",
+                [Position.West]: "West",
             },
 
+            vulnerabilities: {
+                [Vulnerability.Both]: "Both",
+                [Vulnerability.None]: "None",
+                [Vulnerability.NS]: "NS",
+                [Vulnerability.EW]: "EW",
+            },
             suits: {
                 [Suit.Spades]: "♠",
                 [Suit.Hearts]: "♥",
@@ -134,6 +154,14 @@ export default defineComponent({
                 [Suit.Notrump]: "NT",
             },
         };
+    },
+    computed: {
+        cardErrors() {
+            return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as any));
+        },
+        showErrors() {
+            return  Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
+        }
     },
 });
 </script>
@@ -146,6 +174,18 @@ export default defineComponent({
     display: flex;
     padding: 10px;
     flex-direction: column;
+}
+
+.error-list {
+
+    grid-column: 1 / 3;
+
+    div {
+        padding: 0 10px ;
+        text-align: right;
+    }
+    font-size: 0.8em;
+    color: red;
 }
 
 #configurator-tabs {

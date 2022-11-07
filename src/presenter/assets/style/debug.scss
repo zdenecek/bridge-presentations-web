@@ -7,10 +7,40 @@
     background-color: aquamarine;
 }
 
+
+.bid-stack-container {
+    
+    outline: green dotted 2px ;
+    outline-offset: -1px;
+}
+
+
 .bid-stack {
+
+    outline: blue solid 1px ;
+    outline-offset: -2px;
     .bid {
         outline: red 1px solid;
     }
+}
+
+
+.hand-north {
+    background-color: lightblue;
+}
+
+.hand-east {
+    background-color: lightgoldenrodyellow;
+
+    
+}
+.hand-south {
+    background-color: lightgreen;
+}
+
+.hand-west {
+    background-color: lightpink;
+
 }
 
 .bid-stack-north {
@@ -29,4 +59,20 @@
 .bid-stack-west {
     background-color: lightpink;
 
+}
+
+
+
+
+.trick-view-origin-north div {
+    background-color: lightblue;
+}
+.trick-view-origin-east div {
+    background-color: lightgoldenrodyellow;    
+}
+.trick-view-origin-south div {
+    background-color: lightgreen;
+}
+.trick-view-origin-west div {
+    background-color: lightpink;
 }

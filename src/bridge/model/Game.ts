@@ -8,6 +8,7 @@ import { Auction } from "./Auction";
 import { Contract } from "./Contract";
 import { ISimpleEvent, SimpleEventDispatcher } from "strongly-typed-events";
 import { runLater } from "../utils/runLater";
+import { Vulnerability } from "./Vulnerability";
 
 type GameState = "notStarted" | "bidding" | "cardplay" | "finished";
 
@@ -41,12 +42,14 @@ export class Game {
     finalContract: Contract | undefined;
     state: GameState;
     bidding: boolean;
+    vulnerability: Vulnerability;
     currentlyRequestedPlayer: Player | undefined;
 
-    constructor(players: PositionList<Player>, bidding = true) {
+    constructor(players: PositionList<Player>, bidding = true, vulnerability = Vulnerability.None) {
         this.players = players;
         this.state = "notStarted";
         this.bidding = bidding;
+        this.vulnerability = vulnerability;
     }
 
     get currentTrick(): Trick | undefined {

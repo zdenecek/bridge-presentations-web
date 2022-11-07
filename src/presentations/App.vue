@@ -45,6 +45,14 @@ export default defineComponent({
 
 <style lang="scss">
 
+
+body {
+  // background-image: url(0.png);
+    background-size: cover;
+  // filter: opacity(20%);
+}
+
+
 * {
   box-sizing: border-box;
 }
@@ -57,7 +65,6 @@ h1, h2 {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #2c3e50;
     height: 100%;
 }

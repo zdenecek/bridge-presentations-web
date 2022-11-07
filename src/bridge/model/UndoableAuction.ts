@@ -16,9 +16,8 @@ export class UndoableAuction extends Auction {
     }
 
     public undo(): PositionedBid | undefined {
-        if (this.bids.length === 0) return;
-
-        const lastBid = this.bids.pop()!;
+        const lastBid = this.bids.pop();
+        if (!lastBid) return;
         this._isFinished = false;
 
         this.resetStanding();
