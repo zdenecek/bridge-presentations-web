@@ -105,22 +105,25 @@ export class Player {
         runLater(() => this._playRequested.dispatch({ player: this, game: game, trick: toTrick }));
     }
 
-    protected playCard(card: Card): void {
+    protected playCard(card: Card): boolean {
         const successfullyPlayed = this.playCallback?.(this, card);
-        if (!successfullyPlayed) return;
+        if (!successfullyPlayed) return false;
 
         this.playCallback = undefined;
         this.hand.removeCard(card);
 
+        
         runLater(() => this._cardPlayer.dispatch({ player: this, game: this.game, card: card }));
+        return true;
     }
 
-    protected bid(bid: Bid): void {
+    protected bid(bid: Bid): boolean {
         const successfullyPlayed = this.bidCallback?.(this, bid);
-        if (!successfullyPlayed) return;
+        if (!successfullyPlayed) return false;
 
         this.bidCallback = undefined;
 
         runLater(() => this._bidMade.dispatch({ player: this, game: this.game, bid: bid }));
+        return true;
     }
 }

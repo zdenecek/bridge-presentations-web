@@ -11,9 +11,26 @@ export interface HandCardEvent {
     card: Card;
 }
 
+export interface CardInHand {
+    card: Card;
+    played: boolean;
+}
+
 export class Hand {
-    cards: Array<Card> = [];
+    private _cards: Array<CardInHand> = [];
     position?: Position;
+
+    public get cards(): Array<Card> {
+        return this._cards.filter(c => !c.played).map(c => c.card);
+    }
+
+    public get allCards(): Array<Card> {
+        return this._cards.map(c => c.card);
+    }
+
+    public get cardsWithPlayInfo(): Array<CardInHand> {
+        return new Array<CardInHand>(...this._cards);
+    }
 
     protected _cardAdded = new SimpleEventDispatcher<HandCardEvent>();
     protected _cardRemoved = new SimpleEventDispatcher<HandCardEvent>();
@@ -27,30 +44,30 @@ export class Hand {
     }
 
     constructor(cards: Array<Card> = [], position?: Position) {
-        this.cards = cards;
+        this._cards = cards.map(card => ({ card, played: false}));
         this.position = position;
         this.sortCards();
     }
 
     private sortCards(): void {
-        this.cards.sort((a, b) => (a.suit - b.suit !== 0 ? a.suit - b.suit : b.value - a.value));
+        this._cards.sort((a,b) => (a.card.suit - b.card.suit !== 0 ? a.card.suit - b.card.suit : b.card.value - a.card.value));
     }
 
     public addCard(card: Card): void {
-        this.cards.push(card);
+        this._cards.push({card, played: false});
         this.sortCards();
         this._cardAdded.dispatch({ hand: this , card: card });
     }
 
     public removeCard(card: Card): boolean {
-        const index = this.cards.indexOf(card);
-        if (index === -1) return false;
-        this.cards.splice(index, 1);
+        const c =this._cards.find(a => a.card === card);
+        if(!c) return false;
+        c.played = true;
         this._cardRemoved.dispatch({ hand: this, card: card });
         return true;
     }
 
     toString(): string {
-        return `(${this.cards.map((card) => card.toString()).join(" ")})`;
+        return `(${this._cards.map((card) => card.toString()).join(" ")})`;
     }
 }

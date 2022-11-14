@@ -21,6 +21,10 @@ class CardValueHelper {
     static toString(value: CardValue): string {
         return CardValue[value];
     }
+
+    static toSymbol(value: CardValue): string {
+        return this.toString(value)[0];
+    }
 }
 
 class Card {
@@ -35,6 +39,11 @@ class Card {
     public toString(): string {
         return `${CardValueHelper.toString(this.value)} of ${SuitHelper.toString(this.suit)}`;
     }
+
+    public toShortString(): string {
+        return `${SuitHelper.toSymbol(this.suit)}${CardValueHelper.toSymbol(this.value)}`;
+
+    } 
 }
 
 export { CardValue, CardValueHelper, Card };

@@ -4,11 +4,11 @@ import { Player } from "./Player";
 
 
 export class PresentationPlayer extends Player {
-    public bid(bid: Bid): void {
-        super.bid(bid);
+    public bid(bid: Bid): boolean {
+        return super.bid(bid);
     }
 
-    public playCard(card: Card): void {
-        super.playCard(card);
+    public playCard(card: Card): boolean {
+        return super.playCard(card);
     }
 }
