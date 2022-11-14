@@ -52,8 +52,13 @@ export default class GameViewFactory {
         });
 
         gameView.addSubView(mainView);
-        gameView.addSubView(bb);
-        gameView.addSubView(controlPanel);
+
+        const controlCenter = new View('<div id="control-center">');
+        controlCenter.addSubView(controlPanel);
+        controlCenter.addSubView(bb);
+
+        gameView.addSubView(controlCenter);
+        
         return gameView;
     }
 

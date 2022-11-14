@@ -72,7 +72,7 @@ export class UndoableGame extends Game {
         } else {
             lastTrick = this.tricks[this.tricks.length - 1];
             const lastCard = this.popCard(lastTrick)!;
-            this.players[lastCard.player].hand.addCard(lastCard.card);
+            this.players[lastCard.player].hand._cards.find(c => c.card === lastCard.card)!.played = false;
             lastTrick.currentToPlay = lastCard.player;
             
             runLater(() => this._undoMade.dispatch({ game: this }));

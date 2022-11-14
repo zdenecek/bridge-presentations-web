@@ -1,6 +1,7 @@
 import { Game } from "@/bridge/model/Game";
 import { Player } from "@/bridge/model/Player";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
+import { SuitHelper } from "@/bridge/model/Suit";
 import * as $ from "jquery";
 import View from "./View";
 
@@ -48,6 +49,8 @@ export default class ControlPanel extends View {
             value.hand.cardsWithPlayInfo.forEach((card, index) => {
                 if (index >= this.buttons.length) return;
                 this.buttons[index].root.children(".content-label")[0].innerText = card.card.toShortString();
+                this.buttons[index].root.toggleClass("clubs spades hearts diamonds", false);
+                this.buttons[index].root.toggleClass(SuitHelper.toString(card.card.suit).toLowerCase(), true);
                 this.buttons[index].root.prop("disabled", card.played);
             });
         }
@@ -56,11 +59,16 @@ export default class ControlPanel extends View {
     attachGame(game?: Game): void {
         if (!game) return;
 
+        this.root.hide();
+
         Object.entries(game.players).forEach(([pos, player]) => {
             player.playRequested.sub((e) => {
                 if (e.player instanceof PresentationPlayer) this.player = e.player;
                 else this.player = undefined;
             });
         });
+
+        game.cardplayStarted.sub(() => this.root.show());
+        game.cardplayEnded.sub(() => this.root.hide());
     }
 }

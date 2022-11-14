@@ -100,6 +100,38 @@ $frame-width: 16%;
     text-transform: uppercase;
 }
 
+#control-center {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.control-panel {
+    display: grid;
+    grid-template-columns: repeat( 7, 1fr);
+
+    button:disabled {
+        color: gray;
+        background-color: white;
+    }
+
+    .hearts {
+        color: red;
+    }
+    
+    .diamonds {
+        color: darkgoldenrod;
+    }
+    
+    .spades {
+        color: blue;
+    }
+    
+    .clubs {
+        color: green;
+    }
+}
+
 .center-frame-label-north {
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
@@ -222,7 +254,7 @@ $frame-width: 16%;
     }
 
     &.reverse img.back {
-        z-index: 0;
+        z-index: 1;
         display: initial;
     }
 

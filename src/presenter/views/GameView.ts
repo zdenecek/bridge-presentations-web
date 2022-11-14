@@ -103,8 +103,9 @@ export default class GameView extends BaseView {
             this.dummy = staticDummyPosition;
         }
 
-        game.cardPlayed.sub(() => {
+        game.cardPlayed.sub(e => {
             this.update();
+            
         });
 
         game.allPlayers.forEach((player) => {
@@ -172,6 +173,7 @@ export default class GameView extends BaseView {
             this.trickView.attachTrick(this.game.currentTrick);
         }
 
+        this.trickView.update();
         this.auctionView.update();
     }
 

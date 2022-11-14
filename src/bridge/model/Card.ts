@@ -23,7 +23,8 @@ class CardValueHelper {
     }
 
     static toSymbol(value: CardValue): string {
-        return this.toString(value)[0];
+        if(value >= 10) return this.toString(value)[0];
+        else return value.toString();
     }
 }
 

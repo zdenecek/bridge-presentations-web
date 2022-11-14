@@ -196,8 +196,11 @@ export class Game {
     }
 
     protected addCard(trick: Trick, card: Card, player: Player): boolean {
-        // TODO check follow suit
         // check correct playeer, correct trick, correct card
+        if(trick.cards.length > 0 ) {
+            const suit = trick.cards[0].card.suit;
+            if(suit !== card.suit && player.hand.cardsWithSuit(suit).length > 0) return false;
+        }
 
         trick.addCard(card);
         runLater(() => this._cardPlayed.dispatch({ card, trick, player, game: this }));

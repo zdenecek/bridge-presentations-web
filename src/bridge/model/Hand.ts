@@ -1,6 +1,7 @@
 import { Card } from "./Card";
 import { Position } from "./Position";
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
+import { Suit } from "./Suit";
 
 export interface HandEvent {
     hand: Hand;
@@ -17,7 +18,7 @@ export interface CardInHand {
 }
 
 export class Hand {
-    private _cards: Array<CardInHand> = [];
+    _cards: Array<CardInHand> = [];
     position?: Position;
 
     public get cards(): Array<Card> {
@@ -47,6 +48,10 @@ export class Hand {
         this._cards = cards.map(card => ({ card, played: false}));
         this.position = position;
         this.sortCards();
+    }
+
+    public  cardsWithSuit(suit: Suit): Array<Card> {
+        return this.cards.filter(c => c.suit === suit);
     }
 
     private sortCards(): void {

@@ -30,9 +30,10 @@ export default abstract class HandView extends View {
     set hidden(value: boolean) {
         if (this._hidden === value) return;
         this._hidden = value;
+        console.log(this.hidden);
         if (this._hand) this._hand.cards.forEach((c) => {
             const card = this._cardViews.get(c);
-            if(card) card.reverse = !value;
+            if(card) card.reverse = value;
         });
         this.update();
     }
@@ -50,8 +51,8 @@ export default abstract class HandView extends View {
 
     update(): void {
         if(!this._hand) return;
-        if(this._dummy) this.updateDummy();
-        else this.updateNonDummy();
+        if(!this._dummy || this.hidden) this.updateNonDummy();
+        else this.updateDummy();
     }
 
     abstract updateDummy(): void;

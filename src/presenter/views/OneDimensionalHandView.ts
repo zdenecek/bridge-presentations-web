@@ -82,7 +82,7 @@ export default class OneDimensionalHandView extends HandView {
         this._hand.cards.forEach((card, index) => {
             const view = this._cardViews.get(card);
             if (!view) return;
-            view.reverse = !this.hidden;
+            view.reverse = this.hidden;
             view.position = currentPosition;
             view.root.css("z-index", index);
             currentPosition = currentPosition.moveBy(offsetVector);
@@ -116,7 +116,7 @@ export default class OneDimensionalHandView extends HandView {
                 const view = this._cardViews.get(card);
                 if (!view) return;
                 view.position = currentSuitPos;
-                view.reverse = !this.hidden;
+                view.reverse = false;
 
                 view.root.css("z-index", index);
                 currentSuitPos = currentSuitPos.moveBy(cardOffset);

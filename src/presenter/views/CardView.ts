@@ -35,7 +35,6 @@ export default class CardView  extends View {
     }
 
     model: Card;
-    private _reverse = true;
 
     constructor(model: Card) {
         super(`
@@ -88,6 +87,8 @@ export default class CardView  extends View {
         else if(value ===Rotation.Upside) this.root.addClass("vertical-upside");
     }
 
+    private _reverse = false;
+
     get reverse(): boolean {
         return this._reverse;
     }
@@ -96,10 +97,6 @@ export default class CardView  extends View {
         this.hidden = false;
         if(this.reverse === value) return;
         this._reverse = value;
-        if(!value) {
-            this.root.addClass('reverse')
-        } else {
-            this.root.removeClass('reverse')
-        }
+        this.root.toggleClass('reverse', value)
     }
 }                                                                                      
