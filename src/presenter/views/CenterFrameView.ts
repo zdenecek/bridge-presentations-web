@@ -9,6 +9,7 @@ export default class CenterFrameView  extends View {
     
 
     labels: Map<Position, CenterFrameLabelView> = new Map();
+    private _focus: Position | undefined;
 
     constructor() {
         super(`<div class="center-frame"></div>`);
@@ -29,6 +30,23 @@ export default class CenterFrameView  extends View {
             this.labels.get(pos)?.root.toggleClass("label-vul", vul);
             this.labels.get(pos)?.root.toggleClass("label-nonvul", !vul);
         })
+    }
+
+    public get focus(): Position | undefined {return this._focus    ;}
+    public set focus(value: Position | undefined) {
+        if(this.focus === value) return;
+        if(this.focus) {
+            const label = this.labels.get(this.focus);
+            if(label) label.focus = false;
+        }
+        this._focus = value;
+        if(value) {
+
+            const label = this.labels.get(value);
+
+            if(label) label.focus = true;   
+        }
+
     }
 
 }

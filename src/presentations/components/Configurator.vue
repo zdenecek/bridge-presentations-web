@@ -6,17 +6,18 @@
                 <h2>Cards and play</h2>
                 <div class="vertical">
                     <button tabindex="-1" @click="clear">Clear cards</button>
-                    <button tabindex="-1" @click="null" disabled>Save</button>
-                    <button tabindex="-1" @click="null" disabled>Load</button>
+                    <button tabindex="-1" @click="save">Save</button>
+                    <input type='file' @change='e => load(e)' ref="loadform" hidden/>
+                    <button tabindex="-1" @click="loadClicked">Load</button>
                 </div>
                 <div class="fields">
                     <template v-for="(label, pos) in positions" :key="pos">
                         <label :for="pos">{{ label }}</label>
                         <input :id="pos" type="text" v-model="options.cards[pos]" />
-                        <div class="error-list" v-if="showErrors && cardErrors.has(pos as Position) ">
-                                <div v-for="err in cardErrors.get(pos as Position)" :key="err" >
-                                    {{err}}
-                                </div>
+                        <div class="error-list" v-if="showErrors && cardErrors.has(pos as Position)">
+                            <div v-for="err in cardErrors.get(pos as Position)" :key="err">
+                                {{ err }}
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -57,7 +58,7 @@
                 <h2>Controls</h2>
 
                 <div id="controls-tab">
-                    <div class="key">Enter</div>
+                    <div class="key">S</div>
                     <div>Start game</div>
                     <div class="key">M</div>
                     <div>Toggle this menu</div>
@@ -88,6 +89,8 @@ import { Suit } from "@/bridge/model/Suit";
 import { CardsInputValidator } from "../class/CardsInputValidator";
 import { Position } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
+import { downloadObjectAsJson, loadJson } from "@/presentations/class/utils";
+
 
 export default defineComponent({
     name: "Presenter",
@@ -99,7 +102,7 @@ export default defineComponent({
     },
     created() {
         window.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") this.submit();
+            if (e.key.toLowerCase() === "s") this.submit();
         });
     },
     methods: {
@@ -114,16 +117,27 @@ export default defineComponent({
                 south: "",
             };
         },
+        save() {
+            const name = prompt("Enter file name");
+            if (name) downloadObjectAsJson(this.options, name + ".deal");
+        },
+        load(event: any) {
+            loadJson(event).then(a => this.options = a);
+            (this.$refs.loadform as HTMLElement).blur();  
+        },
+        loadClicked() {
+            (this.$refs.loadform as HTMLElement).click();
+        }
     },
 
     data() {
         return {
             options: {
                 cards: {
-                    north: "QT96 Q97 K8 AK8",
-                    south: "AKJ87 753 A7 643",
-                    east: "542 82 QJT532 T7",
-                    west: "3 AKJT 964 QJ952",
+                    north: "",
+                    south: "",
+                    east: "",
+                    west: "",
                 },
                 firstPlayer: "west",
                 bidding: true,
@@ -160,7 +174,7 @@ export default defineComponent({
             return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as any));
         },
         showErrors() {
-            return  Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
+            return Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
         }
     },
 });
@@ -181,9 +195,10 @@ export default defineComponent({
     grid-column: 1 / 3;
 
     div {
-        padding: 0 10px ;
+        padding: 0 10px;
         text-align: right;
     }
+
     font-size: 0.8em;
     color: red;
 }

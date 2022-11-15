@@ -3,6 +3,8 @@ import { Suit, SuitHelper } from "./Suit";
 
 export abstract class Bid {
     alerted = false;
+
+    abstract toString(): string;
 }
 
 export class ContractBid extends Bid {

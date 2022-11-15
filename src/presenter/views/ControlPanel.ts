@@ -38,7 +38,6 @@ export default class ControlPanel extends View {
         }
     }
 
-
     private _player?: PresentationPlayer;
     private get player(): PresentationPlayer | undefined {
         return this._player;
@@ -46,12 +45,20 @@ export default class ControlPanel extends View {
     private set player(value: PresentationPlayer | undefined) {
         this._player = value;
         if (value) {
-            value.hand.cardsWithPlayInfo.forEach((card, index) => {
+            const cards = value.hand.cardsWithPlayInfo;
+            this.buttons.forEach((button, index) => {
                 if (index >= this.buttons.length) return;
-                this.buttons[index].root.children(".content-label")[0].innerText = card.card.toShortString();
-                this.buttons[index].root.toggleClass("clubs spades hearts diamonds", false);
-                this.buttons[index].root.toggleClass(SuitHelper.toString(card.card.suit).toLowerCase(), true);
-                this.buttons[index].root.prop("disabled", card.played);
+                button.root.toggleClass("clubs spades hearts diamonds", false);
+                button.root.prop("hidden", true);
+
+                if (index >= cards.length) {
+                    return;
+                }
+                button.root.children(".content-label")[0].innerText = cards[index].card.toShortString();
+                button.root.toggleClass(SuitHelper.toString(cards[index].card.suit).toLowerCase(), true);
+                button.root.prop("disabled", cards[index].played);
+                button.root.prop("hidden", false);
+
             });
         }
     }
@@ -63,7 +70,10 @@ export default class ControlPanel extends View {
 
         Object.entries(game.players).forEach(([pos, player]) => {
             player.playRequested.sub((e) => {
-                if (e.player instanceof PresentationPlayer) this.player = e.player;
+                if (e.player instanceof PresentationPlayer)  {
+                    this.player = e.player;
+                    this.root.show();
+                }
                 else this.player = undefined;
             });
         });

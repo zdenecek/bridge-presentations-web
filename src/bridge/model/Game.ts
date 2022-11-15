@@ -53,6 +53,7 @@ export class Game {
     }
 
     get currentTrick(): Trick | undefined {
+        if(this.state !== "cardplay") return undefined;
         return this.tricks[this.tricks.length - 1];
     }
 

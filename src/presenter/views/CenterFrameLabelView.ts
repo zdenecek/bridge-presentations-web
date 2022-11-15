@@ -10,4 +10,8 @@ export default class CenterFrameLabelView  extends View {
         super(`<div class='center-frame-label center-frame-label-${position}'>${position}</div>`);        
     }
 
+
+    public set focus(value: boolean) {
+        this.root.toggleClass("focused", value);
+    }
 }

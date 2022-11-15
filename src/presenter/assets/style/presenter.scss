@@ -70,10 +70,10 @@ $frame-width: 16%;
 
     .center-frame-label {
         color: white;
-        font-size: 90%;
+        font-size: 2vh;
         font-weight: bold;
 
-        &.label-selected {
+        &.focused {
             background-color: yellow;
             color: black;
         }
@@ -280,4 +280,20 @@ $frame-width: 16%;
     &.vertical-upside {
         transform: rotate(180deg);
     }
+}
+
+
+.center-text {
+    position: absolute;
+
+    font-size: 2em;
+
+    top: 50%;
+    right: 0;
+    left: 0;
+
+    transform: translateY(-50%);
+
+    text-align: center;
+    vertical-align: middle;
 }

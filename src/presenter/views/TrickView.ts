@@ -32,7 +32,6 @@ export default class TrickView extends View {
         if(t === this.currentlyDisplayedTrick) { this.update(); return;}
         if (this.currentlyDisplayedTrick) this.detachTrick();
         this.currentlyDisplayedTrick = t;
-        this.update();
     }
 
     public detachTrick(): void {
@@ -59,17 +58,17 @@ export default class TrickView extends View {
         trick.cards.forEach(({ card }, index) => {
             const view = this.cardViews.get(card);
             if(!view) return;
-            view.hidden = false;
             view.reverse = false;
+            view.hidden = false;
             if (view) view.root.css("z-index", index + 100);
         });
         PositionHelper.all().forEach((pos) => {
             const card = trick.getCards()[pos]?.card;
             if (card === undefined) return;
             const view = this.cardViews.get(card);
-            if (!view) throw new Error(`CardView not found: ${card}`);
+            if (!view) return;
             // const coord = cardPositionHelper[pos];
-            view.hidden = false;
+            view.reverse = false;
             const c =this.originPoints.get(pos)!.start;
             view.position = c;
         });

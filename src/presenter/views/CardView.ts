@@ -55,7 +55,7 @@ export default class CardView  extends View {
         this.root.off("click.cardplayed");
         if(!value) return;
         this.root.on("click.cardplayed",() => {
-            if(this._reverse) value();
+            if(!this._reverse) value();
         });
     }
 
@@ -67,18 +67,6 @@ export default class CardView  extends View {
         }
     }
 
-    private _hidden = false;
-    
-    get hidden(): boolean {
-        return this._hidden;
-    }
-
-    set hidden(value: boolean) {
-        if(this.hidden === value) return;
-        this._hidden = value;
-        if(value) this.root.hide()
-        else this.root.show()
-    }
 
     set rotation(value: Rotation) {
         this.root.removeClass("horizontal-left horizontal-rigth vertical-upside")

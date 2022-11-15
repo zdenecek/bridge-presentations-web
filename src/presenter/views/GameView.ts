@@ -1,4 +1,4 @@
-import { Game } from "../../bridge/model/Game";
+import { Game, GameEvent } from "../../bridge/model/Game";
 import { Card } from "../../bridge/model/Card";
 import { Position, PositionList, PositionHelper } from "../../bridge/model/Position";
 import { PresentationPlayer } from "../../bridge/model/PresentationPlayer";
@@ -14,6 +14,7 @@ import TrickView from "./TrickView";
 import CenterPanelView from "./CenterPanelView";
 
 import _ from "lodash";
+import TextView from "./TextView";
 
 export interface GameChangedEvent {
     game?: Game;
@@ -26,20 +27,22 @@ export default class GameView extends BaseView {
     private cardViews: Map<Card, CardView>;
     private biddingBox: BiddingBoxView;
     private handViews: PositionList<OneDimensionalHandView>;
-    private auctionView: AuctionView;
-    private trickView: TrickView;
     private centerPanelView: CenterPanelView;
 
     private _game?: Game;
     private _dummy?: Position | undefined;
 
 
-    constructor(cardViews: Map<Card, CardView>, centerPanelView: CenterPanelView, auctionView: AuctionView, trickView: TrickView, handViews: PositionList<OneDimensionalHandView>,  biddingBox: BiddingBoxView) {
+    protected _updateDispatched = new SimpleEventDispatcher<GameEvent>();
+
+    public get updateDispatched(): ISimpleEvent<GameEvent> {
+        return this._updateDispatched.asEvent();
+    }
+
+    constructor(cardViews: Map<Card, CardView>, centerPanelView: CenterPanelView,handViews: PositionList<OneDimensionalHandView>,  biddingBox: BiddingBoxView) {
         super("<div class='presenter-app'></div>");
 
         this.cardViews = cardViews;
-        this.trickView = trickView;
-        this.auctionView = auctionView;
         this.handViews = handViews;
         this.centerPanelView = centerPanelView;
 
@@ -69,31 +72,23 @@ export default class GameView extends BaseView {
         return this._game;
     }
 
+    public onEachGame(action: ((game:Game) => void)) : void {
+        this.gameChanged.sub(({game}) => {if(game) action(game);});
+    }
+
     public attachGame(game: Game | undefined, dummy: DummyOptions = "auto", staticDummyPosition?: Position): void {
         if (!this.root) throw new Error("root not attached");
         this._game = game;
         this._gameChanged.dispatch({ game });
         if (!game) return;
-        this.auctionView.setGame(game);
-
-        this.biddingBox.visible = false;
-        game?.biddingStarted.sub(() => (this.biddingBox.visible = true));
-        game?.biddingEnded.sub(() => (this.biddingBox.visible = false));
-
-        this.centerPanelView.centerFrameView.vulnerability = game.vulnerability;
-
-        if (game instanceof UndoableGame)
-            game.undoMade.sub(() => {
-                if (game.state === "bidding") {
-                    this.dummy = undefined;
-                    this.biddingBox.visible = true;
-                    this.auctionView.visible = true;
-                }
-                this.update();
-            });
-
 
         this.dummy = undefined;
+
+
+
+        
+
+
 
         if (dummy === "auto" || game.bidding) {
             game.leadMade.sub((e) => {
@@ -105,8 +100,11 @@ export default class GameView extends BaseView {
 
         game.cardPlayed.sub(e => {
             this.update();
-            
         });
+
+        // TODO move to factory and split
+
+        this.centerPanelView.centerFrameView.vulnerability = game.vulnerability;
 
         game.allPlayers.forEach((player) => {
 
@@ -165,20 +163,18 @@ export default class GameView extends BaseView {
     update(): void {
         if (this.game === undefined) return;
 
-        // Hands
-        Object.values(this.handViews).forEach((handView) => handView.update());
+        this._updateDispatched.dispatch({game: this.game});
+    }
 
-        // Tricks
-        if (this.game.currentTrick) {
-            this.trickView.attachTrick(this.game.currentTrick);
-        }
-
-        this.trickView.update();
-        this.auctionView.update();
+    getEndText(): string {
+        let s = "";
+        if(this.game?.finalContract) s += `${this.game.finalContract.toString()}\n`;
+        s += "Well done!";
+        return s;
     }
 
     toggleVisible(position: Position): void {
-        this.handViews[position].hidden = !this.handViews[position].hidden;
+        this.handViews[position].reverse = !this.handViews[position].reverse;
     }
 
 }

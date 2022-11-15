@@ -9,7 +9,7 @@ import View from "./View";
 export default abstract class HandView extends View {
     public readonly position: Position;
     protected _dummy = false;
-    protected _hidden = false;
+    protected _reversed = false;
     protected _cardViews: Map<Card, CardView>;
     protected _hand?: Hand;
 
@@ -23,14 +23,14 @@ export default abstract class HandView extends View {
         this.hand = hand;
     }
 
-    get hidden(): boolean {
-        return this._hidden;
+    get reverse(): boolean {
+        return this._reversed;
     }
 
-    set hidden(value: boolean) {
-        if (this._hidden === value) return;
-        this._hidden = value;
-        console.log(this.hidden);
+    set reverse(value: boolean) {
+        if (this._reversed === value) return;
+        this._reversed = value;
+        console.log(this.reverse);
         if (this._hand) this._hand.cards.forEach((c) => {
             const card = this._cardViews.get(c);
             if(card) card.reverse = value;
@@ -45,13 +45,13 @@ export default abstract class HandView extends View {
     public set dummy(value: boolean) {
         if (this._dummy === value) return;
         this._dummy = value;
-        if (this.dummy) this._hidden = false;
+        if (this.dummy) this._reversed = false;
         this.update();
     }
 
     update(): void {
         if(!this._hand) return;
-        if(!this._dummy || this.hidden) this.updateNonDummy();
+        if(!this._dummy || this.reverse) this.updateNonDummy();
         else this.updateDummy();
     }
 

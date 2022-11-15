@@ -25,6 +25,29 @@ export default class View {
         this.root.detach();
     }
 
+    public hide(): void {
+        this.hidden = true;
+    }
+
+    public show(): void {
+        this.hidden = false;
+    }
+
+
+    private _hidden = false;
+    
+    get hidden(): boolean {
+        return this._hidden;
+    }
+
+    set hidden(value: boolean) {
+        if(this.hidden === value) return;
+        this._hidden = value;
+        if(value) this.root.hide()
+        else this.root.show()
+    }
+
+
     public get height(): number {
         return this.root.height() || 0;
     }
