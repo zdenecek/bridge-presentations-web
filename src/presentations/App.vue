@@ -27,7 +27,7 @@ export default defineComponent({
       
       this.state = state? state : (this.state == 'configurator' ? 'presenter' : 'configurator');
       if(this.state == 'presenter') {
-        this.$nextTick( () => (this.$refs.presenter as typeof Presenter).updatePositions());
+        this.$nextTick( () => (this.$refs.presenter as typeof Presenter)?.updatePositions());
       }
     },
     play(options: configuratorOptions) {
@@ -46,10 +46,10 @@ export default defineComponent({
 <style lang="scss">
 
 
-body {
-  // background-image: url(0.png);
-    background-size: cover;
-  // filter: opacity(20%);
+.body {
+  background-image: url(0.png);
+  background-size: cover;
+  filter: opacity(20%);
 }
 
 

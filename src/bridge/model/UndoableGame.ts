@@ -76,6 +76,9 @@ export class UndoableGame extends Game {
             lastTrick.currentToPlay = lastCard.player;
             
             runLater(() => this._undoMade.dispatch({ game: this }));
+            if(lastTrick.cards.length === 3) 
+            runLater(() => this._trickCountChanged.dispatch({ game: this }));
+
             runLater(() => {
                 this.currentlyRequestedPlayer = this.players[lastCard.player];
                 this.currentlyRequestedPlayer.requestPlay(this, lastTrick, (player: Player, card: Card) => this.addCard(lastTrick, card, player));

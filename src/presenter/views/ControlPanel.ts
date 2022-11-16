@@ -33,7 +33,7 @@ export default class ControlPanel extends View {
         if (!this.player) return;
 
         const cards = this.player.hand.cardsWithPlayInfo;
-        if (cards.length >= index && cards[index].played === false) {
+        if (cards.length > index && cards[index].played === false) {
             if (this.player.playCard(cards[index].card)) this.player = undefined;
         }
     }

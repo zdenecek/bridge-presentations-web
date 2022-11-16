@@ -1,6 +1,6 @@
 import { Card } from "./Card";
 import { Player } from "./Player";
-import { Position, PositionHelper, PositionList } from "./Position";
+import { Position, PositionHelper, PositionList, Side } from "./Position";
 import { Suit } from "./Suit";
 import { Trick } from "./Trick";
 import { Bid } from "./Bid";
@@ -40,14 +40,14 @@ export class Game {
     trumps: Suit = Suit.Notrump;
     auction: Auction | undefined;
     finalContract: Contract | undefined;
-    state: GameState;
+    _state: GameState;
     bidding: boolean;
     vulnerability: Vulnerability;
     currentlyRequestedPlayer: Player | undefined;
 
     constructor(players: PositionList<Player>, bidding = true, vulnerability = Vulnerability.None) {
         this.players = players;
-        this.state = "notStarted";
+        this._state = "notStarted";
         this.bidding = bidding;
         this.vulnerability = vulnerability;
     }
@@ -68,6 +68,8 @@ export class Game {
     protected _gameStarted = new SimpleEventDispatcher<GameEvent>();
     protected _gameEnded = new SimpleEventDispatcher<GameEvent>();
     protected _leadMade = new SimpleEventDispatcher<CardPlayedEvent>();
+    protected _trickCountChanged = new SimpleEventDispatcher<GameEvent>();
+    protected _stateChanged = new SimpleEventDispatcher<GameEvent>();
 
     // Events
 
@@ -104,6 +106,21 @@ export class Game {
     public get leadMade(): ISimpleEvent<CardPlayedEvent> {
         return this._leadMade.asEvent();
     }
+    public get trickCountChanged(): ISimpleEvent<GameEvent> {
+        return this._trickCountChanged.asEvent();
+    }
+    public get stateChanged(): ISimpleEvent<GameEvent> {
+        return this._stateChanged.asEvent();
+    }
+
+    public get state(): GameState {
+        return this._state;   
+    }
+
+    public set state(value:  GameState) {
+        this._state = value;
+        this._stateChanged.dispatch({ game: this});   
+    }
 
     public player(position: Position): Player {
         return this.players[position];
@@ -111,6 +128,10 @@ export class Game {
 
     public get allPlayers(): Player[] {
         return Object.values(this.players);
+    }
+
+    public trickCount(side: Side) : number {
+        return this.tricks.filter(t => t.winner && PositionHelper.side(t.winner.player) === side).length;
     }
 
     public start(firstToPlay: Position, trumps?: Suit): void {
@@ -170,7 +191,7 @@ export class Game {
     }
 
     protected startNewTrick(firstToPlay: Position): void {
-        const trick = new Trick(firstToPlay);
+        const trick = new Trick(firstToPlay, this.trumps);
         const player = this.players[firstToPlay];
         this.tricks.push(trick);
 
@@ -184,10 +205,11 @@ export class Game {
     protected endTrick(): void {
         const trick = this.currentTrick;
         if (!trick) throw Error("No trick to end");
-        const winner = trick.winner(this.trumps)?.player;
+        const winner = trick.winner?.player;
         if (!winner) throw Error(`Cannot end unfinished trick: ${trick}`);
 
         runLater(() => this._trickEnded.dispatch({ game: this, trick }));
+        runLater(() => this._trickCountChanged.dispatch({ game: this }));
 
         if (this.players[Position.North].hand.cards.length > 0) {
             runLater((() => this.startNewTrick(winner)).bind(this));

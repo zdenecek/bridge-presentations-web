@@ -1,5 +1,5 @@
 import { Card } from "@/bridge/model/Card";
-import { PositionList, PositionHelper, Position } from "@/bridge/model/Position";
+import { PositionList, PositionHelper, Position, Side } from "@/bridge/model/Position";
 import { Rotation } from "../classes/Rotation";
 import View from "./View";
 import AuctionView from "./AuctionView";
@@ -97,17 +97,22 @@ export default class GameViewFactory {
 
         gameView.updateDispatched.sub((e) => {
             if (e.game.currentTrick) {
-                centerText.hide();
                 trickView.attachTrick(e.game.currentTrick);
             } else {
                 trickView.detachTrick();
                 if (e.game.state === "finished") {
                     centerText.text = gameView.getEndText();
-                    centerText.show();
                 }
             }
             trickView.update();
         });
+
+        gameView.onEachGame(game => {
+            game.stateChanged.sub(({game}) => {
+                centerText.hidden = game.state !== "finished";
+                
+            });
+        })
         gameView.updateDispatched.sub((e) => auctionView.update());
         gameView.updateDispatched.sub((e) => Object.values(handViews).forEach((handView) => handView.update()));
 
@@ -132,6 +137,9 @@ export default class GameViewFactory {
                 });
         });
 
+        const sidePanel = this.makeSidePanel(gameView);
+        gameView.addSubView(sidePanel);
+
         return gameView;
     }
 
@@ -153,5 +161,36 @@ export default class GameViewFactory {
                 cardViews.set(card, view);
             });
         });
+    }
+
+    static makeSidePanel(gameView: GameView): View {
+        const sidePanel = new View(`<div class="side-panel"><div class="t-label-tricks">Tricks</div><div class="t-label-ns">NS</div><div class="t-label-ew">EW</div><div class="t-label-contract">Contract</div></div>`);
+
+        const ew = new TextView("t-ew", "0");
+        const ns = new TextView("t-ns", "0");
+        const contract = new TextView("t-contract");
+
+        sidePanel.addSubView(ew);
+        sidePanel.addSubView(ns);
+        sidePanel.addSubView(contract);
+
+        gameView.onEachGame(game => game.biddingEnded.sub((e) => 
+            contract.text = e.game.finalContract!.toString()
+        ));
+
+        gameView.onEachGame(game => game.trickCountChanged.sub(({game})=> {
+            ew.text = game.trickCount(Side.EW).toString();
+            ns.text = game.trickCount(Side.NS).toString();
+        }))
+
+        gameView.onEachGame(game => {
+            game.stateChanged.sub(({game}) => {
+                sidePanel.hidden = !(game.state === "cardplay" || game.state === "finished") ;
+                
+            });
+
+        });
+
+        return sidePanel;
     }
 }

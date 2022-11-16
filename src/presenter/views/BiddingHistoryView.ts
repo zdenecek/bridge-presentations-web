@@ -8,7 +8,7 @@ export default class BiddingHistoryView extends View {
 
     constructor() {
         super(`<div class='bidding-history'>
-        <span>West</span> <span>North</span> <span>East</span> <span>South</span>
+        <span class="header">West</span> <span class="header">North</span> <span class="header">East</span> <span class="header">South</span>
         <div class='separator'></div>
         </div>`);
     }

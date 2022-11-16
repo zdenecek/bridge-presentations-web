@@ -5,14 +5,15 @@ import View from "./View";
 export default class TextView extends View {
 
 
-    constructor(classes?: string) {
+    constructor(classes?: string, text?: string) {
         super('<span>');
 
         if(classes) this.root.addClass(classes);
+        if(text) this.text = text;
     }
 
     public set text(value: string) {
-        this.root.text(value);
+        this.root.html(value.replace("\n", "<br>"));
     }
 
 }

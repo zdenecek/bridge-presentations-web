@@ -63,7 +63,7 @@ export default defineComponent({
 
 <style lang="scss">
 @import "@/presenter/assets/style/presenter.scss";
-@import '@/presenter/assets/style/debug.scss';
+// @import '@/presenter/assets/style/debug.scss';
 
 .presenter {
     width: 100%;

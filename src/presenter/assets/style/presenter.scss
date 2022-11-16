@@ -17,6 +17,12 @@
     overflow: hidden;
     display: grid;
 
+    padding-left: 20px;
+    padding-right: 20px;
+
+    background-color: variables.$background;
+    color: variables.$primary;
+
     grid-template-columns: 1fr 100vh 2fr;
 
     ::selection {
@@ -58,7 +64,7 @@ $frame-width: 16%;
     position: relative;
 
     .frame {
-        outline: black solid 2px;
+        outline: variables.$primary solid 3px;
         position: absolute;
         top: calc($frame-width/2);
         left: calc($frame-width/2);
@@ -91,9 +97,9 @@ $frame-width: 16%;
 .center-frame-label {
     cursor: default;
     position: absolute;
-    outline: solid black 1px;
+    outline: solid variables.$primary 1px;
     padding: 2px 5px;
-    background-color: white;
+    background-color: variables.$background;
     border-radius: 2px;
     width: variables.$card-width;
     text-align: center;
@@ -108,7 +114,7 @@ $frame-width: 16%;
 
 .control-panel {
     display: grid;
-    grid-template-columns: repeat( 7, 1fr);
+    grid-template-columns: repeat(7, 1fr);
 
     button:disabled {
         color: gray;
@@ -118,15 +124,15 @@ $frame-width: 16%;
     .hearts {
         color: red;
     }
-    
+
     .diamonds {
         color: darkgoldenrod;
     }
-    
+
     .spades {
         color: blue;
     }
-    
+
     .clubs {
         color: green;
     }
@@ -157,8 +163,9 @@ $frame-width: 16%;
 }
 
 .main {
-    border: red solid 1px;
+    border: variables.$primary solid 1px;
     margin: variables.$margin;
+    padding: 10px;
     aspect-ratio: 1;
     grid-column: 2;
     display: grid;
@@ -282,11 +289,10 @@ $frame-width: 16%;
     }
 }
 
-
 .center-text {
     position: absolute;
 
-    font-size: 2em;
+    font-size: 5vh;
 
     top: 50%;
     right: 0;
@@ -296,4 +302,77 @@ $frame-width: 16%;
 
     text-align: center;
     vertical-align: middle;
+}
+
+.side-panel {
+    grid-column: 1;
+    grid-row: 1;
+
+    text-align: center;
+    font-size: 2.6vh;
+    font-weight: bold;
+
+    outline: solid 1px black;
+
+    justify-self: center;
+    align-self: center;
+
+
+    display: grid;
+    grid-template-columns: 1fr 25px 1fr;
+    grid-template-rows: repeat();
+
+    padding-top: 85px;
+
+    div, span {
+        padding: 4px 14px;
+    }
+
+    .t-label-tricks {
+        grid-column: 1 / span 3;
+        padding-bottom: 12px;
+    }
+
+    .t-label-ns {
+        grid-column: 1;
+        grid-row: 2;
+        background-color: variables.$primary;
+        color: variables.$secondary;
+    }
+
+    .t-label-ew {
+        grid-column: 3;
+        grid-row: 2;
+        background-color: variables.$primary;
+        color: variables.$secondary;
+    }
+
+    .t-ns {
+        grid-column: 1;
+        grid-row: 3;
+        outline: solid 1px variables.$primary;
+        outline-offset: -1px;
+    }
+
+    .t-ew {
+        grid-column: 3;
+        grid-row: 3;
+        outline: solid 1px variables.$primary;
+        outline-offset: -1px;
+
+    }
+
+    .t-label-contract {
+        grid-column: 1 / span 3;
+        grid-row: 4;
+        padding-top: 14px;
+        padding-bottom: 12px;
+    }
+
+    .t-contract {
+        grid-column: 1 / span 3;
+        grid-row: 5;
+        outline: solid 1px variables.$primary;
+        outline-offset: -1px;
+    }
 }

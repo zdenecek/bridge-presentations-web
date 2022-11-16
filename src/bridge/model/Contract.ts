@@ -23,7 +23,7 @@ export class NonPassedContract {
 
     toString(): string {
         const doubled = this.dbl === 'doubled' ? 'x' : this.dbl === 'redoubled' ? 'xx' : '';
-        return `${this.level}${SuitHelper.toSymbol(this.suit)}${doubled} ${this.declarer}`;
+        return `${this.level}${SuitHelper.toSymbol(this.suit)}${doubled} ${this.declarer[0].toUpperCase()}`;
     }
 
 }

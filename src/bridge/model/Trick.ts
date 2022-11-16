@@ -14,10 +14,12 @@ export class Trick {
     _winner: CardInTrick | undefined;
     cardsByPosition: PartialPositionList<CardInTrick> = {};
     cards: Array<CardInTrick> = [];
+    trumps: Suit;
 
-    constructor(firstToPlay: Position) {
+    constructor(firstToPlay: Position, trumps: Suit) {
         this.firstToPlay = firstToPlay;
         this.currentToPlay = firstToPlay;
+        this.trumps =trumps;
     }
 
     addCard(card: Card): void {
@@ -42,7 +44,8 @@ export class Trick {
         return this.cards.length == 4;
     }
 
-    winner(trumps: Suit): CardInTrick | undefined {
+
+    public get winner(): CardInTrick | undefined {
         if (!this.isFinished) return undefined;
         if (this._winner) return this._winner;
 
@@ -61,7 +64,7 @@ export class Trick {
             if (current.card.suit == next.card.suit) {
                 return current.card.value >= next.card.value ? current : next;
             } else {
-                return next.card.suit == trumps ? next : current;
+                return next.card.suit == this.trumps ? next : current;
             }
         });
 
