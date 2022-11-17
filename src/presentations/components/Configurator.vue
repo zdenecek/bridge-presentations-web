@@ -102,6 +102,13 @@
                     <div>Undo</div>
                 </div>
             </div>
+            <div class="tab">
+                    <h2>Graphics</h2>
+                    <div class="fields">
+                        <label for="message">End text</label>
+                        <input type="text"  id="message" v-model="endText" />
+                    </div>
+            </div>
         </div>
         <div id="configurator-buttons">
             <button @click="submit">Play</button>
@@ -136,7 +143,7 @@ export default defineComponent({
     methods: {
         submit() {
             if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
-            this.onSubmit(this.options);
+            this.onSubmit(this.options, { endMessage: this.endText.length > 0 ? this.endText : undefined});
         },
         clear() {
             this.options.cards = {
@@ -176,6 +183,7 @@ export default defineComponent({
             specifyContract: true,
             fakeTricks: false,
             fakeAuction: false,
+            endText: "Well done!",
 
             options: {
                 cards: {

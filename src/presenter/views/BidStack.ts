@@ -5,6 +5,7 @@ import { BidView } from "./BidView";
 import View from "./View";
 
 import _ from "lodash";
+import { runLater } from "@/bridge/utils/runLater";
 
 export class BidStack extends View {
     bidViews: BidView[] = [];
@@ -18,39 +19,60 @@ export class BidStack extends View {
         this.addSubView(this.element);
         this.position = position;
 
-        new ResizeObserver(_.throttle(() => {
+        new ResizeObserver(() => {
             if(this.position == Position.East || this.position == Position.West)  {
                 this.element.root.css({transition: "none"});
-                this.element.root.css({width: this.height, height: this.width, "transform-origin": this.width/2 + "px " +  this.width/2 + "px "});
+                this.element.root.css({width: this.height, height: this.width, "transform-origin": "0 0"});
                 this.element.root.css({transition: "initial"});
+               
             }
-        }, 10)).observe(this.root[0]);
+            this.update();
+        }).observe(this.root[0]);
     }
+
 
     update(): void {
         this.updateSpacing();
     }
 
     updateSpacing(): void {
-        const newWidth = Math.min(Math.max(20, (this.root.width() || 200) / this.bidViews.length), 40);
-        this.bidViews.forEach((bidView, index) => bidView.root.css("left", `${newWidth * index}px`));
+        if(this.bidViews.length === 0) return;
+        const space = Math.min(40, Math.max(20, (this.element.width) / this.bidViews.length));
+        
+        // interesting fix, the image doesnt load instantenously
+        if(this.bidViews[0].width === 0) {
+         runLater(() => this.updateSpacing(), 2); return;
+        }    
+        
+        // yet another hack
+        this.bidViews.forEach(e=>e.show());
+
+        const len = this.bidViews[0].width + space * (this.bidViews.length - 1);
+        
+        let pos = (this.element.width - len) / 2;
+
+        this.bidViews.forEach(bidView => {
+            bidView.root.css("left", `${pos}px`);
+            pos += space;
+        });
     }
 
     addBid(bid: Bid): void {
         const bidView = new BidView(bid);
         this.bidViews.push(bidView);
+        bidView.hide();
         this.element.addSubView(bidView);
-        bidView.root.css("top", "10vh").animate({ top: "0px" });
+        bidView.root.css("top",  this.position === Position.South ? "10vh" : "-10vh" ).animate({ top: "0px" });
         this.updateSpacing();
     }
 
     removeLastBid(): void {
         if (this.bidViews.length === 0) return;
         const bidView = this.bidViews.pop()!;
-        bidView.root.animate({ top: "10vh" }, () => bidView.root.remove());
+
+
+        bidView.root.animate({ top: this.position === Position.South ? "10vh" : "-10vh" }, () => bidView.root.remove());
     }
-
-
 
     reset(): void {
         this.bidViews.forEach((bidView) => bidView.root.remove());

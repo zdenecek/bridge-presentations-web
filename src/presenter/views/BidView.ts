@@ -5,7 +5,7 @@ import { Point } from "../classes/Point";
 import View from "./View";
 
 export class BidView extends View {
-    static images = require.context("@/presenter/assets/bidding", false, /\.(png|jpe?g|svg)$/);
+    static images = require.context("@/presenter/assets/bidding-c", false, /\.(png|jpe?g|svg)$/);
 
     bid: Bid;
 
@@ -49,4 +49,3 @@ export class BidView extends View {
     }
 
 }
-                                                                                                            

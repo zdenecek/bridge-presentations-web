@@ -26,6 +26,8 @@ export default class GameView extends BaseView {
     private _game?: PresentationGame;
     private _dummy?: Position | undefined;
 
+    public endMessage?: string ;
+
     constructor() {
         super("<div class='presenter-app'></div>");
     }
@@ -115,7 +117,7 @@ export default class GameView extends BaseView {
         if (this.game?.finalContract) s += `${this.game.finalContract.toString()}\n`;
         if (this.game?.result?.tricksMade) s += `${this.game.result.tricksMadeRelative}\n`;
         if (this.game?.result) s += `${this.game.result.scoreNS}\n`;
-        s += "Well done!";
+        if(this.endMessage) s += this.endMessage + "\n";
         return s;
     }
 }

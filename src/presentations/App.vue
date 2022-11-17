@@ -30,9 +30,9 @@ export default defineComponent({
         this.$nextTick( () => (this.$refs.presenter as typeof Presenter)?.updatePositions());
       }
     },
-    play(options: configuratorOptions) {
+    play(options: configuratorOptions, otherOptions: {endMessage?: string}) {
       this.changeState('presenter');
-      (this.$refs.presenter as typeof Presenter).startGame(options);
+      (this.$refs.presenter as typeof Presenter).startGame(options, otherOptions);
     }
 
   },

@@ -44,20 +44,19 @@ export default class AuctionView {
         });
 
         if (game instanceof UndoableGame) {
-
             game.stateChanged.sub(({game}) => {
-                this.visible = game.state === 'bidding';
+                if(game.state === 'bidding') this.visible = true;
             })
         }
 
         game?.biddingEnded.sub(() => {
             // check again because of undo :)
-            runLater(() => { if(game.state !== 'bidding') this.visible = false }, 1000)
+            runLater(() => { if(game.state !== 'bidding') this.visible = false }, 1500)
         });
 
         game?.cardPlayed.sub(() => {
             this.visible = false;
-            this.update();
+            //this.update();
         });
         this.reset();
         game?.bidMade.sub((e) => this.addBid(e.player.position, e.bid));
@@ -78,5 +77,6 @@ export default class AuctionView {
 
     private addBid(player: Position, bid: Bid): void {
         this.bidStacks[player].addBid(bid);
+        this.update();
     }
 }

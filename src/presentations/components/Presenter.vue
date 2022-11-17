@@ -26,8 +26,10 @@ export default defineComponent({
             this.gameView.update();
         },
 
-        startGame(options: configuratorOptions) {
+        startGame(options: configuratorOptions, { endMessage }: { endMessage?: string }) {
             const gameOpts =  new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew , options.contract, options.trumps)
+
+            this.gameView.endMessage = endMessage;
 
             this.game = GameFactory.makeObservableGame(this.players, gameOpts, options.vulnerability);
             PlayerFactory.putHands(this.players, options.cards);

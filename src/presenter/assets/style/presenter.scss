@@ -43,6 +43,7 @@
     transition: all 1s;
 
     &.center-panel-bidding {
+        gap: 10px;
         grid-template-columns: variables.$bid-card-height auto variables.$bid-card-height;
         grid-template-rows: variables.$bid-card-height auto variables.$bid-card-height;
     }
