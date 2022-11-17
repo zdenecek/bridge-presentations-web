@@ -59,11 +59,11 @@ export default class CardView  extends View {
         });
     }
 
-    public set playable(value: boolean) {
+    public setPlayable(value: boolean, dummy = false): void {
         if (value) {
-            this.root.addClass("playable");
+            this.root.addClass(dummy? "playable-dummy" : "playable");
         } else {
-            this.root.removeClass("playable");
+            this.root.removeClass("playable playable-dummy");
         }
     }
 

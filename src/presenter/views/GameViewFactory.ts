@@ -51,7 +51,7 @@ export default class GameViewFactory {
     static makeCardViews(gameView: GameView): Map<Card, CardView> {
         const cardViews = new Map<Card, CardView>();
         gameView.gameChanged.sub((e) => {
-            this.makeCards(cardViews, e.game);
+            this.makeCards(gameView, cardViews, e.game);
             cardViews.forEach((v) => gameView.addSubView(v));
         });
         return cardViews;
@@ -113,7 +113,7 @@ export default class GameViewFactory {
         return centerPanelView;
     }
 
-    static makeCards(cardViews: Map<Card, CardView>, game?: PresentationGame): void {
+    static makeCards(gameView: GameView, cardViews: Map<Card, CardView>, game?: PresentationGame): void {
         cardViews.forEach((cardView) => cardView.detach());
         cardViews.clear();
 
@@ -134,16 +134,16 @@ export default class GameViewFactory {
             player.cardPlayed.sub((e) => {
                 e.player.hand.cards.forEach((card) => {
                     const cardView = cardViews.get(card)!;
-                    cardView.playable = false;
+                    cardView.setPlayable(false);
                     cardView.onclick = undefined;
                 });
                 const cardView = cardViews.get(e.card)!;
-                cardView.playable = false;
+                cardView.setPlayable(false);
                 cardView.onclick = undefined;
             });
 
             player.playRequestCancelled.sub((e) => {
-                e.player.hand.cards.forEach((card) => (cardViews.get(card)!.playable = false));
+                e.player.hand.cards.forEach((card) => (cardViews.get(card)!.setPlayable(false)));
             });
 
             player.playRequested.sub((e) => {
@@ -154,7 +154,7 @@ export default class GameViewFactory {
 
                 playables.forEach((card) => {
                     const cardView = cardViews.get(card)!;
-                    cardView.playable = true;
+                    cardView.setPlayable(true, gameView.dummy === player.position );
                     cardView.onclick = () => (player as PresentationPlayer).playCard(card);
                 });
             });

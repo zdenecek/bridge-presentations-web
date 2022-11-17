@@ -245,14 +245,17 @@ $frame-width: 16%;
     position: absolute;
     transition: top ease 1s, left ease 1s;
 
-    &.playable {
-        img {
-            transition: ease-in-out 0.2s;
-        }
+    &.playable img,
+    &.playable-dummy img {
+        transition: ease-in-out 0.2s;
+    }
 
-        &:hover:not(.reverse) img {
-            transform: translateY(-10%);
-        }
+    &.playable:hover:not(.reverse) img {
+        transform: translateY(-10%);
+    }
+
+    &.playable-dummy:hover:not(.reverse) img {
+        transform: translateX(-10%);
     }
 
     &:not(.reverse) img.front {
@@ -315,13 +318,13 @@ $frame-width: 16%;
     justify-self: center;
     align-self: center;
 
-
     display: grid;
     grid-template-columns: 1fr 25px 1fr;
 
     padding-top: 85px;
 
-    div, span {
+    div,
+    span {
         padding: 4px 14px;
     }
 
@@ -331,11 +334,10 @@ $frame-width: 16%;
     }
 
     .c-tricks {
-        
         display: flex;
         flex-direction: column;
         grid-row: 2;
-        
+
         padding: 0;
 
         outline: solid 1px variables.$primary;
@@ -348,12 +350,11 @@ $frame-width: 16%;
         &.c-tricks-ns {
             grid-column: 1;
         }
-    
+
         &.c-tricks-ew {
             grid-column: 3;
         }
 
-        
         .t-count {
             grid-column: 1;
             grid-row: 3;

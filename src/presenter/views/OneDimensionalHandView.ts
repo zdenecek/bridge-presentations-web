@@ -118,7 +118,7 @@ export default class OneDimensionalHandView extends HandView {
                 view.position = currentSuitPos;
                 view.reverse = false;
 
-                view.root.css("z-index", index);
+                view.root.css("z-index", index + card.suit * 10);
                 currentSuitPos = currentSuitPos.moveBy(cardOffset);
                 index++;
             }
