@@ -151,9 +151,9 @@ export class Game {
     }
 
     protected end(): void {
-        this.state = "finished";
         if(this.finalContract)
         this._result =  Result.make(this.finalContract, this.vulnerability, this.trickCount(Side.NS));
+        this.state = "finished";
         runLater(() => this._gameEnded.dispatch({ game: this }));
     }
 
@@ -220,7 +220,7 @@ export class Game {
         runLater(() => this._trickEnded.dispatch({ game: this, trick }));
         runLater(() => this._trickCountChanged.dispatch({ game: this }));
 
-        if (this.players[Position.North].hand.cards.length > 0) {
+        if (Math.min(...this.allPlayers.map(p => p.hand.cards.length)) > 0) {
             runLater((() => this.startNewTrick(winner)).bind(this));
         } else {
             runLater(() => this.endPlay());

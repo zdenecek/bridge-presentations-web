@@ -157,15 +157,20 @@ export default class GameViewFactory {
 
     static makeSidePanel(gameView: GameView): void {
         const sidePanel = new View(
-            `<div class="side-panel"><div class="t-label-tricks">Tricks</div><div class="t-label-ns">NS</div><div class="t-label-ew">EW</div><div class="t-label-contract">Contract</div></div>`
+            `<div class="side-panel"><div class="t-label-tricks">Tricks</div><div class="t-label-contract">Contract</div></div>`
         );
 
-        const ew = new TextView("t-ew", "0");
-        const ns = new TextView("t-ns", "0");
+        const ewContainer = new View(`<div class="c-tricks-ns c-tricks"><div class="t-label">NS</div></div>`);
+        const nsContainer = new View(`<div class="c-tricks-ew c-tricks"><div class="t-label">EW</div></div>`);
+
+        const ew = new TextView("t-count", "0");
+        const ns = new TextView("t-count", "0");
         const contract = new TextView("t-contract");
 
-        sidePanel.addSubView(ew);
-        sidePanel.addSubView(ns);
+        nsContainer.addSubView(ns);
+        ewContainer.addSubView(ew);
+        sidePanel.addSubView(ewContainer);
+        sidePanel.addSubView(nsContainer);
         sidePanel.addSubView(contract);
 
         gameView.onEachGame((game) =>

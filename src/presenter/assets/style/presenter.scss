@@ -312,15 +312,12 @@ $frame-width: 16%;
     font-size: 16px;
     font-weight: bold;
 
-    outline: solid 1px black;
-
     justify-self: center;
     align-self: center;
 
 
     display: grid;
     grid-template-columns: 1fr 25px 1fr;
-    grid-template-rows: repeat();
 
     padding-top: 85px;
 
@@ -333,33 +330,34 @@ $frame-width: 16%;
         padding-bottom: 12px;
     }
 
-    .t-label-ns {
-        grid-column: 1;
+    .c-tricks {
+        
+        display: flex;
+        flex-direction: column;
         grid-row: 2;
-        background-color: variables.$primary;
-        color: variables.$secondary;
-    }
+        
+        padding: 0;
 
-    .t-label-ew {
-        grid-column: 3;
-        grid-row: 2;
-        background-color: variables.$primary;
-        color: variables.$secondary;
-    }
-
-    .t-ns {
-        grid-column: 1;
-        grid-row: 3;
-        outline: solid 1px variables.$primary;
-        outline-offset: -1px;
-    }
-
-    .t-ew {
-        grid-column: 3;
-        grid-row: 3;
         outline: solid 1px variables.$primary;
         outline-offset: -1px;
 
+        .t-label {
+            background-color: variables.$primary;
+            color: variables.$secondary;
+        }
+        &.c-tricks-ns {
+            grid-column: 1;
+        }
+    
+        &.c-tricks-ew {
+            grid-column: 3;
+        }
+
+        
+        .t-count {
+            grid-column: 1;
+            grid-row: 3;
+        }
     }
 
     .t-label-contract {
