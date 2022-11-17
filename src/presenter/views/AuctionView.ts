@@ -6,6 +6,7 @@ import View from "./View";
 import { Game } from "@/bridge/model/Game";
 import CenterPanelView from "./CenterPanelView";
 import { runLater } from "@/bridge/utils/runLater";
+import { UndoableGame } from "@/bridge/model/UndoableGame";
 
 export default class AuctionView {
     private bidStacks: PositionList<BidStack>;
@@ -32,7 +33,6 @@ export default class AuctionView {
         this.visible = false;
         game?.biddingStarted.sub(() => {
             this.visible = true;
-            this.centerPanelView.bidding = true;
             this.update();
             if (game?.auction instanceof UndoableAuction) {
                 game.auction.bidRemoved.sub(({ position }) => {
@@ -42,8 +42,16 @@ export default class AuctionView {
             }
         });
 
+        if (game instanceof UndoableGame) {
+
+            game.stateChanged.sub(({game}) => {
+                this.visible = game.state === 'bidding';
+            })
+        }
+
         game?.biddingEnded.sub(() => {
-            runLater(() => { this.visible = false}, 1000)
+            // check again because of undo :)
+            runLater(() => { if(game.state !== 'bidding') this.visible = false }, 1000)
         });
 
         game?.cardPlayed.sub(() => {
@@ -56,8 +64,7 @@ export default class AuctionView {
 
     public set visible(visible: boolean) {
         Object.values(this.bidStacks).forEach((b) => b.root.toggle(visible));
-        this.centerPanelView.bidding = false;
-
+        this.centerPanelView.bidding = visible;
     }
 
     public update(): void {

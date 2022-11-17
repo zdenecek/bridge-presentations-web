@@ -41,6 +41,21 @@ class SuitHelper {
         }
     }
 
+    static fromLetter(letter: string): Suit | undefined {
+        switch (letter.toUpperCase()[0]) {
+            case "C":
+                return Suit.Clubs;
+            case "D":
+                return Suit.Diamonds;
+            case "H":
+                return Suit.Hearts;
+            case "S":
+                return Suit.Spades;
+            case "N":
+                return Suit.Notrump;
+        }
+    }
+
     static all(): Array<Suit> {
         return [Suit.Clubs, Suit.Diamonds, Suit.Hearts, Suit.Spades, Suit.Notrump];
     }

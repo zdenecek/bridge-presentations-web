@@ -23,15 +23,15 @@
 
         &.suit-clubs {
             color: #3575af;
-            background-color: lighten( variables.$color: #3575af,  variables.$amount: 50%);
+            background-color: lighten( #3575af,  50%);
         }
         &.suit-diamonds {
             color: #d26d2a;
-            background-color: lighten( variables.$color: #d26d2a,  variables.$amount: 50%);
+            background-color: lighten( #d26d2a,  50%);
         }
         &.suit-hearts {
             color: #e90202;
-            background-color: lighten( variables.$color: #e90202,  variables.$amount: 50%);
+            background-color: lighten( #e90202,  50%);
         }
         &.suit-spades {
             color: black;

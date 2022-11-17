@@ -13,7 +13,7 @@ export default class TextView extends View {
     }
 
     public set text(value: string) {
-        this.root.html(value.replace("\n", "<br>"));
+        this.root.html(value.replaceAll("\n", "<br>"));
     }
 
 }

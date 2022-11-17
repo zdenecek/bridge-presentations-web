@@ -68,7 +68,9 @@ export default class GameFactory {
         game.undoMade.sub(() => {
             console.debug(`undo made`);
         });
-
+        game.stateChanged.sub((e) => {
+            console.debug(`state changed to: ${e.game.state}`);
+        });
         return game;
     }
 }

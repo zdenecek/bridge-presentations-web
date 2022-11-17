@@ -1,4 +1,4 @@
-import { Position } from "./Position";
+import { Position, PositionHelper } from "./Position";
 import { Suit, SuitHelper } from "./Suit";
 
 
@@ -22,8 +22,26 @@ export class NonPassedContract {
     }
 
     toString(): string {
-        const doubled = this.dbl === 'doubled' ? 'x' : this.dbl === 'redoubled' ? 'xx' : '';
-        return `${this.level}${SuitHelper.toSymbol(this.suit)}${doubled} ${this.declarer[0].toUpperCase()}`;
+        return NonPassedContract.toString(this);
+    }
+
+    static toString(c: NonPassedContract): string {
+        const doubled = c.dbl === 'doubled' ? 'x' : c.dbl === 'redoubled' ? 'xx' : '';
+        return `${c.level}${SuitHelper.toSymbol(c.suit)}${doubled} ${c.declarer[0].toUpperCase()}`;
+    }
+
+    static fromString(s: string): Contract | undefined {
+        const cs = s.toLowerCase().replaceAll(" ", "").replace("t", "");
+        if(cs.length <3) return undefined;
+        const lvl = parseInt(cs[0]);
+        const suit = SuitHelper.fromLetter(cs[1]);
+        const decl = PositionHelper.fromLetter(cs[cs.length - 1]);
+        let d = "undoubled";
+        if(cs.includes("xx")) d = "redoubled";
+        else if(cs.includes("x")) d = "doubled";
+
+        if(0 < lvl  && lvl < 8 && suit && decl) 
+            return new NonPassedContract(suit, lvl as ContractLevel, decl, d as ContractDoubledState);
     }
 
 }

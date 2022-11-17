@@ -47,12 +47,6 @@ export default class TrickView extends View {
     }
 
     private positionTrick(trick: Trick) {
-        // const cardPositionHelper = {
-        //     north: this.start.moveBy(new Vector((this.width - this.cardWidth) / 2, 0)),
-        //     east: this.start.moveBy(new Vector(0, (this.height - this.cardWidth) / 2)),
-        //     south: this.start.moveBy(new Vector((this.width - this.cardWidth) / 2, this.height - this.cardHeight)),
-        //     west: this.start.moveBy(new Vector(this.width - this.cardHeight, (this.height - this.cardWidth) / 2)),
-        // };
 
 
         trick.cards.forEach(({ card }, index) => {

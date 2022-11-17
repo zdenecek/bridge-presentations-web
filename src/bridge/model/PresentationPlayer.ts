@@ -11,4 +11,8 @@ export class PresentationPlayer extends Player {
     public playCard(card: Card): boolean {
         return super.playCard(card);
     }
+
+    public  toString() {
+        return `Presentation player sitting ${this.position}`;
+    }
 }

@@ -165,7 +165,7 @@ $frame-width: 16%;
 .main {
     border: variables.$primary solid 1px;
     margin: variables.$margin;
-    padding: 10px;
+    padding: 10px 20px;
     aspect-ratio: 1;
     grid-column: 2;
     display: grid;
@@ -309,7 +309,7 @@ $frame-width: 16%;
     grid-row: 1;
 
     text-align: center;
-    font-size: 2.6vh;
+    font-size: 16px;
     font-weight: bold;
 
     outline: solid 1px black;

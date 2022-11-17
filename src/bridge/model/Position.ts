@@ -35,6 +35,20 @@ class PositionHelper {
         return Object.keys(Position)[Object.values(Position).indexOf(position)];
     }
 
+    static fromLetter(letter: string): Position  | undefined{
+
+        switch (letter.toUpperCase()[0]) {
+            case "N":
+                return Position.North;
+            case "E":
+                return Position.East;
+            case "S":
+                return Position.South;
+            case "W":
+                return Position.West;
+        }
+    }
+
     static all(): Array<Position> {
         // no idea
         return [

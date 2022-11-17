@@ -9,6 +9,7 @@ import { Contract } from "./Contract";
 import { ISimpleEvent, SimpleEventDispatcher } from "strongly-typed-events";
 import { runLater } from "../utils/runLater";
 import { Vulnerability } from "./Vulnerability";
+import { Result } from "./Result";
 
 type GameState = "notStarted" | "bidding" | "cardplay" | "finished";
 
@@ -40,6 +41,7 @@ export class Game {
     trumps: Suit = Suit.Notrump;
     auction: Auction | undefined;
     finalContract: Contract | undefined;
+    private _result: Result | undefined;
     _state: GameState;
     bidding: boolean;
     vulnerability: Vulnerability;
@@ -122,6 +124,11 @@ export class Game {
         this._stateChanged.dispatch({ game: this});   
     }
 
+    public get result(): Result | undefined {
+        if(this.state !== "finished") return undefined;
+        return this._result;   
+    }
+
     public player(position: Position): Player {
         return this.players[position];
     }
@@ -145,6 +152,8 @@ export class Game {
 
     protected end(): void {
         this.state = "finished";
+        if(this.finalContract)
+        this._result =  Result.make(this.finalContract, this.vulnerability, this.trickCount(Side.NS));
         runLater(() => this._gameEnded.dispatch({ game: this }));
     }
 

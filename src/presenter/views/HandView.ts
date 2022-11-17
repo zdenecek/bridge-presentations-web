@@ -30,7 +30,6 @@ export default abstract class HandView extends View {
     set reverse(value: boolean) {
         if (this._reversed === value) return;
         this._reversed = value;
-        console.log(this.reverse);
         if (this._hand) this._hand.cards.forEach((c) => {
             const card = this._cardViews.get(c);
             if(card) card.reverse = value;
