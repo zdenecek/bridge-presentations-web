@@ -16,11 +16,13 @@ export class Scoring {
         return (PositionHelper.side(contract.declarer) === Side.NS) ? points: -points;
     }
 
-    static Score(contract: Contract, vul: boolean, result?: number): number {
+    static Score(contract: Contract, vul: boolean, res?: number): number {
         if (contract === "passed") return 0;
 
-        if (!result) throw new Error("Cannot compute score");
+        if (!res) throw new Error("Cannot compute score");
 
+
+        const result = res -  contract.level - 6
         // Contract Points
         const points_contract = [
             [

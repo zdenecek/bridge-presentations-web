@@ -10,7 +10,7 @@ import { Trick, CardInTrick } from "./Trick";
 import { UndoableAuction } from "./UndoableAuction";
 
 export class UndoableGame extends Game {
-    private _undoMade = new SimpleEventDispatcher<GameEvent>();
+    protected _undoMade = new SimpleEventDispatcher<GameEvent>();
 
     public get undoMade(): ISimpleEvent<GameEvent> {
         return this._undoMade.asEvent();
@@ -36,7 +36,7 @@ export class UndoableGame extends Game {
         return new UndoableAuction(dealer);
     }
 
-    private undoBidding(): void {
+    protected undoBidding(): void {
         const lastBid = (this.auction as UndoableAuction).undo();
         if (!lastBid) return;
 
@@ -49,7 +49,7 @@ export class UndoableGame extends Game {
         });
     }
 
-    private undoCardplay(): void {
+    protected undoCardplay(): void {
         if (this.tricks.length === 0) return;
 
         let lastTrick = this.tricks[this.tricks.length - 1];
@@ -61,14 +61,9 @@ export class UndoableGame extends Game {
         }
 
         if (this.tricks.length === 0) {
-            if(this.bidding) {
-                this.state = "bidding";
-                this.undoBidding();
-            }
-            else {
-                this.startNewTrick(lastTrick.firstToPlay);
-                runLater(() => this._undoMade.dispatch({ game: this }));
-            }
+            this.state = "bidding";
+            this.undoBidding();
+            
         } else {
             lastTrick = this.tricks[this.tricks.length - 1];
             const lastCard = this.popCard(lastTrick)!;
@@ -87,7 +82,7 @@ export class UndoableGame extends Game {
         }
     }
 
-    private undoGameEnded(): void {
+    protected undoGameEnded(): void {
         //TODO check if passed
         if(this.finalContract == 'passed') {
             this.state = 'bidding';
@@ -99,7 +94,7 @@ export class UndoableGame extends Game {
         }
     }
 
-    private popCard(trick: Trick): CardInTrick | undefined {
+    protected popCard(trick: Trick): CardInTrick | undefined {
         const lastCard = trick.cards.pop();
         if (lastCard) {
             delete trick.cardsByPosition[lastCard.player];

@@ -6,9 +6,10 @@ import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import CardView from "./CardView";
 import BaseView from "./BaseView";
 import { UndoableGame } from "@/bridge/model/UndoableGame";
+import { PresentationGame } from "@/bridge/model/PresentationGame";
 
 export interface GameChangedEvent {
-    game?: Game;
+    game?: PresentationGame;
 }
 
 export interface GameViewEvent {
@@ -22,7 +23,7 @@ export interface PositionEvent {
 export type DummyOptions = "static" | "auto" | "none";
 
 export default class GameView extends BaseView {
-    private _game?: Game;
+    private _game?: PresentationGame;
     private _dummy?: Position | undefined;
 
     constructor() {
@@ -66,17 +67,17 @@ export default class GameView extends BaseView {
         return this._gameChanged.asEvent();
     }
 
-    public get game(): Game | undefined {
+    public get game(): PresentationGame | undefined {
         return this._game;
     }
 
-    public onEachGame(action: (game: Game) => void): void {
+    public onEachGame(action: (game: PresentationGame) => void): void {
         this.gameChanged.sub(({ game }) => {
             if (game) action(game);
         });
     }
 
-    public attachGame(game: Game | undefined, dummy: DummyOptions = "auto", staticDummyPosition?: Position): void {
+    public attachGame(game: PresentationGame | undefined, dummy: DummyOptions = "auto", staticDummyPosition?: Position): void {
         if (!this.root) throw new Error("root not attached");
         this._game = game;
         this._gameChanged.dispatch({ game });
@@ -112,8 +113,8 @@ export default class GameView extends BaseView {
     getEndText(): string {
         let s = "";
         if (this.game?.finalContract) s += `${this.game.finalContract.toString()}\n`;
-        if (this.game?.result?.madeTricks) s += `${this.game.result.madeTricks}\n`;
-        if (this.game?.result) s += `${this.game.result.scoreDeclarer}\n`;
+        if (this.game?.result?.tricksMade) s += `${this.game.result.tricksMadeRelative}\n`;
+        if (this.game?.result) s += `${this.game.result.scoreNS}\n`;
         s += "Well done!";
         return s;
     }

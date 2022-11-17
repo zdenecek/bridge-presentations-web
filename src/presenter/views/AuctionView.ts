@@ -7,6 +7,7 @@ import { Game } from "@/bridge/model/Game";
 import CenterPanelView from "./CenterPanelView";
 import { runLater } from "@/bridge/utils/runLater";
 import { UndoableGame } from "@/bridge/model/UndoableGame";
+import { PresentationGame } from "@/bridge/model/PresentationGame";
 
 export default class AuctionView {
     private bidStacks: PositionList<BidStack>;
@@ -29,8 +30,8 @@ export default class AuctionView {
         this.visible = false;
     }
 
-    public setGame(game: Game): void {
-        this.visible = false;
+    public setGame(game: PresentationGame): void {
+        this.visible = game.bidding;
         game?.biddingStarted.sub(() => {
             this.visible = true;
             this.update();

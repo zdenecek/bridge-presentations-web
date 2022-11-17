@@ -6,46 +6,41 @@ import { Scoring } from "./Scoring";
 
 export class Result {
 
-    public readonly tricksNS?: number;
+    public readonly tricksMade?: number;
     public readonly contract: Contract;
     public readonly vul: boolean;
 
-    public static  make(contract: Contract, vulnerability: Vulnerability, tricksNS?: number): Result {
+    public static  make(contract: Contract, vulnerability: Vulnerability, tricksMade?: number): Result {
         if(contract !== "passed")
-            return new Result(contract, VulnerabilityHelper.IsVulnerable(contract.declarer, vulnerability), tricksNS);
+            return new Result(contract, VulnerabilityHelper.IsVulnerable(contract.declarer, vulnerability), tricksMade);
         else
             return new Result("passed");
     }
 
-    constructor(contract: Contract, vulnerable = false, tricksNS?: number) {
+    constructor(contract: Contract, vulnerable = false, tricksMade?: number) {
         this.contract = contract;
         this.vul =vulnerable;
 
-        if(contract !== "passed") this.tricksNS = tricksNS;
+        if(contract !== "passed") this.tricksMade = tricksMade;
     }
 
-    public get declarersTricks(): number | undefined {
-        if(this.contract === "passed") return undefined;
-        return PositionHelper.side(this.contract.declarer) === Side.NS ? this.tricksNS : 13 - this.tricksNS!;
+    public get score(): number {
+        return Scoring.Score(this.contract, this.vul, this.tricksMade);
     }
-
-    /**
-     * Returns number of trict made relative to contract
-     */
-    public get madeTricks(): number | undefined {
-        if(this.contract === "passed") return undefined;
-
-        return this.contract.level + 6 - this.declarersTricks!;
-    }
-
 
     public get scoreNS(): number {
-        return Scoring.ScoreNS(this.contract, this.vul, this.madeTricks);
+        if(this.contract === "passed") return 0;
+        return (PositionHelper.side(this.contract.declarer) === Side.NS ? 1 : -1) * this.score;
     }
 
-    public get scoreDeclarer(): number {
-        if(this.contract === "passed") return 0;
-        return (PositionHelper.side(this.contract.declarer) === Side.NS ? 1 : -1) * this.scoreNS;
+    public get tricksMadeRelative(): number {
+        if(this.contract === "passed" ) return 0;
+        return this.tricksMade! - this.contract.level - 6;
+    }
+
+    public get resultString(): string {
+        const c = this.tricksMadeRelative;
+        return c === 0 ? "=" : c.toString();
     }
 
 

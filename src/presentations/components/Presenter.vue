@@ -12,6 +12,7 @@ import { configuratorOptions } from "@/presentations/types";
 import GameFactory from "@/bridge/factory/GameFactory";
 import { UndoableGame } from "@/bridge/model/UndoableGame";
 import GameViewFactory from "@/presenter/views/GameViewFactory";
+import { PresentationGame , PresentationGameOptions } from "@/bridge/model/PresentationGame";
 
 
 export default defineComponent({
@@ -26,7 +27,9 @@ export default defineComponent({
         },
 
         startGame(options: configuratorOptions) {
-            this.game = GameFactory.makeObservableGame(this.players, options.bidding, options.vulnerability);
+            const gameOpts =  new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew , options.contract, options.trumps)
+
+            this.game = GameFactory.makeObservableGame(this.players, gameOpts, options.vulnerability);
             PlayerFactory.putHands(this.players, options.cards);
             this.gameView.attachGame(this.game, options.dummy, options.staticDummyPosition) ;
 
@@ -50,7 +53,7 @@ export default defineComponent({
     setup() {
         const players = PlayerFactory.makeObservablePlayers();
         const gameView = GameViewFactory.make();
-        const game = new UndoableGame(players);
+        const game = new PresentationGame(players, PresentationGameOptions.Default);
 
         return {
             players,

@@ -6,9 +6,10 @@ import { Suit } from "../model/Suit";
 import { PresentationPlayer } from "../model/PresentationPlayer";
 import { UndoableGame } from "../model/UndoableGame";
 import { Vulnerability } from "../model/Vulnerability";
+import { PresentationGame, PresentationGameOptions } from "../model/PresentationGame";
 
 export default class GameFactory {
-    static makeTestGame(): UndoableGame {
+    static makeTestGame(): PresentationGame {
         const players = {} as PositionList<Player>;
         PositionHelper.all().forEach((position) => {
             players[position] = new PresentationPlayer(position);
@@ -30,11 +31,17 @@ export default class GameFactory {
             new Card(Suit.Spades, CardValue.Jack),
             new Card(Suit.Spades, CardValue.Ace),
         ]);
-        return GameFactory.makeObservableGame(players);
+        return GameFactory.makeObservableGame(players, PresentationGameOptions.Default);
     }
 
-    static makeObservableGame(players: PositionList<Player>, bidding = true, vulnerability?: Vulnerability): UndoableGame {
-        const game = new UndoableGame(players, bidding, vulnerability);
+    static makeGame(players: PositionList<Player>, vulnerability: Vulnerability, options: PresentationGameOptions) : PresentationGame {
+        const game = new PresentationGame(players, options, vulnerability);
+
+        return game;
+    }
+
+    static makeObservableGame(players: PositionList<Player>, options: PresentationGameOptions, vul = Vulnerability.None): PresentationGame {
+        const game = this.makeGame(players, vul, options);
         game.cardPlayed.sub((e) => {
             console.debug(`card played: ${e.card}`);
         });

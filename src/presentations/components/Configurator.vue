@@ -7,14 +7,15 @@
                 <div class="vertical">
                     <button tabindex="-1" @click="clear">Clear cards</button>
                     <button tabindex="-1" @click="save">Save</button>
-                    <input type='file' @change='e => load(e)' ref="loadform" hidden/>
+                    <input type='file' @change='e => load(e)' ref="loadform" hidden />
                     <button tabindex="-1" @click="loadClicked">Load</button>
                 </div>
                 <div class="fields">
                     <template v-for="(label, pos) in positions" :key="pos">
                         <label :for="pos">{{ label }}</label>
                         <input :id="pos" type="text" v-model="options.cards[pos]" />
-                        <div class="error-list" v-if="showErrors && cardErrors.has(pos as Position)">
+                        <div class="error-list"
+                             v-if="showErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
                             <div v-for="err in cardErrors.get(pos as Position)" :key="err">
                                 {{ err }}
                             </div>
@@ -27,20 +28,20 @@
                     <select id="first" v-model="options.vulnerability">
                         <option :value="vul" v-for="(label, vul) in vulnerabilities" :key="vul">{{ label }}</option>
                     </select>
-                    <label for="enable-bidding">Enable bidding</label>
-                    <input type="checkbox" class="checkbox" id="enable-bidding" v-model="options.bidding" />
+                    <label for="include-auction">Auction</label>
+                    <input type="checkbox" class="checkbox" id="include-auction" v-model="options.bidding" />
                     <template v-if="!options.bidding">
-                    <label for="specify-contract">Contract</label>
-                    <div class="contract-field" >
-                        <input type="checkbox" class="checkbox" id="specify-contract" v-model="specifyContract" />
-                        <input type="text" v-model="contractInput" v-show="specifyContract" placeholder="4SxE"/>
-                        <span v-show="specifyContract" > {{ contract }}</span>
-                    </div>
+                        <label for="specify-contract">Contract</label>
+                        <div class="contract-field">
+                            <input type="checkbox" class="checkbox" id="specify-contract" v-model="specifyContract" />
+                            <input type="text" v-model="contractInput" v-show="specifyContract" placeholder="4SxE" />
+                            <span v-show="specifyContract"> {{ contract }}</span>
+                        </div>
                     </template>
-                    
-                    
+
+
                     <label for="trumps" v-show="!options.bidding && !specifyContract">{{ "Trumps" }}</label>
-                    <select id="trumps"  v-model="options.trumps" v-show="!options.bidding && !specifyContract">
+                    <select id="trumps" v-model="options.trumps" v-show="!options.bidding && !specifyContract">
                         <option :value="suit" v-for="(label, suit) in suits" :key="suit">{{ label }}</option>
                     </select>
                     <label for="dummy-choice" v-show="!options.bidding">{{ "Dummy" }}</label>
@@ -57,22 +58,26 @@
                             <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                         </select>
                     </div>
-                    <label for="first" v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract )">{{ options.bidding ? "Dealer" : "First to play" }}</label>
-                    <select id="first" v-model="options.firstPlayer"  v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract )">
+                    <label for="first" v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">{{
+                            options.bidding ? "Dealer" : "First to play"
+                    }}</label>
+                    <select id="first" v-model="options.firstPlayer"
+                            v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">
                         <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                     </select>
-                    <label for="fake-tricks" v-show="!options.bidding">Fake trick count</label>
-                    <div v-show="!options.bidding" class="fake-tricks-field">
-                        <input type="checkbox" class="checkbox" id="fake-tricks" v-model="fakeTricks"  />
+                    <label for="fake-tricks" >Fake trick count</label>
+                    <div  class="fake-tricks-field">
+                        <input type="checkbox" class="checkbox" id="fake-tricks" v-model="fakeTricks" />
                         <div v-show="fakeTricks">
-                            <label for="fake-ns" v-show="!options.bidding">NS:</label>
-                            <input type="text" id="fake-ns"  v-model.number="options.fake.ns" v-show="fakeTricks"/>
-                            <label for="fake-ew" v-show="!options.bidding">EW:</label>
-                            <input type="text" id="fake-ew"  v-model.number="options.fake.ew" v-show="fakeTricks"/>
+                            <label for="fake-ns">NS:</label>
+                            <input type="text" id="fake-ns" v-model.number="options.fake.ns" v-show="fakeTricks" />
+                            <label for="fake-ew">EW:</label>
+                            <input type="text" id="fake-ew" v-model.number="options.fake.ew" v-show="fakeTricks" />
                         </div>
                     </div>
                     <label for="fake-auction" v-show="options.bidding">Fake auction</label>
-                    <input type="checkbox" class="checkbox" id="fake-auction" v-model="fakeAuction" v-show="options.bidding" disabled />
+                    <input type="checkbox" class="checkbox" id="fake-auction" v-model="fakeAuction"
+                           v-show="options.bidding" disabled />
                 </div>
             </div>
             <div class="tab">
@@ -99,7 +104,7 @@
             </div>
         </div>
         <div id="configurator-buttons">
-            <button @click="onSubmit(options)">Play</button>
+            <button @click="submit">Play</button>
         </div>
     </div>
 </template>
@@ -130,6 +135,7 @@ export default defineComponent({
     },
     methods: {
         submit() {
+            if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
             this.onSubmit(this.options);
         },
         clear() {
@@ -145,26 +151,28 @@ export default defineComponent({
             if (name) downloadObjectAsJson(this.options, name + ".deal");
         },
         load(event: any) {
-            (this.$refs.loadform as HTMLElement).blur();  
+            (this.$refs.loadform as HTMLElement).blur();
             loadJson(event).then(a => {
                 this.options = a
                 this.fakeTricks = a.fake?.ns > 0 || a.fake?.ew > 0;
-                this.specifyContract =  a.contract !== undefined;
+                this.specifyContract = a.contract !== undefined;
                 this.fakeAuction = a.auction;
+                if (this.options.contract && this.options.contract !== "passed")
+                    this.options.contract = new NonPassedContract(this.options.contract.suit, this.options.contract.level, this.options.contract.declarer, this.options.contract.dbl);
             });
-            },
+        },
         loadClicked() {
             (this.$refs.loadform as HTMLElement).click();
         },
         parseContract(value: string) {
             const c = NonPassedContract.fromString(value);
-            if(c) this.options.contract = c;
+            if (c) this.options.contract = c;
         }
     },
 
     data() {
         return {
-            contractInput : "",
+            contractInput: "",
             specifyContract: true,
             fakeTricks: false,
             fakeAuction: false,
@@ -176,7 +184,7 @@ export default defineComponent({
                     east: "",
                     west: "",
                 },
-                fake: {ns: 0, ew: 0},
+                fake: { ns: 0, ew: 0 },
                 firstPlayer: "west" as Position,
                 bidding: true,
                 contract: undefined as Contract | undefined,
@@ -209,14 +217,14 @@ export default defineComponent({
         };
     },
     watch: {
-        contractInput(value:string) {
+        contractInput(value: string) {
             this.parseContract(value);
         },
         "options.bidding"(value: boolean) {
-            if(value) this.specifyContract = false;
+            if (value) this.specifyContract = false;
         },
         specifyContract(value: boolean) {
-            if(!value) this.options.contract = undefined;
+            if (!value) this.options.contract = undefined;
             else this.parseContract(this.contractInput);
         }
     },
@@ -282,7 +290,7 @@ export default defineComponent({
         gap: 10px;
 
         .checkbox {
-            align-self: center;
+            justify-self: start;
         }
 
         label {

@@ -11,7 +11,7 @@ import OneDimensionalHandView from "./OneDimensionalHandView";
 import TrickView from "./TrickView";
 import ControlPanel from "./ControlPanel";
 import BiddingBoxView from "./BiddingBoxView";
-import { Game } from "@/bridge/model/Game";
+import { PresentationGame } from "@/bridge/model/PresentationGame";
 import BiddingHistoryView from "./BiddingHistoryView";
 import TextView from "./TextView";
 import { SuitHelper } from "@/bridge/model/Suit";
@@ -27,7 +27,7 @@ export default class GameViewFactory {
         const frameView = this.makeFrameView(gameView);
         const centerPanelView = this.makeCenterPanelView(gameView, frameView);
         const mainView = this.makeMainView(gameView, centerPanelView);
-        this.makeTrickView(cardViews, gameView, frameView);
+        const trick = this.makeTrickView(cardViews, gameView, frameView);
         this.makeAuctionView(gameView, centerPanelView);
         this.makeHandViews(gameView, cardViews, mainView);
         this.makeAuctionHistoryView(gameView);
@@ -42,6 +42,8 @@ export default class GameViewFactory {
         gameView.addSubView(controlCenter);
         ///
         this.makeBB(gameView, controlCenter);
+
+        new ResizeObserver(_.debounce(trick.update, 100)).observe(frameView.root[0]);
 
         return gameView;
     }
@@ -102,12 +104,16 @@ export default class GameViewFactory {
             ({ game }) => (centerPanelView.centerFrameView.vulnerability = game?.vulnerability ?? Vulnerability.None)
         );
 
-        new ResizeObserver(_.debounce(gameView.update, 100)).observe(centerPanelView.centerFrameView.root[0]);
+        new ResizeObserver(
+            _.debounce(() => {
+                gameView.update();
+            }, 100)
+        ).observe(centerPanelView.centerFrameView.root[0]);
 
         return centerPanelView;
     }
 
-    static makeCards(cardViews: Map<Card, CardView>, game?: Game): void {
+    static makeCards(cardViews: Map<Card, CardView>, game?: PresentationGame): void {
         cardViews.forEach((cardView) => cardView.detach());
         cardViews.clear();
 
@@ -160,8 +166,8 @@ export default class GameViewFactory {
             `<div class="side-panel"><div class="t-label-tricks">Tricks</div><div class="t-label-contract">Contract</div></div>`
         );
 
-        const ewContainer = new View(`<div class="c-tricks-ns c-tricks"><div class="t-label">NS</div></div>`);
-        const nsContainer = new View(`<div class="c-tricks-ew c-tricks"><div class="t-label">EW</div></div>`);
+        const nsContainer = new View(`<div class="c-tricks-ns c-tricks"><div class="t-label">NS</div></div>`);
+        const ewContainer = new View(`<div class="c-tricks-ew c-tricks"><div class="t-label">EW</div></div>`);
 
         const ew = new TextView("t-count", "0");
         const ns = new TextView("t-count", "0");
@@ -173,23 +179,23 @@ export default class GameViewFactory {
         sidePanel.addSubView(nsContainer);
         sidePanel.addSubView(contract);
 
-        gameView.onEachGame((game) =>
-            game.cardplayStarted.sub(({ game }) => {
-                if (game.finalContract) contract.text = game.finalContract.toString();
-                else contract.text = SuitHelper.toString(game.trumps);
-            })
-        );
+        gameView.onEachGame((game) => {
+            ew.text = game.trickCount(Side.EW).toString();
+            ns.text = game.trickCount(Side.NS).toString();
 
-        gameView.onEachGame((game) =>
             game.trickCountChanged.sub(({ game }) => {
                 ew.text = game.trickCount(Side.EW).toString();
                 ns.text = game.trickCount(Side.NS).toString();
-            })
-        );
+            });
+        });
 
         gameView.onEachGame((game) => {
             game.stateChanged.sub(({ game }) => {
                 sidePanel.hidden = !(game.state === "cardplay" || game.state === "finished");
+                if (!sidePanel.hidden) {
+                    if (game.finalContract) contract.text = game.finalContract.toString();
+                    else contract.text = SuitHelper.toString(game.trumps);
+                }
             });
         });
 
@@ -231,14 +237,13 @@ export default class GameViewFactory {
     static makeAuctionHistoryView(gameView: GameView): View {
         const auctionHistoryView = new BiddingHistoryView();
 
-        
         gameView.onEachGame((game) => {
             game?.biddingEnded.sub(() => {
                 auctionHistoryView.attachAuction(game.auction);
             });
             game?.stateChanged.sub(({ game }) => {
-
-                auctionHistoryView.hidden = !(game.state === "cardplay" || game.state === "finished") || !game.bidding;
+                auctionHistoryView.hidden =
+                    !(game.state === "cardplay" || game.state === "finished") || !(game as PresentationGame).bidding;
             });
         });
 

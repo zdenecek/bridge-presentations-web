@@ -43,14 +43,12 @@ export class Game {
     finalContract: Contract | undefined;
     private _result: Result | undefined;
     _state: GameState;
-    bidding: boolean;
     vulnerability: Vulnerability;
     currentlyRequestedPlayer: Player | undefined;
 
-    constructor(players: PositionList<Player>, bidding = true, vulnerability = Vulnerability.None) {
+    constructor(players: PositionList<Player>, vulnerability = Vulnerability.None) {
         this.players = players;
         this._state = "notStarted";
-        this.bidding = bidding;
         this.vulnerability = vulnerability;
     }
 
@@ -143,16 +141,12 @@ export class Game {
 
     public start(firstToPlay: Position, trumps?: Suit): void {
         runLater(() => this._gameStarted.dispatch({ game: this }));
-        if (this.bidding) runLater(() => this.startBidding(firstToPlay));
-        else {
-            this.trumps = trumps || Suit.Notrump;
-            runLater(() => this.startPlay(firstToPlay));
-        }
+        runLater(() => this.startBidding(firstToPlay));
     }
 
     protected end(): void {
         if(this.finalContract)
-        this._result =  Result.make(this.finalContract, this.vulnerability, this.trickCount(Side.NS));
+        this._result =  Result.make(this.finalContract, this.vulnerability, this.finalContract === "passed" ? undefined : this.trickCount(PositionHelper.side(this.finalContract.declarer)));
         this.state = "finished";
         runLater(() => this._gameEnded.dispatch({ game: this }));
     }
