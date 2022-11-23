@@ -43,6 +43,7 @@ export default abstract class HandView extends View {
 
     public set dummy(value: boolean) {
         if (this._dummy === value) return;
+        console.log("hey");
         this._dummy = value;
         if (this.dummy) this._reversed = false;
         this.update();

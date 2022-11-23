@@ -114,13 +114,19 @@ $frame-width: 16%;
 }
 
 .control-panel {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+display: flex;
+flex-direction: column;
+
+    .buttons {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
 
     button:disabled {
         color: gray;
         background-color: white;
     }
+
 
     .hearts {
         color: red;

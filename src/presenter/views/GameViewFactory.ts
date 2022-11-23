@@ -34,7 +34,7 @@ export default class GameViewFactory {
         this.makeCenterText(gameView, frameView);
         this.makeSidePanel(gameView);
         // Control Panel
-        const controlPanel = new ControlPanel();
+        const controlPanel = new ControlPanel(gameView);
         gameView.onEachGame((game) => controlPanel.attachGame(game));
         // Control Center
         const controlCenter = new View('<div id="control-center">');
@@ -268,6 +268,10 @@ export default class GameViewFactory {
         gameView.updateDispatched.sub(({ game }) => {
             if (game.state === "finished") centerText.root.fadeIn();
         });
+        gameView.onEachGame(game=> game.claimMade.sub(() => {
+            if(game.tricks[game.tricks.length-1].cards.length === 0)
+            centerText.root.fadeIn();
+        }));
         return centerText;
     }
 

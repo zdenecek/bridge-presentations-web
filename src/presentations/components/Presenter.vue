@@ -13,6 +13,7 @@ import GameFactory from "@/bridge/factory/GameFactory";
 import { UndoableGame } from "@/bridge/model/UndoableGame";
 import GameViewFactory from "@/presenter/views/GameViewFactory";
 import { PresentationGame , PresentationGameOptions } from "@/bridge/model/PresentationGame";
+import { Application } from "../class/Application";
 
 
 export default defineComponent({
@@ -42,6 +43,8 @@ export default defineComponent({
         $(window)
             .on("resize click", () => this.gameView.update())
             .on("keydown", (e) => {
+                if(Application.state !== 'presenter') return;
+
                 if (e.key === "ArrowLeft") this.gameView.toggleVisible(Position.West);
                 if (e.key === "ArrowRight") this.gameView.toggleVisible(Position.East);
                 if (e.key === "ArrowDown") this.gameView.toggleVisible(Position.South);

@@ -99,8 +99,13 @@ export default class GameView extends BaseView {
             this.update();
         });
 
+        game.claimMade.sub(() => this.update());
+
         if (game instanceof UndoableGame) {
-           game.undoMade.sub((e) => this.update());
+           game.undoMade.sub((e) => {
+            this.update();
+            if(game.state === 'bidding' || game.tricks?.[0]?.cards.length === 0) this.dummy = undefined;
+           });
         }
 
         this.update();
@@ -115,7 +120,7 @@ export default class GameView extends BaseView {
     getEndText(): string {
         let s = "";
         if (this.game?.finalContract) s += `${this.game.finalContract.toString()}\n`;
-        if (this.game?.result?.tricksMade) s += `${this.game.result.tricksMadeRelative}\n`;
+        if (this.game?.result?.tricksMade) s += `${this.game.result.resultString}\n`;
         if (this.game?.result) s += `${this.game.result.scoreNS}\n`;
         if(this.endMessage) s += this.endMessage + "\n";
         return s;

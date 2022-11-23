@@ -45,6 +45,8 @@ export class Game {
     _state: GameState;
     vulnerability: Vulnerability;
     currentlyRequestedPlayer: Player | undefined;
+    private claimedTricks = {ns: 0, ew: 0};
+    claimed = false;
 
     constructor(players: PositionList<Player>, vulnerability = Vulnerability.None) {
         this.players = players;
@@ -70,6 +72,7 @@ export class Game {
     protected _leadMade = new SimpleEventDispatcher<CardPlayedEvent>();
     protected _trickCountChanged = new SimpleEventDispatcher<GameEvent>();
     protected _stateChanged = new SimpleEventDispatcher<GameEvent>();
+    protected _claimMade = new SimpleEventDispatcher<GameEvent>();
 
     // Events
 
@@ -112,6 +115,9 @@ export class Game {
     public get stateChanged(): ISimpleEvent<GameEvent> {
         return this._stateChanged.asEvent();
     }
+    public get claimMade(): ISimpleEvent<GameEvent> {
+        return this._claimMade.asEvent();
+    }
 
     public get state(): GameState {
         return this._state;   
@@ -136,12 +142,27 @@ export class Game {
     }
 
     public trickCount(side: Side) : number {
-        return this.tricks.filter(t => t.winner && PositionHelper.side(t.winner.player) === side).length;
+        return this.tricks.filter(t => t.winner && PositionHelper.side(t.winner.player) === side).length + this.claimedTricks[side];
     }
 
     public start(firstToPlay: Position, trumps?: Suit): void {
         runLater(() => this._gameStarted.dispatch({ game: this }));
         runLater(() => this.startBidding(firstToPlay));
+    }
+
+    public claim(tricksNS: number): void {
+        if(this.state !== 'cardplay') return;
+
+        this.claimedTricks.ns = tricksNS;
+        this.claimedTricks.ew = 13 - this.tricks.filter(t => t.isFinished).length - tricksNS;
+
+        this.claimed = true;
+
+        this.currentlyRequestedPlayer?.cancelRequestToPlay();
+        
+        runLater(() => this._claimMade.dispatch({ game: this }));
+        runLater(() => this._trickCountChanged.dispatch({ game: this }));
+        runLater(() => this.endPlay());
     }
 
     protected end(): void {
@@ -223,6 +244,7 @@ export class Game {
 
     protected addCard(trick: Trick, card: Card, player: Player): boolean {
         // check correct playeer, correct trick, correct card
+        if(this.state !== 'cardplay') return false;
         if(trick.cards.length > 0 ) {
             const suit = trick.cards[0].card.suit;
             if(suit !== card.suit && player.hand.cardsWithSuit(suit).length > 0) return false;
@@ -249,6 +271,9 @@ export class Game {
     protected addBid(bid: Bid, player: Player): boolean {
         if (!this.auction) throw Error("No auction");
         // todo check correct player, correct bid
+
+        if(this.state !== 'bidding') return false;
+
 
         const success = this.auction.addBid(bid, player.position);
         if (!success) return false;

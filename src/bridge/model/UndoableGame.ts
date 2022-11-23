@@ -89,6 +89,9 @@ export class UndoableGame extends Game {
             this.undoBidding();
         }
         else {
+            // TODO support claims
+            if(this.claimed) return;
+
             this.state = "cardplay";
             this.undoCardplay();
         }

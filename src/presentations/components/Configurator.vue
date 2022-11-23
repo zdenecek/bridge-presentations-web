@@ -86,7 +86,7 @@
                 <div id="controls-tab">
                     <div class="key">+</div>
                     <div>Start game</div>
-                    <div class="key">M</div>
+                    <div class="key">Home</div>
                     <div>Toggle this menu</div>
                     <div>
                         <span class="key">&larr;</span>
@@ -100,6 +100,11 @@
                     <div>Toggle visibility for a hand</div>
                     <div class="key">Z</div>
                     <div>Undo</div>
+                    <div> <span class="key">0</span>- <span class="key">9</span>, <span class="key">/</span>, <span class="key">*</span>, <span class="key">-</span></div>
+                    <div>Play card</div>
+                    <div class="key">C</div>
+                    <div>Claim (first focus then submit)</div>
+                    
                 </div>
             </div>
             <div class="tab">

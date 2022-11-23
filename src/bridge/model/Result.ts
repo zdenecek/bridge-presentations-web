@@ -40,7 +40,7 @@ export class Result {
 
     public get resultString(): string {
         const c = this.tricksMadeRelative;
-        return c === 0 ? "=" : c.toString();
+        return c === 0 ? "=" : c > 0 ? "+" +  c.toString() : c.toString();
     }
 
 
