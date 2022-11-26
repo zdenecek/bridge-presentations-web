@@ -1,4 +1,4 @@
-import { Auction } from "@/bridge/model/Auction";
+import { Auction, PositionedBid } from "@/bridge/model/Auction";
 import { Bid } from "@/bridge/model/Bid";
 import { Position, PositionHelper } from "@/bridge/model/Position";
 import View from "./View";
@@ -8,7 +8,7 @@ export default class BiddingHistoryView extends View {
 
     constructor() {
         super(`<div class='bidding-history'>
-        <span class="header">West</span> <span class="header">North</span> <span class="header">East</span> <span class="header">South</span>
+        <span class="header header-west">West</span> <span class="header header-north">North</span> <span class="header header-east">East</span> <span class="header header-south">South</span>
         <div class='separator'></div>
         </div>`);
     }
@@ -26,12 +26,12 @@ export default class BiddingHistoryView extends View {
         }
 
         auction.bids.forEach(bid => {
-            this.addBid(bid.bid);
+            this.addBid(bid);
         })
     }
 
     private bidViews = new Array<BidView | View>();
-    private addBid(bid: Bid) {
+    private addBid(bid: PositionedBid) {
         const view = new BidView(bid);
         this.bidViews.push(view);
         this.addSubView(view);
@@ -46,7 +46,7 @@ export default class BiddingHistoryView extends View {
 
 class BidView extends View {
 
-    constructor(bid: Bid) {
-        super(`<span class="bid-view">${bid.toString()}</span>`);
+    constructor(bid: PositionedBid) {
+        super(`<span class="bid-view bid-view-${bid.position}">${bid.bid.toString()}</span>`);
     }
 }

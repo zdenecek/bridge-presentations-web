@@ -30,6 +30,7 @@ export class CardsInputValidator {
                 ar.push(`Irregular card count: ${cards.length} instead of ${correct}`);
             }            
             cards.forEach( card => { 
+                if(card.value === CardValue.Other) return;
                 if(unique.has(card.toString())) ar.push(`Duplicate card: ${card}`);
                 unique.add(card.toString());
             })

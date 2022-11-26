@@ -86,21 +86,18 @@
                 <div id="controls-tab">
                     <div class="key">+</div>
                     <div>Start game</div>
-                    <div class="key">Home</div>
+                    <div class="keys"><span class="key">Ctrl</span>+<span class="key">Q</span></div>
                     <div>Toggle this menu</div>
-                    <div>
+                    <div class="keys">
                         <span class="key">&larr;</span>
-                        ,
                         <span class="key">&uarr;</span>
-                        ,
                         <span class="key">&darr;</span>
-                        ,
                         <span class="key">&rarr;</span>
                     </div>
                     <div>Toggle visibility for a hand</div>
                     <div class="key">Z</div>
                     <div>Undo</div>
-                    <div> <span class="key">0</span>- <span class="key">9</span>, <span class="key">/</span>, <span class="key">*</span>, <span class="key">-</span></div>
+                    <div  class="keys"> <div><span class="key">0</span>-<span class="key">9</span></div><span class="key">/</span><span class="key">*</span><span class="key">-</span></div>
                     <div>Play card</div>
                     <div class="key">C</div>
                     <div>Claim (first focus then submit)</div>
@@ -361,6 +358,8 @@ export default defineComponent({
         display: grid;
         grid-template-columns: auto 1fr;
         gap: 10px;
+        align-items: baseline;
+        
 
         div {
             text-align: left;
@@ -368,13 +367,20 @@ export default defineComponent({
         }
 
         .key {
-            margin: auto;
             border: solid gray 1px;
             background-color: lightgray;
-            padding: 2px 4px;
+            padding: 2px 6px;
             border-radius: 5px;
             display: inline;
             user-select: none;
+            justify-self: center;
+        }
+
+        .keys {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
         }
     }
 }

@@ -37,13 +37,15 @@
     grid-row: 2;
     grid-column: 2;
 
-    padding: 5%;
+    padding: 10px;
     display: grid;
 
     transition: all 1s;
 
+    align-self: center;
+
     &.center-panel-bidding {
-        gap: 10px;
+        gap: 3px;
         grid-template-columns: variables.$bid-card-height auto variables.$bid-card-height;
         grid-template-rows: variables.$bid-card-height auto variables.$bid-card-height;
     }
@@ -170,9 +172,9 @@ flex-direction: column;
 }
 
 .main {
-    border: variables.$primary solid 1px;
+    //border: variables.$primary solid 1px;
     margin: variables.$margin;
-    padding: 10px 20px;
+    //padding: 10px 20px;
     aspect-ratio: 1;
     grid-column: 2;
     display: grid;

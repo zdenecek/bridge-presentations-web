@@ -14,7 +14,10 @@ export default defineComponent({
   name: 'App',
   created() {
     window.addEventListener('keydown', (e) => {
-      if (e.key === "Home") this.changeState();
+      if (e.key.toLowerCase() === "q" && e.ctrlKey) {
+        e.preventDefault();
+        this.changeState();
+      }
     });
   },
   data() {
