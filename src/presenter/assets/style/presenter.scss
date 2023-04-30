@@ -384,3 +384,15 @@ flex-direction: column;
         outline-offset: -1px;
     }
 }
+
+.claim-input {
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+    display: none;
+    }
+    width: 100%;
+
+    &[type=number] {
+    -moz-appearance:textfield; /* Firefox */
+    }
+}

@@ -18,6 +18,7 @@ export interface GameViewEvent {
 
 export interface PositionEvent {
     position: Position;
+    value?: boolean;
 }
 
 export type DummyOptions = "static" | "auto" | "none";
@@ -45,8 +46,8 @@ export default class GameView extends BaseView {
         return this._visibilityToggle.asEvent();
     }
 
-    public toggleVisible(position: Position): void {
-        this._visibilityToggle.dispatch({ position });
+    public toggleVisible(position: Position, value?: boolean): void {
+        this._visibilityToggle.dispatch({ position, value });
     }
 
     private _dummyChanged = new SimpleEventDispatcher<GameViewEvent>();

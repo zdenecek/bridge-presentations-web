@@ -82,16 +82,29 @@ export class UndoableGame extends Game {
         }
     }
 
+    protected undoClaim(): void {
+        this.claimed = false;
+        this.claimedTricks = { ns: 0, ew: 0};
+        runLater(() => this._undoMade.dispatch({ game: this }));
+        runLater(() => this._trickCountChanged.dispatch({ game: this }));
+        const lastTrick = this.tricks[this.tricks.length - 1];
+        runLater(() => {
+            if(lastTrick.currentToPlay == undefined) throw new Error("No current player");
+            this.currentlyRequestedPlayer = this.players[lastTrick.currentToPlay];
+            this.currentlyRequestedPlayer.requestPlay(this, lastTrick, (player: Player, card: Card) => this.addCard(lastTrick, card, player)); 
+        });
+    }
+
     protected undoGameEnded(): void {
-        //TODO check if passed
         if(this.finalContract == 'passed') {
             this.state = 'bidding';
             this.undoBidding();
         }
+        else if(this.claimed) {
+            this.state = 'cardplay';
+            this.undoClaim();
+        }
         else {
-            // TODO support claims
-            if(this.claimed) return;
-
             this.state = "cardplay";
             this.undoCardplay();
         }

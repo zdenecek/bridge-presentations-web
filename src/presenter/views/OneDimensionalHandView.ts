@@ -1,8 +1,8 @@
+import { sortSuits } from "@/bridge/utils/CardSorter";
 import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
-import { Position, PositionHelper, PositionList, Side } from "../../bridge/model/Position";
+import { Position } from "../../bridge/model/Position";
 import { Suit } from "../../bridge/model/Suit";
-import { Point } from "../classes/Point";
 import { Rotation, RotationHelper } from "../classes/Rotation";
 import { Vector } from "../classes/Vector";
 import CardView from "./CardView";
@@ -96,8 +96,9 @@ export default class OneDimensionalHandView extends HandView {
             return groups;
         }, {} as Record<Suit, Card[]>);
 
+        let suits = Object.keys(bySuit).map((suit) => parseInt(suit)) as Suit[];
+        suits = sortSuits(suits, this.prioritizedSuit);
         const suitCount = Object.keys(bySuit).length;
-        // start SUIT offset SUIT offset ... SUIT end
         const primarySize = (CardView.width + this.dummySuitOffset()) * suitCount - this.dummySuitOffset();
 
         const center = this.start.moveBy(this.make1DVector(this.primaryDimensionSize / 2));
@@ -109,16 +110,19 @@ export default class OneDimensionalHandView extends HandView {
 
         const cardOffset = this.make1DVector( c, true);
 
-        for (let s = 0; s < suitCount; s++) {
+        console.log("hello");
+        console.log(suits);
+
+        for (const [suitIndex, suit] of suits.entries()) {
             let currentSuitPos = currentPosition.copy();
             let index = 0;
-            for (const card of bySuit[Object.keys(bySuit)[s] as any as Suit]) {
+            for (const card of bySuit[suit]) {
                 const view = this._cardViews.get(card);
                 if (!view) return;
                 view.position = currentSuitPos;
                 view.reverse = false;
 
-                view.root.css("z-index", index + card.suit * 10);
+                view.root.css("z-index", index + suitIndex * 10);
                 currentSuitPos = currentSuitPos.moveBy(cardOffset);
                 index++;
             }

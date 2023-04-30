@@ -2,6 +2,7 @@ import { Card } from "./Card";
 import { Position } from "./Position";
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 import { Suit } from "./Suit";
+import { sortCards } from "../utils/CardSorter";
 
 export interface HandEvent {
     hand: Hand;
@@ -55,7 +56,7 @@ export class Hand {
     }
 
     private sortCards(): void {
-        this._cards.sort((a,b) => (a.card.suit - b.card.suit !== 0 ? a.card.suit - b.card.suit : b.card.value - a.card.value));
+        sortCards(this._cards);
     }
 
     public addCard(card: Card): void {

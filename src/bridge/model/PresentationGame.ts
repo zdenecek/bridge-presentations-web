@@ -1,6 +1,6 @@
 import { runLater } from "../utils/runLater";
+import { Bid } from "./Bid";
 import { Contract } from "./Contract";
-import { Game } from "./Game";
 import { Player } from "./Player";
 import { Position, PositionHelper, PositionList, Side } from "./Position";
 import { Suit } from "./Suit";
@@ -21,14 +21,17 @@ export class PresentationGameOptions {
         fakeNSTricks = 0,
         fakeEWTricks = 0,
         contract?: Contract,
-        trumps = Suit.Notrump
+        trumps?: Suit
     ) {
         this.bidding = bidding;
         this.fakeEWTricks = fakeEWTricks;
         this.fakeNSTricks = fakeNSTricks;
         if (!bidding) {
-            if (contract) this.contract = contract;
-            else this.trumps = trumps;
+            if (contract)  {
+                this.contract = contract;
+                this.trumps = contract == "passed" ? undefined : contract.suit;
+            }
+            else if(trumps) this.trumps = trumps;
         }
     }
 }
@@ -49,10 +52,22 @@ export class PresentationGame extends UndoableGame {
     }
 
     public start(firstToPlay: Position, trumps?: Suit | undefined): void {
+
         runLater(() => this._gameStarted.dispatch({ game: this }));
+
+        
+
         if (this.bidding) runLater(() => this.startBidding(firstToPlay));
         else {
-            this.trumps = trumps || Suit.Notrump;
+            if(this.finalContract) {
+                if(this.finalContract == "passed") {
+                    runLater(() => this.end());
+                    return;
+                }
+                firstToPlay = PositionHelper.nextPosition(this.finalContract.declarer);
+            } else if(trumps) {
+                this.trumps = trumps;
+            }
             runLater(() => this.startPlay(firstToPlay));
         }
     }
@@ -64,5 +79,9 @@ export class PresentationGame extends UndoableGame {
     protected undoCardplay(): void {
         if (!this.bidding && this.tricks.length === 1 && this.tricks[0].cards.length === 0) return;
         else super.undoCardplay();
+    }
+
+    public tryAddBid(bid: Bid, player: Player): boolean {
+       return this.addBid(bid, player);
     }
 }

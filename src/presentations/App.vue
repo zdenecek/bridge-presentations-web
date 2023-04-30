@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from 'vue';
+import { defineComponent} from 'vue';
 import Presenter from '@/presentations/components/Presenter.vue';
 import Configurator from '@/presentations/components/Configurator.vue';
 import { configuratorOptions } from './types';

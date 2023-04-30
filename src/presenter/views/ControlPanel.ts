@@ -1,5 +1,4 @@
 import { Game } from "@/bridge/model/Game";
-import { Player } from "@/bridge/model/Player";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import { SuitHelper } from "@/bridge/model/Suit";
 import { Application } from "@/presentations/class/Application";
@@ -28,7 +27,7 @@ export default class ControlPanel extends View {
         }
 
         const claimPanel = new View("<form  class='claim-panel'>");
-        const claimInput = new View(`<input  class="claim-input" type="number" placeholder="claim">`);
+        const claimInput = new View(`<input  class="claim-input" type="number" placeholder="claim (claimed tricks NS)">`);
         const defocuser = new View(`<input type="checkbox" style="filter: opacity(0); width: 0px;">`);
 
 
@@ -108,7 +107,7 @@ export default class ControlPanel extends View {
 
         this.root.hide();
 
-        Object.entries(game.players).forEach(([pos, player]) => {
+        Object.values(game.players).forEach(player => {
             player.playRequested.sub((e) => {
                 if (e.player instanceof PresentationPlayer) {
                     this.player = e.player;

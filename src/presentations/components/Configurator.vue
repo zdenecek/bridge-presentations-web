@@ -59,14 +59,14 @@
                         </select>
                     </div>
                     <label for="first" v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">{{
-                            options.bidding ? "Dealer" : "First to play"
+                        options.bidding ? "Dealer" : "First to play"
                     }}</label>
                     <select id="first" v-model="options.firstPlayer"
                             v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">
                         <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                     </select>
-                    <label for="fake-tricks" >Fake trick count</label>
-                    <div  class="fake-tricks-field">
+                    <label for="fake-tricks">Fake trick count</label>
+                    <div class="fake-tricks-field">
                         <input type="checkbox" class="checkbox" id="fake-tricks" v-model="fakeTricks" />
                         <div v-show="fakeTricks">
                             <label for="fake-ns">NS:</label>
@@ -89,27 +89,43 @@
                     <div class="keys"><span class="key">Ctrl</span>+<span class="key">Q</span></div>
                     <div>Toggle this menu</div>
                     <div class="keys">
-                        <span class="key">&larr;</span>
-                        <span class="key">&uarr;</span>
-                        <span class="key">&darr;</span>
-                        <span class="key">&rarr;</span>
+                            <span class="key"><arrow direction="up"/></span>
+                            <span class="key"><arrow direction="left"/></span>
+                            <span class="key"><arrow direction="down"/></span>
+                            <span class="key"><arrow direction="right"/></span>
                     </div>
                     <div>Toggle visibility for a hand</div>
+                    <div class="keys">
+                        <span class="key">Ctrl</span>
+                        +
+                        <div class="key-grid">
+                            <span class="key"><arrow direction="up"/></span>
+                            <span class="key"><arrow direction="left"/></span>
+                            <span class="key"><arrow direction="down"/></span>
+                            <span class="key"><arrow direction="right"/></span>
+                        </div>
+                    </div>
+                    <div>Show one hand, hide others, does not affect dummy</div>
                     <div class="key">Z</div>
                     <div>Undo</div>
-                    <div  class="keys"> <div><span class="key">0</span>-<span class="key">9</span></div><span class="key">/</span><span class="key">*</span><span class="key">-</span></div>
+                    <div class="keys">
+                        <div><span class="key">0</span>-<span class="key">9</span></div><span class="key">/</span><span
+                              class="key">*</span><span class="key">-</span>
+                    </div>
                     <div>Play card</div>
                     <div class="key">C</div>
-                    <div>Claim (first focus then submit)</div>
-                    
+                    <div>Claim (first focus then submit, <br>enter claimed tricks for NS)</div>
+                    <div class="key">Spacebar</div>
+                    <div>Pass (in auction)</div>
+
                 </div>
             </div>
             <div class="tab">
-                    <h2>Graphics</h2>
-                    <div class="fields">
-                        <label for="message">End text</label>
-                        <input type="text"  id="message" v-model="endText" />
-                    </div>
+                <h2>Graphics</h2>
+                <div class="fields">
+                    <label for="message">End text</label>
+                    <input type="text" id="message" v-model="endText" />
+                </div>
             </div>
         </div>
         <div id="configurator-buttons">
@@ -127,9 +143,12 @@ import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { downloadObjectAsJson, loadJson } from "@/presentations/class/utils";
 import { Contract, NonPassedContract } from "@/bridge/model/Contract";
 import { DummyOptions } from "@/presenter/views/GameView";
-
+import Arrow from "@/presentations/components/Arrow.vue";
 
 export default defineComponent({
+    components: {
+        Arrow
+    },
     name: "Presenter",
     props: {
         onSubmit: {
@@ -145,7 +164,7 @@ export default defineComponent({
     methods: {
         submit() {
             if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
-            this.onSubmit(this.options, { endMessage: this.endText.length > 0 ? this.endText : undefined});
+            this.onSubmit(this.options, { endMessage: this.endText.length > 0 ? this.endText : undefined });
         },
         clear() {
             this.options.cards = {
@@ -159,7 +178,7 @@ export default defineComponent({
             const name = prompt("Enter file name");
             if (name) downloadObjectAsJson(this.options, name + ".deal");
         },
-        load(event: any) {
+        load(event: unknown) {
             (this.$refs.loadform as HTMLElement).blur();
             loadJson(event).then(a => {
                 this.options = a
@@ -253,6 +272,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+
+.flex {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
 #configurator {
     width: 100%;
     height: 100%;
@@ -260,6 +286,12 @@ export default defineComponent({
     display: flex;
     padding: 10px;
     flex-direction: column;
+}
+
+.key-grid {
+   display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
 }
 
 .error-list {
@@ -359,7 +391,7 @@ export default defineComponent({
         grid-template-columns: auto 1fr;
         gap: 10px;
         align-items: baseline;
-        
+
 
         div {
             text-align: left;
@@ -393,5 +425,4 @@ export default defineComponent({
         padding: 5px 30px;
         font-size: 1.2rem;
     }
-}
-</style>
+}</style>

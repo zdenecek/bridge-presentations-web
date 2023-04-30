@@ -3,17 +3,16 @@
 </template>
 
 <script lang="ts">
-import GameView from "@/presenter/views/GameView";
-import { Position } from "@/bridge/model/Position";
+import { Position, PositionHelper } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { defineComponent } from "vue";
 import $ from "jquery";
 import { configuratorOptions } from "@/presentations/types";
 import GameFactory from "@/bridge/factory/GameFactory";
-import { UndoableGame } from "@/bridge/model/UndoableGame";
 import GameViewFactory from "@/presenter/views/GameViewFactory";
 import { PresentationGame , PresentationGameOptions } from "@/bridge/model/PresentationGame";
 import { Application } from "../class/Application";
+import { PassBid } from "@/bridge/model/Bid";
 
 
 export default defineComponent({
@@ -45,11 +44,23 @@ export default defineComponent({
             .on("keydown", (e) => {
                 if(Application.state !== 'presenter') return;
 
-                if (e.key === "ArrowLeft") this.gameView.toggleVisible(Position.West);
-                if (e.key === "ArrowRight") this.gameView.toggleVisible(Position.East);
-                if (e.key === "ArrowDown") this.gameView.toggleVisible(Position.South);
-                if (e.key === "ArrowUp") this.gameView.toggleVisible(Position.North);
+                var arrowHelper = (ctrl: boolean, pos: Position) => {
+                    if(!ctrl) {
+                        this.gameView.toggleVisible(pos);
+                        return;
+                    }
+
+                    PositionHelper.all().forEach((p) => {
+                        if( p !== this.gameView.dummy) this.gameView.toggleVisible(p, p === pos  );
+                    });
+                }
+
+                if (e.key === "ArrowLeft") arrowHelper(e.ctrlKey,  Position.West);
+                if (e.key === "ArrowRight")arrowHelper(e.ctrlKey, Position.East);
+                if (e.key === "ArrowDown")arrowHelper(e.ctrlKey, Position.South);
+                if (e.key === "ArrowUp")arrowHelper(e.ctrlKey, Position.North);
                 if (e.key === "Z" || e.key === "z") this.game.undo();
+                if (e.key === " " && this.game.state === "bidding" &&  this.game.currentlyRequestedPlayer) this.game.tryAddBid(new PassBid(), this.game.currentlyRequestedPlayer);
 
             });
 

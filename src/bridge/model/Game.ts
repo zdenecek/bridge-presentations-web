@@ -38,24 +38,37 @@ export interface BidMadeEvent {
 export class Game {
     players: PositionList<Player>;
     tricks: Array<Trick> = [];
-    trumps: Suit = Suit.Notrump;
+    trumps: Suit | undefined;
     auction: Auction | undefined;
-    finalContract: Contract | undefined;
-    private _result: Result | undefined;
+    _finalContract: Contract | undefined;
+    protected _result: Result | undefined;
     _state: GameState;
     vulnerability: Vulnerability;
     currentlyRequestedPlayer: Player | undefined;
-    private claimedTricks = {ns: 0, ew: 0};
+    protected claimedTricks = { ns: 0, ew: 0 };
     claimed = false;
 
-    constructor(players: PositionList<Player>, vulnerability = Vulnerability.None) {
+ 
+
+    public get finalContract(): Contract | undefined {
+        return this._finalContract;
+    }
+    public set finalContract(value: Contract | undefined) {
+        if (value && value !== "passed") this.trumps = value.suit;
+        this._finalContract = value;
+    }
+
+    constructor(
+        players: PositionList<Player>,
+        vulnerability = Vulnerability.None
+    ) {
         this.players = players;
         this._state = "notStarted";
         this.vulnerability = vulnerability;
     }
 
     get currentTrick(): Trick | undefined {
-        if(this.state !== "cardplay") return undefined;
+        if (this.state !== "cardplay") return undefined;
         return this.tricks[this.tricks.length - 1];
     }
 
@@ -120,17 +133,17 @@ export class Game {
     }
 
     public get state(): GameState {
-        return this._state;   
+        return this._state;
     }
 
-    public set state(value:  GameState) {
+    public set state(value: GameState) {
         this._state = value;
-        this._stateChanged.dispatch({ game: this});   
+        this._stateChanged.dispatch({ game: this });
     }
 
     public get result(): Result | undefined {
-        if(this.state !== "finished") return undefined;
-        return this._result;   
+        if (this.state !== "finished") return undefined;
+        return this._result;
     }
 
     public player(position: Position): Player {
@@ -141,8 +154,12 @@ export class Game {
         return Object.values(this.players);
     }
 
-    public trickCount(side: Side) : number {
-        return this.tricks.filter(t => t.winner && PositionHelper.side(t.winner.player) === side).length + this.claimedTricks[side];
+    public trickCount(side: Side): number {
+        return (
+            this.tricks.filter(
+                (t) => t.winner && PositionHelper.side(t.winner.player) === side
+            ).length + this.claimedTricks[side]
+        );
     }
 
     public start(firstToPlay: Position, trumps?: Suit): void {
@@ -151,23 +168,32 @@ export class Game {
     }
 
     public claim(tricksNS: number): void {
-        if(this.state !== 'cardplay') return;
+        if (this.state !== "cardplay") return;
 
         this.claimedTricks.ns = tricksNS;
-        this.claimedTricks.ew = 13 - this.tricks.filter(t => t.isFinished).length - tricksNS;
+        this.claimedTricks.ew =
+            13 - this.tricks.filter((t) => t.isFinished).length - tricksNS;
 
         this.claimed = true;
 
         this.currentlyRequestedPlayer?.cancelRequestToPlay();
-        
+
         runLater(() => this._claimMade.dispatch({ game: this }));
         runLater(() => this._trickCountChanged.dispatch({ game: this }));
         runLater(() => this.endPlay());
     }
 
     protected end(): void {
-        if(this.finalContract)
-        this._result =  Result.make(this.finalContract, this.vulnerability, this.finalContract === "passed" ? undefined : this.trickCount(PositionHelper.side(this.finalContract.declarer)));
+        if (this.finalContract)
+            this._result = Result.make(
+                this.finalContract,
+                this.vulnerability,
+                this.finalContract === "passed"
+                    ? undefined
+                    : this.trickCount(
+                          PositionHelper.side(this.finalContract.declarer)
+                      )
+            );
         this.state = "finished";
         runLater(() => this._gameEnded.dispatch({ game: this }));
     }
@@ -195,13 +221,16 @@ export class Game {
         runLater(() => this._biddingStarted.dispatch({ game: this }));
         runLater(() => {
             this.currentlyRequestedPlayer = player;
-            player.requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, player));
+            player.requestBid(this, (player: Player, bid: Bid) =>
+                this.addBid(bid, player)
+            );
         });
     }
 
     protected endBidding(): void {
         if (!this.auction) throw Error("No auction");
-        if (!this.auction.isFinished || !this.auction.finalContract) throw Error("Bidding not finished");
+        if (!this.auction.isFinished || !this.auction.finalContract)
+            throw Error("Bidding not finished");
         this.finalContract = this.auction.finalContract;
 
         runLater(() => this._biddingEnded.dispatch({ game: this }));
@@ -210,11 +239,14 @@ export class Game {
         else {
             const contract = this.finalContract;
             this.trumps = this.finalContract.suit;
-            runLater(() => this.startPlay(PositionHelper.nextPosition(contract.declarer)));
+            runLater(() =>
+                this.startPlay(PositionHelper.nextPosition(contract.declarer))
+            );
         }
     }
 
     protected startNewTrick(firstToPlay: Position): void {
+        if (!this.trumps) throw Error("No trumps");
         const trick = new Trick(firstToPlay, this.trumps);
         const player = this.players[firstToPlay];
         this.tricks.push(trick);
@@ -222,7 +254,9 @@ export class Game {
         runLater(() => this._trickStarted.dispatch({ game: this, trick }));
         runLater(() => {
             this.currentlyRequestedPlayer = player;
-            player.requestPlay(this, trick, (player: Player, card: Card) => this.addCard(trick, card, player));
+            player.requestPlay(this, trick, (player: Player, card: Card) =>
+                this.addCard(trick, card, player)
+            );
         });
     }
 
@@ -235,7 +269,7 @@ export class Game {
         runLater(() => this._trickEnded.dispatch({ game: this, trick }));
         runLater(() => this._trickCountChanged.dispatch({ game: this }));
 
-        if (Math.min(...this.allPlayers.map(p => p.hand.cards.length)) > 0) {
+        if (Math.min(...this.allPlayers.map((p) => p.hand.cards.length)) > 0) {
             runLater((() => this.startNewTrick(winner)).bind(this));
         } else {
             runLater(() => this.endPlay());
@@ -244,24 +278,36 @@ export class Game {
 
     protected addCard(trick: Trick, card: Card, player: Player): boolean {
         // check correct playeer, correct trick, correct card
-        if(this.state !== 'cardplay') return false;
-        if(trick.cards.length > 0 ) {
+        if (this.state !== "cardplay") return false;
+        if (trick.cards.length > 0) {
             const suit = trick.cards[0].card.suit;
-            if(suit !== card.suit && player.hand.cardsWithSuit(suit).length > 0) return false;
+            if (
+                suit !== card.suit &&
+                player.hand.cardsWithSuit(suit).length > 0
+            )
+                return false;
         }
 
         trick.addCard(card);
-        runLater(() => this._cardPlayed.dispatch({ card, trick, player, game: this }));
+        runLater(() =>
+            this._cardPlayed.dispatch({ card, trick, player, game: this })
+        );
         if (this.tricks.length === 1 && trick.cards.length === 1)
-            runLater(() => this._leadMade.dispatch({ card, trick, player, game: this }));
+            runLater(() =>
+                this._leadMade.dispatch({ card, trick, player, game: this })
+            );
 
         if (trick.isFinished) runLater(() => this.endTrick());
         else {
-            const nextPlayer = this.players[PositionHelper.nextPosition(player.position)];
+            const nextPlayer =
+                this.players[PositionHelper.nextPosition(player.position)];
             runLater(() => {
                 this.currentlyRequestedPlayer = nextPlayer;
-                nextPlayer.requestPlay(this, trick, (player: Player, card: Card) =>
-                    this.addCard(trick, card, nextPlayer)
+                nextPlayer.requestPlay(
+                    this,
+                    trick,
+                    (player: Player, card: Card) =>
+                        this.addCard(trick, card, nextPlayer)
                 );
             });
         }
@@ -272,8 +318,7 @@ export class Game {
         if (!this.auction) throw Error("No auction");
         // todo check correct player, correct bid
 
-        if(this.state !== 'bidding') return false;
-
+        if (this.state !== "bidding") return false;
 
         const success = this.auction.addBid(bid, player.position);
         if (!success) return false;
@@ -281,9 +326,14 @@ export class Game {
         runLater(() => this._bidMade.dispatch({ bid, player, game: this }));
         if (this.auction.isFinished) runLater(() => this.endBidding());
         else {
-            const nextPlayer = this.players[PositionHelper.nextPosition(player.position)];
+            const nextPlayer =
+                this.players[PositionHelper.nextPosition(player.position)];
             this.currentlyRequestedPlayer = nextPlayer;
-            runLater(() => nextPlayer.requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, nextPlayer)));
+            runLater(() =>
+                nextPlayer.requestBid(this, (player: Player, bid: Bid) =>
+                    this.addBid(bid, nextPlayer)
+                )
+            );
         }
 
         return true;
