@@ -48,8 +48,6 @@ export class Game {
     protected claimedTricks = { ns: 0, ew: 0 };
     claimed = false;
 
- 
-
     public get finalContract(): Contract | undefined {
         return this._finalContract;
     }
@@ -162,7 +160,7 @@ export class Game {
         );
     }
 
-    public start(firstToPlay: Position, trumps?: Suit): void {
+    public start(firstToPlay: Position): void {
         runLater(() => this._gameStarted.dispatch({ game: this }));
         runLater(() => this.startBidding(firstToPlay));
     }
@@ -240,14 +238,18 @@ export class Game {
             const contract = this.finalContract;
             this.trumps = this.finalContract.suit;
             runLater(() =>
-                this.startPlay(PositionHelper.nextPosition(contract.declarer))
+                this.startPlay(this.nextToPlay(contract.declarer))
             );
         }
     }
 
+    protected makeTrick(firstToPlay: Position): Trick {
+        if (!this.trumps) throw Error("No trumps are set");
+        return new Trick(firstToPlay, this.trumps);
+    }
+
     protected startNewTrick(firstToPlay: Position): void {
-        if (!this.trumps) throw Error("No trumps");
-        const trick = new Trick(firstToPlay, this.trumps);
+        const trick = this.makeTrick(firstToPlay);
         const player = this.players[firstToPlay];
         this.tricks.push(trick);
 
@@ -276,6 +278,10 @@ export class Game {
         }
     }
 
+    protected nextToPlay(position: Position): Position {
+        return PositionHelper.nextPosition(position);
+    }
+
     protected addCard(trick: Trick, card: Card, player: Player): boolean {
         // check correct playeer, correct trick, correct card
         if (this.state !== "cardplay") return false;
@@ -300,7 +306,7 @@ export class Game {
         if (trick.isFinished) runLater(() => this.endTrick());
         else {
             const nextPlayer =
-                this.players[PositionHelper.nextPosition(player.position)];
+                this.players[this.nextToPlay(player.position)];
             runLater(() => {
                 this.currentlyRequestedPlayer = nextPlayer;
                 nextPlayer.requestPlay(
@@ -327,7 +333,7 @@ export class Game {
         if (this.auction.isFinished) runLater(() => this.endBidding());
         else {
             const nextPlayer =
-                this.players[PositionHelper.nextPosition(player.position)];
+                this.players[this.nextToPlay(player.position)];
             this.currentlyRequestedPlayer = nextPlayer;
             runLater(() =>
                 nextPlayer.requestBid(this, (player: Player, bid: Bid) =>

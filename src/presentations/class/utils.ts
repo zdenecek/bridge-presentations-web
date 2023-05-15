@@ -1,4 +1,9 @@
-export function downloadObjectAsJson(exportObj: any, exportName: string): void {
+import { ConfiguratorOptions, normalizeConfiguratorOptions } from "./ConfiguratorOptions";
+
+export function downloadObjectAsJson(
+    exportObj: unknown,
+    exportName: string
+): void {
     const json = [JSON.stringify(exportObj)];
     const blob1 = new Blob(json, { type: "text/plain;charset=utf-8" });
 
@@ -12,18 +17,34 @@ export function downloadObjectAsJson(exportObj: any, exportName: string): void {
     document.body.removeChild(a);
 }
 
-export function loadJson(event: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-        if (typeof window.FileReader !== "function") reject("The file API isn't supported on this browser.");
-        const input = event.target;
-        if (!input) reject("The browser does not properly implement the event object");
-        if (!input.files) reject("This browser does not support the `files` property of the file input.");
+export interface FileEventTarget {
+    files?: FileList;
+}
 
-        if (!input.files[0]) resolve(undefined);
-        const file = input.files[0];
-        const fr = new FileReader();
-        fr.onload = a => { if(a.target?.result)  resolve(JSON.parse(a.target.result as string));
-                            else reject("failed");};
-        fr.readAsText(file);
+export function loadJson(input: FileEventTarget): Promise<ConfiguratorOptions | undefined> {
+    return new Promise((resolve, reject) => {
+        if (typeof window.FileReader !== "function")
+            reject("The file API isn't supported on this browser.");
+        else if (!input)
+            reject("The browser does not properly implement the event object");
+        else if (!input.files)
+            reject(
+                "This browser does not support the `files` property of the file input."
+            );
+        else if (!input.files[0]) resolve(undefined);
+        else {
+            const file = input.files[0];
+            const fr = new FileReader();
+            fr.onload = (a) => {
+                if (a.target?.result) {
+                    const res = JSON.parse(a.target.result as string);
+
+                    resolve( normalizeConfiguratorOptions(res));
+
+                }
+                else reject("failed");
+            };
+            fr.readAsText(file);
+        }
     });
 }

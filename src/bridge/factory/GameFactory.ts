@@ -4,7 +4,6 @@ import { Hand } from "../model/Hand";
 import { Card, CardValue } from "../model/Card";
 import { Suit } from "../model/Suit";
 import { PresentationPlayer } from "../model/PresentationPlayer";
-import { UndoableGame } from "../model/UndoableGame";
 import { Vulnerability } from "../model/Vulnerability";
 import { PresentationGame, PresentationGameOptions } from "../model/PresentationGame";
 

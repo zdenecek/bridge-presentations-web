@@ -1,8 +1,9 @@
-import { Contract, ContractDoubledState } from "./Contract";
-import { Position, PositionHelper, Side } from "./Position";
+import { Contract } from "./Contract";
+import { PositionHelper, Side } from "./Position";
 import { Vulnerability, VulnerabilityHelper } from "./Vulnerability";
 
 import { Scoring } from "./Scoring";
+import errorMessage from "../utils/throw";
 
 export class Result {
 
@@ -35,7 +36,8 @@ export class Result {
 
     public get tricksMadeRelative(): number {
         if(this.contract === "passed" ) return 0;
-        return this.tricksMade! - this.contract.level - 6;
+        if(!this.tricksMade) errorMessage("Invalid Result state: tricksMade is undefined");
+        return this.tricksMade - this.contract.level - 6;
     }
 
     public get resultString(): string {

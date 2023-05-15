@@ -7,7 +7,7 @@ import { Position, PositionHelper } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { defineComponent } from "vue";
 import $ from "jquery";
-import { configuratorOptions } from "@/presentations/types";
+import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
 import GameViewFactory from "@/presenter/views/GameViewFactory";
 import { PresentationGame , PresentationGameOptions } from "@/bridge/model/PresentationGame";
@@ -26,8 +26,8 @@ export default defineComponent({
             this.gameView.update();
         },
 
-        startGame(options: configuratorOptions, { endMessage }: { endMessage?: string }) {
-            const gameOpts =  new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew , options.contract, options.trumps)
+        startGame(options: ConfiguratorOptions, { endMessage }: { endMessage?: string }) {
+            const gameOpts =  new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew , options.contract, options.trumps, options.activePositions)
 
             this.gameView.endMessage = endMessage;
 

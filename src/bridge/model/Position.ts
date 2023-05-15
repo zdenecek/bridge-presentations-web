@@ -26,6 +26,13 @@ class PositionHelper {
         return PositionHelper.nextPosition(pos, count - 1);
     }
 
+    static nextPosisitionFrom(positions: Array<Position>, position: Position): Position {
+        const currentIndex = positions.indexOf(position);
+        if(currentIndex < 0) throw new Error("Position not found in array");
+        const nextIndex = (currentIndex + 1) % positions.length;
+        return  positions[nextIndex];
+    }
+
     static side(position: Position): Side  {
         return position === Position.North || position === Position.South  ? Side.NS : Side.EW;
     }

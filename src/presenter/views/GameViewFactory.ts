@@ -23,6 +23,7 @@ import { SuitHelper } from "@/bridge/model/Suit";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import _ from "lodash";
+import errorMessage from "@/bridge/utils/throw";
 
 export default class GameViewFactory {
     static make(): GameView {
@@ -53,6 +54,14 @@ export default class GameViewFactory {
         );
 
         return gameView;
+    }
+
+    static getCardView(cardViews: Map<Card, CardView>, card: Card): CardView {
+        const cardView = cardViews.get(card);
+        if (!cardView) {
+            errorMessage("CardView not found for card: " + card.toString());
+        }
+        return cardView;
     }
 
     static makeCardViews(gameView: GameView): Map<Card, CardView> {
@@ -157,18 +166,18 @@ export default class GameViewFactory {
 
             player.cardPlayed.sub((e) => {
                 e.player.hand.cards.forEach((card) => {
-                    const cardView = cardViews.get(card)!;
+                    const cardView = this.getCardView(cardViews, card);
                     cardView.setPlayable(false);
                     cardView.onclick = undefined;
                 });
-                const cardView = cardViews.get(e.card)!;
+                const cardView = this.getCardView(cardViews, e.card);
                 cardView.setPlayable(false);
                 cardView.onclick = undefined;
             });
 
             player.playRequestCancelled.sub((e) => {
                 e.player.hand.cards.forEach((card) =>
-                    cardViews.get(card)!.setPlayable(false)
+                  this.getCardView(cardViews, card).setPlayable(false)
                 );
             });
 
@@ -181,7 +190,7 @@ export default class GameViewFactory {
                 if (playables.length == 0) playables = e.player.hand.cards;
 
                 playables.forEach((card) => {
-                    const cardView = cardViews.get(card)!;
+                    const cardView = this.getCardView(cardViews, card);
                     cardView.setPlayable(
                         true,
                         gameView.dummy === player.position
@@ -247,7 +256,7 @@ export default class GameViewFactory {
         gameView: GameView,
         cardViews: Map<Card, CardView>,
         mainView: View
-    ) {
+    ) : PositionList<OneDimensionalHandView> {
         const handViews = {} as PositionList<OneDimensionalHandView>;
         PositionHelper.all().forEach((position) => {
             const rotation =
@@ -267,7 +276,7 @@ export default class GameViewFactory {
         Object.values(handViews).forEach((handView) => {
             mainView.addSubView(handView);
         });
-        gameView.updateDispatched.sub((e) =>
+        gameView.updateDispatched.sub(() =>
             Object.values(handViews).forEach((handView) => handView.update())
         );
 
@@ -275,7 +284,7 @@ export default class GameViewFactory {
             game.allPlayers.forEach((player) => {
                 handViews[player.position].hand = player.hand;
 
-                player.hand.cardAdded.sub((e) => {
+                player.hand.cardAdded.sub(() => {
                     handViews[player.position].update();
                 });
             });
@@ -360,7 +369,7 @@ export default class GameViewFactory {
         centerPanelView: CenterPanelView
     ): AuctionView {
         const auctionView = new AuctionView(centerPanelView);
-        gameView.updateDispatched.sub((e) => auctionView.update());
+        gameView.updateDispatched.sub(() => auctionView.update());
         gameView.gameChanged.sub(({ game }) => {
             if (!game) return;
             auctionView.setGame(game);

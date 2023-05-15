@@ -8,6 +8,7 @@ import { Player } from "./Player";
 import { Position } from "./Position";
 import { Trick, CardInTrick } from "./Trick";
 import { UndoableAuction } from "./UndoableAuction";
+import errorMessage from "../utils/throw";
 
 export class UndoableGame extends Game {
     protected _undoMade = new SimpleEventDispatcher<GameEvent>();
@@ -66,8 +67,9 @@ export class UndoableGame extends Game {
             
         } else {
             lastTrick = this.tricks[this.tricks.length - 1];
-            const lastCard = this.popCard(lastTrick)!;
-            this.players[lastCard.player].hand._cards.find(c => c.card === lastCard.card)!.played = false;
+            const lastCard = this.popCard(lastTrick) ?? errorMessage("popCard returned undefined");
+            const card = this.players[lastCard.player].hand._cards.find(c => c.card === lastCard.card) ?? errorMessage("card not found");
+            card.played = false;
             lastTrick.currentToPlay = lastCard.player;
             
             runLater(() => this._undoMade.dispatch({ game: this }));

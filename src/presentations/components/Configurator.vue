@@ -7,7 +7,7 @@
                 <div class="vertical">
                     <button tabindex="-1" @click="clear">Clear cards</button>
                     <button tabindex="-1" @click="save">Save</button>
-                    <input type='file' @change='e => load(e)' ref="loadform" hidden />
+                    <input type='file' accept=".deal" @change='e => load(e)' ref="loadform" hidden />
                     <button tabindex="-1" @click="loadClicked">Load</button>
                 </div>
                 <div class="fields">
@@ -15,7 +15,7 @@
                         <label :for="pos">{{ label }}</label>
                         <input :id="pos" type="text" v-model="options.cards[pos]" />
                         <div class="error-list"
-                             v-if="showErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
+                             v-if="showCardInputErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
                             <div v-for="err in cardErrors.get(pos as Position)" :key="err">
                                 {{ err }}
                             </div>
@@ -58,6 +58,7 @@
                             <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                         </select>
                     </div>
+                    <div class="error" v-show="'firstPlayer' in errors"> {{ errors.firstPlayer }}</div>
                     <label for="first" v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">{{
                         options.bidding ? "Dealer" : "First to play"
                     }}</label>
@@ -77,7 +78,21 @@
                     </div>
                     <label for="fake-auction" v-show="options.bidding">Fake auction</label>
                     <input type="checkbox" class="checkbox" id="fake-auction" v-model="fakeAuction"
-                           v-show="options.bidding" disabled />
+                           v-show="options.bidding" disabled title="Not supported" />
+                    <label>Active positions</label>
+                    <div class="flex">
+                        <div>
+                            <div v-for="(label, position) in positions" :key="'inp' + position">
+                            <input type="checkbox" :value="position" :name="position" v-model="options.activePositions"  />
+                            <label :for="position">{{ label }}</label>
+                            </div>
+                        </div>
+                        <div class="active-positions-buttons">
+                            <button @click="setActiveNS">NS</button>
+                            <button @click="setActiveEW">EW</button>
+                            <button @click="setActiveAll">All</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tab">
@@ -89,20 +104,36 @@
                     <div class="keys"><span class="key">Ctrl</span>+<span class="key">Q</span></div>
                     <div>Toggle this menu</div>
                     <div class="keys">
-                            <span class="key"><arrow direction="up"/></span>
-                            <span class="key"><arrow direction="left"/></span>
-                            <span class="key"><arrow direction="down"/></span>
-                            <span class="key"><arrow direction="right"/></span>
+                        <span class="key">
+                            <arrow direction="up" />
+                        </span>
+                        <span class="key">
+                            <arrow direction="left" />
+                        </span>
+                        <span class="key">
+                            <arrow direction="down" />
+                        </span>
+                        <span class="key">
+                            <arrow direction="right" />
+                        </span>
                     </div>
                     <div>Toggle visibility for a hand</div>
                     <div class="keys">
                         <span class="key">Ctrl</span>
                         +
                         <div class="key-grid">
-                            <span class="key"><arrow direction="up"/></span>
-                            <span class="key"><arrow direction="left"/></span>
-                            <span class="key"><arrow direction="down"/></span>
-                            <span class="key"><arrow direction="right"/></span>
+                            <span class="key">
+                                <arrow direction="up" />
+                            </span>
+                            <span class="key">
+                                <arrow direction="left" />
+                            </span>
+                            <span class="key">
+                                <arrow direction="down" />
+                            </span>
+                            <span class="key">
+                                <arrow direction="right" />
+                            </span>
                         </div>
                     </div>
                     <div>Show one hand, hide others, does not affect dummy</div>
@@ -138,11 +169,12 @@
 import { defineComponent } from "vue";
 import { Suit } from "@/bridge/model/Suit";
 import { CardsInputValidator } from "../class/CardsInputValidator";
-import { Position } from "@/bridge/model/Position";
+import { Position, PositionHelper } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
-import { downloadObjectAsJson, loadJson } from "@/presentations/class/utils";
+import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
 import { Contract, NonPassedContract } from "@/bridge/model/Contract";
 import { DummyOptions } from "@/presenter/views/GameView";
+import { validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import Arrow from "@/presentations/components/Arrow.vue";
 
 export default defineComponent({
@@ -178,13 +210,14 @@ export default defineComponent({
             const name = prompt("Enter file name");
             if (name) downloadObjectAsJson(this.options, name + ".deal");
         },
-        load(event: unknown) {
+        load(event: Event) {
             (this.$refs.loadform as HTMLElement).blur();
-            loadJson(event).then(a => {
+            loadJson(event.target as FileEventTarget).then(a => {
+                if (!a) return;
                 this.options = a
                 this.fakeTricks = a.fake?.ns > 0 || a.fake?.ew > 0;
                 this.specifyContract = a.contract !== undefined;
-                this.fakeAuction = a.auction;
+                this.fakeAuction = a.bidding;
                 if (this.options.contract && this.options.contract !== "passed")
                     this.options.contract = new NonPassedContract(this.options.contract.suit, this.options.contract.level, this.options.contract.declarer, this.options.contract.dbl);
             });
@@ -195,7 +228,16 @@ export default defineComponent({
         parseContract(value: string) {
             const c = NonPassedContract.fromString(value);
             if (c) this.options.contract = c;
-        }
+        },
+        setActiveNS() {
+            this.options.activePositions = [Position.North, Position.South]
+        },
+        setActiveEW() {
+            this.options.activePositions = [Position.East, Position.West]
+        },
+        setActiveAll() {
+            this.options.activePositions = [Position.North, Position.South, Position.East, Position.West]
+        },
     },
 
     data() {
@@ -221,6 +263,7 @@ export default defineComponent({
                 dummy: "auto" as DummyOptions | undefined,
                 staticDummyPosition: "north" as Position | undefined,
                 vulnerability: Vulnerability.None,
+                activePositions: PositionHelper.all(),
             },
 
             positions: {
@@ -264,20 +307,24 @@ export default defineComponent({
         cardErrors() {
             return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as any));
         },
-        showErrors() {
+        showCardInputErrors() {
             return Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
+        },
+        errors() {
+            return validateConfiguratorOptions(this.options);
         }
     },
 });
 </script>
 
 <style lang="scss">
-
 .flex {
     display: flex;
     gap: 1em;
     align-items: center;
 }
+
+
 
 #configurator {
     width: 100%;
@@ -286,15 +333,19 @@ export default defineComponent({
     display: flex;
     padding: 10px;
     flex-direction: column;
+    gap: 10px;
 }
 
 .key-grid {
-   display: grid;
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5px;
 }
 
 .error-list {
+
+    max-height: 80px;
+    overflow-y: scroll;
 
     grid-column: 1 / 3;
 
@@ -316,6 +367,7 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
+    overflow: auto;
 
     .tab {
         display: flex;
@@ -324,12 +376,20 @@ export default defineComponent({
         border-radius: 10px;
         padding: 20px 10px;
         gap: 20px;
+        overflow-y: auto;
     }
 
     .fields {
         display: grid;
         grid-template-columns: 2fr 3fr;
         gap: 10px;
+
+        .error {
+            grid-column: 1 / span 2;
+            color: red;
+            font-size: 0.8em;
+            text-align: right;
+        }
 
         .checkbox {
             justify-self: start;
@@ -386,6 +446,15 @@ export default defineComponent({
         }
     }
 
+    .active-positions-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        button {
+            min-width: 40px;
+        }
+    }
+
     #controls-tab {
         display: grid;
         grid-template-columns: auto 1fr;
@@ -425,4 +494,7 @@ export default defineComponent({
         padding: 5px 30px;
         font-size: 1.2rem;
     }
-}</style>
+    
+    
+}
+</style>

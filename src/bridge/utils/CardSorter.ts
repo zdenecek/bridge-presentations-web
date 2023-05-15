@@ -1,5 +1,6 @@
 import { CardInHand } from "../model/Hand";
 import { Suit } from "../model/Suit";
+import errorMessage from "./throw";
 
 const defaultOrder = [
     Suit.Spades,
@@ -18,7 +19,7 @@ export function sortSuits(suits: Array<Suit>, prioritizedSuit: Suit | undefined 
 
     if(prioritizedSuit) {
         
-        while(new_order[0] != prioritizedSuit) new_order.unshift( new_order.pop()!);
+        while(new_order[0] != prioritizedSuit) new_order.unshift( new_order.pop() ?? errorMessage("Error in sortSuits"));
     }
 
     return suits.sort((a,b) => {

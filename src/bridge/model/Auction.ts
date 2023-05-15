@@ -1,3 +1,4 @@
+import errorMessage from "../utils/throw";
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "./Bid";
 import { Contract, ContractDoubledState, NonPassedContract } from "./Contract";
 import { Position, PositionHelper } from "./Position";
@@ -53,18 +54,23 @@ export class Auction {
         this._dealer = dealer;
     }
 
+    protected get auctionFinished(): boolean {
+        return this._standingPassCount >= 3 && this.bids.length >= 4
+    }
+
     addBid(bid: Bid, position: Position): boolean {
         if (!this.isLegal(bid, position)) return false;
 
         const positionedBid = new PositionedBid(position, bid);
         this.bids.push(positionedBid);
         this.updateStanding(positionedBid);
-        if (this._standingPassCount >= 3 && this.bids.length >= 4) this.finalize();
-        
+        if (this.auctionFinished)
+            this.finalize();
+
         return true;
     }
 
-    protected updateStanding( {bid, position}: PositionedBid): void {
+    protected updateStanding({ bid, position }: PositionedBid): void {
         if (bid instanceof PassBid) {
             this._standingPassCount++;
             return;
@@ -90,33 +96,44 @@ export class Auction {
             return true;
         } else if (bid instanceof DoubleBid) {
             return (
+                this.standingBidPosition !== undefined &&
                 this._standingContractState === "undoubled" &&
-                PositionHelper.side(position) !== PositionHelper.side(this.standingBidPosition!)
+                PositionHelper.side(position) !==
+                    PositionHelper.side(this.standingBidPosition)
             );
         } else if (bid instanceof RedoubleBid) {
-            return this._standingContractState === "doubled"  &&
-            PositionHelper.side(position) === PositionHelper.side(this.standingBidPosition!)
+            return (
+                this.standingBidPosition !== undefined &&
+                this._standingContractState === "doubled" &&
+                PositionHelper.side(position) ===
+                    PositionHelper.side(this.standingBidPosition)
+            );
         } else if (bid instanceof ContractBid) {
-            return this._standingBid === undefined || bid.isGreaterThan(this._standingBid);
+            return (
+                this._standingBid === undefined ||
+                bid.isGreaterThan(this._standingBid)
+            );
         }
 
         return false;
     }
 
     protected finalize(): void {
-        if (this._standingPassCount === 4) this._finalContract = "passed";
+        if (this.standingBid === undefined) this._finalContract = "passed";
         else {
-            const lastBid = this._standingBid!;
-            const side = PositionHelper.side(this._standingBidPosition!);
+            const lastBid = this.standingBid;
+            const side = PositionHelper.side(this.standingBidPosition ?? errorMessage("standingBidPosition is undefined"));
             const declarer = this.bids.filter(
                 (b) =>
-                    b.bid instanceof ContractBid && b.bid.suit === lastBid.suit && PositionHelper.side(b.position) === side
+                    b.bid instanceof ContractBid &&
+                    b.bid.suit === lastBid.suit &&
+                    PositionHelper.side(b.position) === side
             )[0].position;
             this._finalContract = new NonPassedContract(
                 lastBid.suit,
                 lastBid.level,
                 declarer,
-                this._standingContractState!
+                this._standingContractState  ?? errorMessage("standingContractState is undefined")
             );
         }
 

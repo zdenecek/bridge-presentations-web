@@ -1,9 +1,7 @@
-import { Game, GameEvent } from "../../bridge/model/Game";
-import { Card } from "../../bridge/model/Card";
-import { Position, PositionList, PositionHelper } from "../../bridge/model/Position";
+import {  GameEvent } from "../../bridge/model/Game";
+import { Position,  PositionHelper } from "../../bridge/model/Position";
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
 
-import CardView from "./CardView";
 import BaseView from "./BaseView";
 import { UndoableGame } from "@/bridge/model/UndoableGame";
 import { PresentationGame } from "@/bridge/model/PresentationGame";
@@ -96,14 +94,14 @@ export default class GameView extends BaseView {
             this.dummy = staticDummyPosition;
         }
 
-        game.cardPlayed.sub((e) => {
+        game.cardPlayed.sub(() => {
             this.update();
         });
 
         game.claimMade.sub(() => this.update());
 
         if (game instanceof UndoableGame) {
-           game.undoMade.sub((e) => {
+           game.undoMade.sub(() => {
             this.update();
             if(game.state === 'bidding' || game.tricks?.[0]?.cards.length === 0) this.dummy = undefined;
            });

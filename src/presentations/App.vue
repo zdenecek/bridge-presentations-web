@@ -7,7 +7,7 @@
 import { defineComponent} from 'vue';
 import Presenter from '@/presentations/components/Presenter.vue';
 import Configurator from '@/presentations/components/Configurator.vue';
-import { configuratorOptions } from './types';
+import { ConfiguratorOptions } from './class/ConfiguratorOptions';
 import { Application } from './class/Application';
 
 export default defineComponent({
@@ -36,7 +36,7 @@ export default defineComponent({
 
       Application.state = this.state;
     },
-    play(options: configuratorOptions, otherOptions: { endMessage?: string }) {
+    play(options: ConfiguratorOptions, otherOptions: { endMessage?: string }) {
       this.changeState('presenter');
       (this.$refs.presenter as typeof Presenter).startGame(options, otherOptions);
     },

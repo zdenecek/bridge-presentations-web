@@ -1,7 +1,6 @@
 import { Card, CardValue } from "@/bridge/model/Card";
 import { Parser } from "@/bridge/utils/Parser";
 import { Position } from "@/bridge/model/Position";
-import { mergeProps } from "vue";
 
 
 export class CardsInputValidator {
@@ -21,7 +20,7 @@ export class CardsInputValidator {
             if(e.length > 0) errors.set( pos, e );
         });
         
-        const [correct, f] = [... counts.entries()].reduce( ([a,b], [c, d]) => d > b ? [c,d] : [a,b])
+        const [correct, ] = [... counts.entries()].reduce( ([a,b], [c, d]) => d > b ? [c,d] : [a,b])
         const unique = new Set<string>();
 
         playerCards.forEach( (cards, pos) => {

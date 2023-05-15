@@ -1,9 +1,13 @@
 import { runLater } from "../utils/runLater";
+import { Auction } from "./Auction";
 import { Bid } from "./Bid";
 import { Contract } from "./Contract";
 import { Player } from "./Player";
 import { Position, PositionHelper, PositionList, Side } from "./Position";
+import { PresentationAuction } from "./PresentationAuction";
+import { PresentationTrick } from "./PresentationTrick";
 import { Suit } from "./Suit";
+import { Trick } from "./Trick";
 import { UndoableGame } from "./UndoableGame";
 import { Vulnerability } from "./Vulnerability";
 
@@ -13,6 +17,7 @@ export class PresentationGameOptions {
     fakeEWTricks: number;
     contract?: Contract;
     trumps?: Suit;
+    activePositions: Array<Position>;
 
     static Default = new PresentationGameOptions(true, 0, 0, undefined);
 
@@ -21,11 +26,13 @@ export class PresentationGameOptions {
         fakeNSTricks = 0,
         fakeEWTricks = 0,
         contract?: Contract,
-        trumps?: Suit
+        trumps?: Suit,
+        activePositions: Array<Position> = PositionHelper.all()
     ) {
         this.bidding = bidding;
         this.fakeEWTricks = fakeEWTricks;
         this.fakeNSTricks = fakeNSTricks;
+        this.activePositions = activePositions;
         if (!bidding) {
             if (contract)  {
                 this.contract = contract;
@@ -55,8 +62,6 @@ export class PresentationGame extends UndoableGame {
 
         runLater(() => this._gameStarted.dispatch({ game: this }));
 
-        
-
         if (this.bidding) runLater(() => this.startBidding(firstToPlay));
         else {
             if(this.finalContract) {
@@ -83,5 +88,18 @@ export class PresentationGame extends UndoableGame {
 
     public tryAddBid(bid: Bid, player: Player): boolean {
        return this.addBid(bid, player);
+    }
+
+    protected nextToPlay(position: Position): Position {
+        return PositionHelper.nextPosisitionFrom(this.options.activePositions, position);
+    }
+
+    protected makeAuction(dealer: Position): Auction {
+        return new PresentationAuction(dealer, this.options.activePositions.length);
+    }
+
+    protected makeTrick(firstToPlay: Position): Trick {
+        if(!this.trumps) throw new Error("Trumps not set");
+        return new PresentationTrick(firstToPlay, this.trumps, this.options.activePositions);
     }
 }

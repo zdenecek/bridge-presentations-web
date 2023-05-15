@@ -2,7 +2,6 @@ import { Bid } from "./Bid";
 import { Card } from "./Card";
 import { Player } from "./Player";
 
-
 export class PresentationPlayer extends Player {
     public bid(bid: Bid): boolean {
         return super.bid(bid);
@@ -12,7 +11,7 @@ export class PresentationPlayer extends Player {
         return super.playCard(card);
     }
 
-    public  toString() {
+    public toString(): string {
         return `Presentation player sitting ${this.position}`;
     }
 }
