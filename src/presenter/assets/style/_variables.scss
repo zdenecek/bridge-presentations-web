@@ -1,6 +1,7 @@
 $padding: 10px;
-$margin: 10px;
-$card-height: calc((95vh - 2 * $padding - 2 * $margin) / 4.5);
+$margin: 8px;
+$top-space: 18px;
+$card-height: calc((95vh - 2 * $padding -  $margin - $top-space ) / 4.5);
 $card-width: calc($card-height * 53 / 80);
 $bid-card-height: 10vh;
 

@@ -4,8 +4,8 @@
 .test-card {
     position: absolute;
     filter: opacity(0);
-    top: 100vh;
-    left: 100vw;
+    // top: 100vh;
+    // left: 100vw;
 }
 
 .presenter-app {
@@ -173,13 +173,15 @@ flex-direction: column;
 
 .main {
     //border: variables.$primary solid 1px;
-    margin: variables.$margin;
-    //padding: 10px 20px;
+    padding: variables.$margin;
+    padding-top: variables.$top-space;
+
     aspect-ratio: 1;
     grid-column: 2;
     display: grid;
-    grid-template-columns: variables.$card-height auto variables.$card-height;
-    grid-template-rows: variables.$card-height auto variables.$card-height;
+    $template: variables.$card-height calc(100vh - 2*variables.$card-height - variables.$margin - variables.$top-space) variables.$card-height;
+    grid-template-columns: $template;
+    grid-template-rows:  $template;
 
     &.expanded {
         grid-template-rows: calc(variables.$card-height * 1.6) auto variables.$card-height;
@@ -393,6 +395,7 @@ flex-direction: column;
     width: 100%;
 
     &[type=number] {
-    -moz-appearance:textfield; /* Firefox */
+    -moz-appearance:textfield; /* Firefox */ 
+    appearance: textfield;   
     }
 }
