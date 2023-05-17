@@ -262,6 +262,10 @@ export class Game {
         });
     }
 
+    protected cardplayShouldEnd(): boolean {
+        return Math.min(...this.allPlayers.map((p) => p.hand.cards.length)) > 0;
+    }
+
     protected endTrick(): void {
         const trick = this.currentTrick;
         if (!trick) throw Error("No trick to end");
@@ -271,10 +275,10 @@ export class Game {
         runLater(() => this._trickEnded.dispatch({ game: this, trick }));
         runLater(() => this._trickCountChanged.dispatch({ game: this }));
 
-        if (Math.min(...this.allPlayers.map((p) => p.hand.cards.length)) > 0) {
-            runLater((() => this.startNewTrick(winner)).bind(this));
-        } else {
+        if (this.cardplayShouldEnd()) {
             runLater(() => this.endPlay());
+        } else {
+            runLater((() => this.startNewTrick(winner)).bind(this));
         }
     }
 

@@ -58,14 +58,15 @@
                             <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                         </select>
                     </div>
-                    <div class="error" v-show="'firstPlayer' in errors"> {{ errors.firstPlayer }}</div>
-                    <label for="first" v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">{{
-                        options.bidding ? "Dealer" : "First to play"
-                    }}</label>
-                    <select id="first" v-model="options.firstPlayer"
-                            v-show="options.bidding || (options.dummy !== 'auto' || !specifyContract)">
-                        <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
-                    </select>
+                    <template v-if="options.bidding || (options.dummy !== 'auto' || !specifyContract)">
+                        <div class="error" v-show="'firstPlayer' in errors"> {{ errors.firstPlayer }}</div>
+                        <label for="first">{{
+                            options.bidding ? "Dealer" : "First to play"
+                        }}</label>
+                        <select id="first" v-model="options.firstPlayer">
+                            <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
+                        </select>
+                    </template>
                     <label for="fake-tricks">Fake trick count</label>
                     <div class="fake-tricks-field">
                         <input type="checkbox" class="checkbox" id="fake-tricks" v-model="fakeTricks" />
@@ -83,8 +84,9 @@
                     <div class="flex">
                         <div>
                             <div v-for="(label, position) in positions" :key="'inp' + position">
-                            <input type="checkbox" :value="position" :name="position" v-model="options.activePositions"  />
-                            <label :for="position">{{ label }}</label>
+                                <input type="checkbox" :value="position" :name="position"
+                                       v-model="options.activePositions" />
+                                <label :for="position">{{ label }}</label>
                             </div>
                         </div>
                         <div class="active-positions-buttons">
@@ -450,6 +452,7 @@ export default defineComponent({
         display: flex;
         flex-direction: column;
         gap: 4px;
+
         button {
             min-width: 40px;
         }
@@ -494,7 +497,7 @@ export default defineComponent({
         padding: 5px 30px;
         font-size: 1.2rem;
     }
-    
-    
+
+
 }
 </style>

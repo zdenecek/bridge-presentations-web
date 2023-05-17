@@ -102,4 +102,8 @@ export class PresentationGame extends UndoableGame {
         if(!this.trumps) throw new Error("Trumps not set");
         return new PresentationTrick(firstToPlay, this.trumps, this.options.activePositions);
     }
+
+    protected cardplayShouldEnd(): boolean {
+        return Math.min(...this.options.activePositions.map((p) => this.player(p).hand.cards.length)) === 0;
+    }
 }
