@@ -1,6 +1,3 @@
-
-
 export class Application {
-
-    static state: 'configurator' | 'presenter' = "configurator";
+  static state: "configurator" | "presenter" = "configurator";
 }

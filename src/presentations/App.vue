@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import Presenter from '@/presentations/components/Presenter.vue';
 import Configurator from '@/presentations/components/Configurator.vue';
 import { ConfiguratorOptions } from './class/ConfiguratorOptions';
@@ -22,7 +22,7 @@ export default defineComponent({
   },
   data() {
     return {
-      state: 'configurator' as  'configurator' | 'presenter',
+      state: 'configurator' as 'configurator' | 'presenter',
 
     };
   },

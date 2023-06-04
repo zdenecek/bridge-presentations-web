@@ -12,98 +12,96 @@ import { UndoableGame } from "./UndoableGame";
 import { Vulnerability } from "./Vulnerability";
 
 export class PresentationGameOptions {
-    bidding: boolean;
-    fakeNSTricks: number;
-    fakeEWTricks: number;
-    contract?: Contract;
-    trumps?: Suit;
-    activePositions: Array<Position>;
+  bidding: boolean;
+  fakeNSTricks: number;
+  fakeEWTricks: number;
+  contract?: Contract;
+  trumps?: Suit;
+  activePositions: Array<Position>;
 
-    static Default = new PresentationGameOptions(true, 0, 0, undefined);
+  static Default = new PresentationGameOptions(true, 0, 0, undefined);
 
-    constructor(
-        bidding: boolean,
-        fakeNSTricks = 0,
-        fakeEWTricks = 0,
-        contract?: Contract,
-        trumps?: Suit,
-        activePositions: Array<Position> = PositionHelper.all()
-    ) {
-        this.bidding = bidding;
-        this.fakeEWTricks = fakeEWTricks;
-        this.fakeNSTricks = fakeNSTricks;
-        this.activePositions = activePositions;
-        if (!bidding) {
-            if (contract)  {
-                this.contract = contract;
-                this.trumps = contract == "passed" ? undefined : contract.suit;
-            }
-            else if(trumps) this.trumps = trumps;
-        }
+  constructor(
+    bidding: boolean,
+    fakeNSTricks = 0,
+    fakeEWTricks = 0,
+    contract?: Contract,
+    trumps?: Suit,
+    activePositions: Array<Position> = PositionHelper.all()
+  ) {
+    this.bidding = bidding;
+    this.fakeEWTricks = fakeEWTricks;
+    this.fakeNSTricks = fakeNSTricks;
+    this.activePositions = activePositions;
+    if (!bidding) {
+      if (contract) {
+        this.contract = contract;
+        this.trumps = contract == "passed" ? undefined : contract.suit;
+      } else if (trumps) this.trumps = trumps;
     }
+  }
 }
 
 export class PresentationGame extends UndoableGame {
-    private options: PresentationGameOptions;
+  private options: PresentationGameOptions;
 
-    public get bidding(): boolean {
-        return this.options.bidding;
-    }
+  public get bidding(): boolean {
+    return this.options.bidding;
+  }
 
-    constructor(players: PositionList<Player>, options: PresentationGameOptions, vulnerability = Vulnerability.None) {
-        super(players, vulnerability);
-        this.options = options;
+  constructor(players: PositionList<Player>, options: PresentationGameOptions, vulnerability = Vulnerability.None) {
+    super(players, vulnerability);
+    this.options = options;
 
-        if (options.contract) this.finalContract = options.contract;
-        else if (options.trumps) this.trumps = options.trumps;
-    }
+    if (options.contract) this.finalContract = options.contract;
+    else if (options.trumps) this.trumps = options.trumps;
+  }
 
-    public start(firstToPlay: Position, trumps?: Suit | undefined): void {
+  public start(firstToPlay: Position, trumps?: Suit | undefined): void {
+    runLater(() => this._gameStarted.dispatch({ game: this }));
 
-        runLater(() => this._gameStarted.dispatch({ game: this }));
-
-        if (this.bidding) runLater(() => this.startBidding(firstToPlay));
-        else {
-            if(this.finalContract) {
-                if(this.finalContract == "passed") {
-                    runLater(() => this.end());
-                    return;
-                }
-                firstToPlay = PositionHelper.nextPosition(this.finalContract.declarer);
-            } else if(trumps) {
-                this.trumps = trumps;
-            }
-            runLater(() => this.startPlay(firstToPlay));
+    if (this.bidding) runLater(() => this.startBidding(firstToPlay));
+    else {
+      if (this.finalContract) {
+        if (this.finalContract == "passed") {
+          runLater(() => this.end());
+          return;
         }
+        firstToPlay = PositionHelper.nextPosition(this.finalContract.declarer);
+      } else if (trumps) {
+        this.trumps = trumps;
+      }
+      runLater(() => this.startPlay(firstToPlay));
     }
+  }
 
-    public trickCount(side: Side): number {
-        return super.trickCount(side) + ((side === Side.NS) ? this.options.fakeNSTricks : this.options.fakeEWTricks);
-    }
+  public trickCount(side: Side): number {
+    return super.trickCount(side) + (side === Side.NS ? this.options.fakeNSTricks : this.options.fakeEWTricks);
+  }
 
-    protected undoCardplay(): void {
-        if (!this.bidding && this.tricks.length === 1 && this.tricks[0].cards.length === 0) return;
-        else super.undoCardplay();
-    }
+  protected undoCardplay(): void {
+    if (!this.bidding && this.tricks.length === 1 && this.tricks[0].cards.length === 0) return;
+    else super.undoCardplay();
+  }
 
-    public tryAddBid(bid: Bid, player: Player): boolean {
-       return this.addBid(bid, player);
-    }
+  public tryAddBid(bid: Bid, player: Player): boolean {
+    return this.addBid(bid, player);
+  }
 
-    protected nextToPlay(position: Position): Position {
-        return PositionHelper.nextPosisitionFrom(this.options.activePositions, position);
-    }
+  protected nextToPlay(position: Position): Position {
+    return PositionHelper.nextPosisitionFrom(this.options.activePositions, position);
+  }
 
-    protected makeAuction(dealer: Position): Auction {
-        return new PresentationAuction(dealer, this.options.activePositions.length);
-    }
+  protected makeAuction(dealer: Position): Auction {
+    return new PresentationAuction(dealer, this.options.activePositions.length);
+  }
 
-    protected makeTrick(firstToPlay: Position): Trick {
-        if(!this.trumps) throw new Error("Trumps not set");
-        return new PresentationTrick(firstToPlay, this.trumps, this.options.activePositions);
-    }
+  protected makeTrick(firstToPlay: Position): Trick {
+    if (!this.trumps) throw new Error("Trumps not set");
+    return new PresentationTrick(firstToPlay, this.trumps, this.options.activePositions);
+  }
 
-    protected cardplayShouldEnd(): boolean {
-        return Math.min(...this.options.activePositions.map((p) => this.player(p).hand.cards.length)) === 0;
-    }
+  protected cardplayShouldEnd(): boolean {
+    return Math.min(...this.options.activePositions.map((p) => this.player(p).hand.cards.length)) === 0;
+  }
 }

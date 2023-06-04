@@ -22,12 +22,12 @@ export function sortCardsBySuitOrder(cards: Array<Card>, order: Array<Suit>): vo
 }
 
 export function sortCardsInHandByPrioritizedSuit(cards: Array<CardInHand>, suit: Suit): void {
-    _sortCards(cards, sortSuits(defaultOrder, suit), (card: CardInHand) => card.card);
-  }
-  
-  export function sortCardsByPrioritizedSuit(cards: Array<Card>, suit: Suit): void {
-    _sortCards(cards, sortSuits(defaultOrder, suit), (card: Card) => card);
-  }
+  _sortCards(cards, sortSuits(defaultOrder, suit), (card: CardInHand) => card.card);
+}
+
+export function sortCardsByPrioritizedSuit(cards: Array<Card>, suit: Suit): void {
+  _sortCards(cards, sortSuits(defaultOrder, suit), (card: Card) => card);
+}
 
 function _sortCards<T>(cards: Array<T>, order: Array<Suit>, selector: (arg: T) => Card): void {
   cards.sort((a, b) =>

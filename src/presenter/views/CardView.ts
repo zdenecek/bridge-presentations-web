@@ -5,99 +5,94 @@ import { Rotation } from "../classes/Rotation";
 import View from "./View";
 import BaseView from "./BaseView";
 
-export default class CardView  extends View {
-    static images = require.context("@/presenter/assets/cards", false, /\.(png|jpe?g|svg)$/);
+export default class CardView extends View {
+  static images = require.context("@/presenter/assets/cards", false, /\.(png|jpe?g|svg)$/);
 
-    static getCardPath(model: Card): string {
-        if(model.value === CardValue.Other)  return CardView.images('./O.png');
-        const s = SuitHelper.toString(model.suit).charAt(0).toUpperCase();
-        const v =
-            model.value <= 9
-                ? model.value.toString()
-                : CardValueHelper.toString(model.value).charAt(0).toUpperCase();
-        return CardView.images(`./${s}-${v}.png`);
-    }
+  static getCardPath(model: Card): string {
+    if (model.value === CardValue.Other) return CardView.images("./O.png");
+    const s = SuitHelper.toString(model.suit).charAt(0).toUpperCase();
+    const v = model.value <= 9 ? model.value.toString() : CardValueHelper.toString(model.value).charAt(0).toUpperCase();
+    return CardView.images(`./${s}-${v}.png`);
+  }
 
-    static get width(): number {
-        return this.testCard?.width ?? 0;
-    }
+  static get width(): number {
+    return this.testCard?.width ?? 0;
+  }
 
-    static get height(): number {
-        return this.testCard?.height ?? 0;
-    }
+  static get height(): number {
+    return this.testCard?.height ?? 0;
+  }
 
-    private static testCard?: CardView;
+  private static testCard?: CardView;
 
-    static initTestCard(view: BaseView) : void {
-        this.testCard = new CardView(new Card());
-        view.addSubView(this.testCard);
-        this.testCard.root.addClass("test-card");
-    }
+  static initTestCard(view: BaseView): void {
+    this.testCard = new CardView(new Card());
+    view.addSubView(this.testCard);
+    this.testCard.root.addClass("test-card");
+  }
 
-    model: Card;
+  model: Card;
 
-    constructor(model: Card) {
-        super(`
+  constructor(model: Card) {
+    super(`
         <div class="card">
         <img class="front" src='${CardView.getCardPath(model)}'>
         <img class="back" src='${CardView.images("./back.png")}'>
         </div>
         `);
-        this.model = model;
+    this.model = model;
+  }
+
+  public set onclick(value: (() => void) | undefined) {
+    this.root.off("click.cardplayed");
+    if (!value) return;
+    this.root.on("click.cardplayed", () => {
+      if (!this._reverse) value();
+    });
+  }
+
+  public setPlayable(value: boolean, dummy = false): void {
+    if (value) {
+      this.root.addClass(dummy ? "playable-dummy" : "playable");
+    } else {
+      this.root.removeClass("playable playable-dummy");
     }
+  }
 
+  _position: Point = new Point(0, 0);
 
+  public set position(value: Point) {
+    this._position = value;
+    this.updateTransform();
+  }
 
-    public set onclick(value: (() => void)  | undefined) {
-        this.root.off("click.cardplayed");
-        if(!value) return;
-        this.root.on("click.cardplayed",() => {
-            if(!this._reverse) value();
-        });
-    }
+  private _rotation = Rotation.Top;
+  private static rotations = {
+    [Rotation.Left]: "rotate(-90deg) translateX(-100%)",
+    [Rotation.Right]: "rotate(90deg) translateY(-100%)",
+    [Rotation.Upside]: "rotate(180deg)",
+    [Rotation.Top]: "",
+  };
 
-    public setPlayable(value: boolean, dummy = false): void {
-        if (value) {
-            this.root.addClass(dummy? "playable-dummy" : "playable");
-        } else {
-            this.root.removeClass("playable playable-dummy");
-        }
-    }
+  set rotation(value: Rotation) {
+    this._rotation = value;
+    this.updateTransform();
+  }
 
-    _position: Point = new Point(0, 0);
+  private updateTransform(): void {
+    this.root.css("transform", this._position.asTransform() + " " + CardView.rotations[this._rotation]);
+  }
 
-    public set position(value: Point) {
-        this._position = value;
-        this.updateTransform();
-    }
+  private _reverse = false;
 
-    private _rotation = Rotation.Top;
-    private static rotations = {
-        [Rotation.Left]: "rotate(-90deg) translateX(-100%)",
-        [Rotation.Right]: "rotate(90deg) translateY(-100%)",
-        [Rotation.Upside]:  "rotate(180deg)",
-        [Rotation.Top]: ""
-    }
+  get reverse(): boolean {
+    return this._reverse;
+  }
 
-    set rotation(value: Rotation) {
-        this._rotation = value;
-        this.updateTransform();
-    }
-
-    private updateTransform(): void {
-        this.root.css("transform", this._position.asTransform() + " " + CardView.rotations[this._rotation]);
-    }
-
-    private _reverse = false;
-
-    get reverse(): boolean {
-        return this._reverse;
-    }
-
-    set reverse(value: boolean) {
-        this.hidden = false;
-        if(this.reverse === value) return;
-        this._reverse = value;
-        this.root.toggleClass('reverse', value)
-    }
-}                                                                                      
+  set reverse(value: boolean) {
+    this.hidden = false;
+    if (this.reverse === value) return;
+    this._reverse = value;
+    this.root.toggleClass("reverse", value);
+  }
+}

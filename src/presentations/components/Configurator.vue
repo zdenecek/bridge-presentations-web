@@ -307,7 +307,7 @@ export default defineComponent({
             return this.options.contract && this.options.contract !== "passed" ? NonPassedContract.toString(this.options.contract) : "";
         },
         cardErrors() {
-            return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as any));
+            return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as unknown as Iterable<readonly [Position, string]>));
         },
         showCardInputErrors() {
             return Object.values(this.options.cards).map(s => s.length).every(a => a > 10);

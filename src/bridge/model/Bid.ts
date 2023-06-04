@@ -2,45 +2,44 @@ import { ContractLevel } from "./Contract";
 import { Suit, SuitHelper } from "./Suit";
 
 export abstract class Bid {
-    alerted = false;
+  alerted = false;
 
-    abstract toString(): string;
+  abstract toString(): string;
 }
 
 export class ContractBid extends Bid {
+  suit: Suit;
+  level: ContractLevel;
 
-    suit: Suit;
-    level: ContractLevel;
+  constructor(suit: Suit, level: ContractLevel) {
+    super();
+    this.suit = suit;
+    this.level = level;
+  }
 
-    constructor(suit: Suit, level: ContractLevel) {
-        super();
-        this.suit = suit;
-        this.level = level;
-    }
+  isGreaterThan(other: ContractBid): boolean {
+    return this.level > other.level || (this.level === other.level && this.suit > other.suit);
+  }
 
-    isGreaterThan(other: ContractBid): boolean {
-        return this.level > other.level || ( this.level === other.level && this.suit > other.suit);
-    }
-
-    toString(): string {
-        return `${this.level}${SuitHelper.toSymbol(this.suit)}`;
-    }
+  toString(): string {
+    return `${this.level}${SuitHelper.toSymbol(this.suit)}`;
+  }
 }
 
 export class DoubleBid extends Bid {
-    toString(): string {
-        return "X";
-    }
+  toString(): string {
+    return "X";
+  }
 }
 
 export class RedoubleBid extends Bid {
-    toString(): string {
-        return "XX";
-    }
+  toString(): string {
+    return "XX";
+  }
 }
 
 export class PassBid extends Bid {
-    toString(): string {
-        return "Pass";
-    }
+  toString(): string {
+    return "Pass";
+  }
 }
