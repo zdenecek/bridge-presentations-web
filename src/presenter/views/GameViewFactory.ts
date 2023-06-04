@@ -292,7 +292,7 @@ export default class GameViewFactory {
 
         gameView.dummyChanged.sub(({ gameView }) => {
             Object.values(handViews).forEach((handView) => {
-                if (handView.position == gameView.dummy)
+                if (gameView.dummy && PositionHelper.side(handView.position) === PositionHelper.side(gameView.dummy))
                     handView.prioritizedSuit = gameView.game?.trumps;
                 else handView.prioritizedSuit = undefined;
             });
