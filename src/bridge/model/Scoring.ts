@@ -18,7 +18,7 @@ export class Scoring {
   static Score(contract: Contract, vul: boolean, res?: number): number {
     if (contract === "passed") return 0;
 
-    if (!res) throw new Error("Cannot compute score");
+    if (res === undefined) throw new Error("Cannot compute score");
 
     const result = res - contract.level - 6;
     // Contract Points

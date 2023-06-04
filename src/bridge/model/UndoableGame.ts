@@ -101,9 +101,12 @@ export class UndoableGame extends Game {
     } else if (this.claimed) {
       this.state = "cardplay";
       this.undoClaim();
-    } else {
+    } else if (this.tricks.length > 0) {
       this.state = "cardplay";
       this.undoCardplay();
+    } else {
+      this.state = "bidding";
+      this.undoBidding();
     }
   }
 
