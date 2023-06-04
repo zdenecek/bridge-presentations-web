@@ -237,9 +237,11 @@ export class Game {
         else {
             const contract = this.finalContract;
             this.trumps = this.finalContract.suit;
-            runLater(() =>
-                this.startPlay(this.nextToPlay(contract.declarer))
-            );
+            if(this.cardplayShouldEnd()) 
+                runLater(() => this.endPlay());
+            else runLater(() =>
+            this.startPlay(this.nextToPlay(contract.declarer))
+        );
         }
     }
 

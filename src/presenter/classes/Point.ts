@@ -15,6 +15,10 @@ class Point {
         return { top: this.y, left: this.x };
     }
 
+    asTransform(): string {
+        return `translate(${this.x}px, ${this.y}px)`;
+    }
+
     copy(): Point {
         return new Point(this.x, this.y);
     }

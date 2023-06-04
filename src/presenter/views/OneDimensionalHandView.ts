@@ -110,9 +110,6 @@ export default class OneDimensionalHandView extends HandView {
 
         const cardOffset = this.make1DVector( c, true);
 
-        console.log("hello");
-        console.log(suits);
-
         for (const [suitIndex, suit] of suits.entries()) {
             let currentSuitPos = currentPosition.copy();
             let index = 0;

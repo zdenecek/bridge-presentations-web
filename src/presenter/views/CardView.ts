@@ -47,9 +47,6 @@ export default class CardView  extends View {
     }
 
 
-    public set  position(value: Point) {
-        this.root.css(value.asCoords());
-    }
 
     public set onclick(value: (() => void)  | undefined) {
         this.root.off("click.cardplayed");
@@ -67,12 +64,28 @@ export default class CardView  extends View {
         }
     }
 
+    _position: Point = new Point(0, 0);
+
+    public set position(value: Point) {
+        this._position = value;
+        this.updateTransform();
+    }
+
+    private _rotation = Rotation.Top;
+    private static rotations = {
+        [Rotation.Left]: "rotate(-90deg) translateX(-100%)",
+        [Rotation.Right]: "rotate(90deg) translateY(-100%)",
+        [Rotation.Upside]:  "rotate(180deg)",
+        [Rotation.Top]: ""
+    }
 
     set rotation(value: Rotation) {
-        this.root.removeClass("horizontal-left horizontal-rigth vertical-upside")
-        if(value ===Rotation.Left) this.root.addClass("horizontal-left");
-        else if(value ===Rotation.Right) this.root.addClass("horizontal-right");
-        else if(value ===Rotation.Upside) this.root.addClass("vertical-upside");
+        this._rotation = value;
+        this.updateTransform();
+    }
+
+    private updateTransform(): void {
+        this.root.css("transform", this._position.asTransform() + " " + CardView.rotations[this._rotation]);
     }
 
     private _reverse = false;

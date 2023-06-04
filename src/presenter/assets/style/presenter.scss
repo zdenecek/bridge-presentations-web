@@ -254,7 +254,11 @@ flex-direction: column;
     aspect-ratio: 530/800;
     display: inline-block;
     position: absolute;
-    transition: top ease 1s, left ease 1s;
+    transition: transform ease 1s;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+
 
     &.playable img,
     &.playable-dummy img {
@@ -290,17 +294,7 @@ flex-direction: column;
         object-fit: fill;
     }
 
-    &.horizontal-right {
-        transform-origin: 0 0;
-        transform: rotate(90deg) translateY(-100%);
-    }
-    &.horizontal-left {
-        transform-origin: 0 0;
-        transform: rotate(-90deg) translateX(-100%);
-    }
-    &.vertical-upside {
-        transform: rotate(180deg);
-    }
+
 }
 
 .center-text {
