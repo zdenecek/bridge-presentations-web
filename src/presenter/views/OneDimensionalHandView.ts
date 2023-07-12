@@ -89,7 +89,10 @@ export default class OneDimensionalHandView extends HandView {
     let currentPosition = center.moveBy(this.make1DVector(-primarySize / 2));
 
     const cards = [...this._hand.cards];
-    cards.sort((a, b) => a.suit - b.suit || a.value - b.value);
+
+    // patch for Milan: West is sorted other way around
+    if (this.rotation === Rotation.Left) cards.sort((a, b) => a.suit - b.suit || b.value - a.value);
+    else cards.sort((a, b) => a.suit - b.suit || a.value - b.value);
 
     if (this.prioritizedSuit) sortCardsByPrioritizedSuit(cards, this.prioritizedSuit);
 
