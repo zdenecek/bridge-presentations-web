@@ -27,7 +27,7 @@ jobs:
           npm run build --production
       - name: Save commit message into file
         run: |
-          echo  ${{ github.event.head_commit.message }}  >${{ format('./dist/commit_message', steps.package-version.outputs.current-version ) }}
+          echo  ${{ github.event.head_commit.message }}  >>${{ format('./dist/commit_message', steps.package-version.outputs.current-version ) }}
       - name: Upload via FTP
         uses: airvzxf/ftp-deployment-action@latest
         with:
