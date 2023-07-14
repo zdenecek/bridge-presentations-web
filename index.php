@@ -88,7 +88,7 @@ $data = array_reverse($data);
         <?php foreach ($data as $row): ?>
             <a href="<?php echo $row[0]; ?>">
             <li>
-                <div> <?php echo $row[0]; ?></div>
+                <div>version <?php echo $row[0]; ?></div>
                 <p><?php echo $row[1]; ?></p>
             </li>
             </a>
