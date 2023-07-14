@@ -1,4 +1,4 @@
-import { sortCardsByPrioritizedSuit, sortSuits } from "@/bridge/utils/CardSorter";
+import { sortCards, sortCardsByPrioritizedSuit, sortSuits } from "@/bridge/utils/CardSorter";
 import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
 import { Position } from "../../bridge/model/Position";
@@ -90,18 +90,22 @@ export default class OneDimensionalHandView extends HandView {
 
     const cards = [...this._hand.cards];
 
-    // patch for Milan: West is sorted other way around
-    if (this.rotation === Rotation.Left) cards.sort((a, b) => a.suit - b.suit || b.value - a.value);
-    else cards.sort((a, b) => a.suit - b.suit || a.value - b.value);
+
+    const reverseZIndex = this.rotation === Rotation.Left;
 
     if (this.prioritizedSuit) sortCardsByPrioritizedSuit(cards, this.prioritizedSuit);
+    else {
+      sortCards(cards);
+      // patch for Milan: West is sorted other way around
+      if (this.position === Position.West) cards.reverse();
+    }
 
     cards.forEach((card, index) => {
       const view = this._cardViews.get(card);
       if (!view) return;
       view.reverse = this.reverse;
       view.position = currentPosition;
-      view.root.css("z-index", index);
+      view.root.css("z-index", reverseZIndex ? cards.length - index : index);
       currentPosition = currentPosition.moveBy(offsetVector);
     });
   }
