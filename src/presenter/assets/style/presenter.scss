@@ -1,0 +1,395 @@
+@use "variables";
+@use "bidding";
+
+.test-card {
+    position: absolute;
+    filter: opacity(0);
+    // top: 100vh;
+    // left: 100vw;
+}
+
+.presenter-app {
+    // background-color: blanchedalmond;
+
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+
+    padding-left: 20px;
+    padding-right: 20px;
+
+    background-color: variables.$background;
+    color: variables.$primary;
+
+    grid-template-columns: 1fr 100vh 2fr;
+
+    ::selection {
+        color: none;
+        background: none;
+    }
+}
+
+.center-panel {
+    aspect-ratio: 1;
+    position: relative;
+    grid-row: 2;
+    grid-column: 2;
+
+    padding: 10px;
+    display: grid;
+
+    transition: all 1s;
+
+    align-self: center;
+
+    &.center-panel-bidding {
+        gap: 3px;
+        grid-template-columns: variables.$bid-card-height auto variables.$bid-card-height;
+        grid-template-rows: variables.$bid-card-height auto variables.$bid-card-height;
+    }
+    &:not(.center-panel-bidding) {
+        padding: 14% 7% 0 7%;
+        grid-template-columns: 0 auto 0;
+        grid-template-rows: 0 auto 0;
+    }
+}
+$frame-width: 16%;
+
+.center-frame {
+    display: grid;
+    grid-row: 2;
+    grid-column: 2;
+
+    padding: $frame-width;
+
+    position: relative;
+
+    .frame {
+        outline: variables.$primary solid 3px;
+        position: absolute;
+        top: calc($frame-width/2);
+        left: calc($frame-width/2);
+        right: calc($frame-width/2);
+        bottom: calc($frame-width/2);
+
+        border-radius: 2px;
+    }
+
+    .center-frame-label {
+        color: white;
+        font-size: 2vh;
+        font-weight: bold;
+
+        &.focused {
+            background-color: yellow;
+            color: black;
+        }
+    }
+
+    .label-nonvul {
+        background-color: green;
+    }
+
+    .label-vul {
+        background-color: red;
+    }
+}
+
+.center-frame-label {
+    cursor: default;
+    position: absolute;
+    outline: solid variables.$primary 1px;
+    padding: 2px 5px;
+    background-color: variables.$background;
+    border-radius: 2px;
+    width: variables.$card-width;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+#control-center {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.control-panel {
+display: flex;
+flex-direction: column;
+
+    .buttons {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    button:disabled {
+        color: gray;
+        background-color: white;
+    }
+
+
+    .hearts {
+        color: red;
+    }
+
+    .diamonds {
+        color: darkgoldenrod;
+    }
+
+    .spades {
+        color: blue;
+    }
+
+    .clubs {
+        color: green;
+    }
+}
+
+.center-frame-label-north {
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.center-frame-label-east {
+    right: 0;
+    top: 50%;
+    transform: translateX(50%) translateY(-50%) rotate(90deg);
+    transform-origin: 50% 50%;
+}
+
+.center-frame-label-south {
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%) translateY(50%);
+}
+
+.center-frame-label-west {
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) rotate(270deg);
+    transform-origin: 50% 50%;
+}
+
+.main {
+    //border: variables.$primary solid 1px;
+    padding: variables.$margin;
+    padding-top: variables.$top-space;
+
+    aspect-ratio: 1;
+    grid-column: 2;
+    display: grid;
+    $template: variables.$card-height calc(100vh - 2*variables.$card-height - variables.$margin - variables.$top-space) variables.$card-height;
+    grid-template-columns: $template;
+    grid-template-rows:  $template;
+
+    &.expanded {
+        grid-template-rows: calc(variables.$card-height * 1.6) auto variables.$card-height;
+    }
+
+    .hand-north {
+        grid-column: 2;
+    }
+    .hand-south {
+        grid-column: 2;
+        grid-row: 3;
+    }
+    .hand-west {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    .hand-east {
+        grid-column: 3;
+        grid-row: 2;
+    }
+}
+
+.trick-view {
+    position: relative;
+}
+
+.trick-view-origin {
+    position: absolute;
+}
+
+.trick-view-origin-north {
+    width: 100%;
+    div {
+        margin: 0 auto;
+        height: variables.$card-height;
+        width: variables.$card-width;
+    }
+}
+.trick-view-origin-east {
+    height: 100%;
+    right: 0;
+    display: flex;
+    align-items: center;
+    div {
+        width: variables.$card-height;
+        height: variables.$card-width;
+    }
+}
+.trick-view-origin-south {
+    width: 100%;
+    bottom: 0;
+    div {
+        margin: 0 auto;
+        height: variables.$card-height;
+        width: variables.$card-width;
+    }
+}
+.trick-view-origin-west {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    div {
+        width: variables.$card-height;
+        height: variables.$card-width;
+    }
+}
+
+.card {
+    height: variables.$card-height;
+    aspect-ratio: 530/800;
+    display: inline-block;
+    position: absolute;
+    transition: transform ease 1s;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+
+
+    &.playable img,
+    &.playable-dummy img {
+        transition: ease-in-out 0.2s;
+    }
+
+    &.playable:hover:not(.reverse) img {
+        transform: translateY(-10%);
+    }
+
+    &.playable-dummy:hover:not(.reverse) img {
+        transform: translateX(-10%);
+    }
+
+    &:not(.reverse) img.front {
+        z-index: 1;
+        display: initial;
+    }
+
+    &.reverse img.back {
+        z-index: 1;
+        display: initial;
+    }
+
+    img {
+        z-index: -1;
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        object-fit: fill;
+    }
+
+
+}
+
+.center-text {
+    position: absolute;
+
+    font-size: 5vh;
+
+    top: 50%;
+    right: 0;
+    left: 0;
+
+    transform: translateY(-50%);
+
+    text-align: center;
+    vertical-align: middle;
+}
+
+.side-panel {
+    grid-column: 1;
+    grid-row: 1;
+
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+
+    justify-self: center;
+    align-self: center;
+
+    display: grid;
+    grid-template-columns: 1fr 25px 1fr;
+
+    padding-top: 85px;
+
+    div,
+    span {
+        padding: 4px 14px;
+    }
+
+    .t-label-tricks {
+        grid-column: 1 / span 3;
+        padding-bottom: 12px;
+    }
+
+    .c-tricks {
+        display: flex;
+        flex-direction: column;
+        grid-row: 2;
+
+        padding: 0;
+
+        outline: solid 1px variables.$primary;
+        outline-offset: -1px;
+
+        .t-label {
+            background-color: variables.$primary;
+            color: variables.$secondary;
+        }
+        &.c-tricks-ns {
+            grid-column: 1;
+        }
+
+        &.c-tricks-ew {
+            grid-column: 3;
+        }
+
+        .t-count {
+            grid-column: 1;
+            grid-row: 3;
+        }
+    }
+
+    .t-label-contract {
+        grid-column: 1 / span 3;
+        grid-row: 4;
+        padding-top: 14px;
+        padding-bottom: 12px;
+    }
+
+    .t-contract {
+        grid-column: 1 / span 3;
+        grid-row: 5;
+        outline: solid 1px variables.$primary;
+        outline-offset: -1px;
+    }
+}
+
+.claim-input {
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+    display: none;
+    }
+    width: 100%;
+
+    &[type=number] {
+    -moz-appearance:textfield; /* Firefox */ 
+    appearance: textfield;   
+    }
+}
