@@ -50,7 +50,7 @@
         grid-template-rows: variables.$bid-card-height auto variables.$bid-card-height;
     }
     &:not(.center-panel-bidding) {
-        padding: 14% 7% 0 7%;
+        padding: 7% 7% 7% 7%;
         grid-template-columns: 0 auto 0;
         grid-template-rows: 0 auto 0;
     }
