@@ -1,10 +1,10 @@
 name: Deploy
 
 on:
-  workflow_dispatch:
+  # Trigger only on tag push events with tags that start with "v"
   push:
-    branches:
-      - master
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -13,21 +13,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      
-      - name: get-npm-version
+
+      # Extract the version from the tag (without the "v" prefix)
+      - name: Extract version from tag
+        id: tag-version
+        run: echo "tag=${GITHUB_REF##*/}" | sed 's/^v//' > version.txt
+      - name: Get tag version
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1  
+        run: echo "::set-output name=current-version::$(cat version.txt)"
+
+      # Get the tag message
+      - name: Get tag message
+        id: tag-message
+        run: |
+          TAG_MESSAGE=$(git for-each-ref --format='%(contents)' "refs/tags/${GITHUB_REF##*/}")
+          echo "::set-output name=message::$TAG_MESSAGE"
+
       - name: Build
         run: | 
           npm install
           npm run build --production
-      - name: Save commit message into file
+
+      - name: Save tag message into file
         run: |
-          echo  ${{ github.event.head_commit.message }}  >>${{ format('./dist/commit_message', steps.package-version.outputs.current-version ) }}
+          echo "${{ steps.tag-message.outputs.message }}" >> "./dist/tag_message_${{ steps.tag-version.outputs.current-version }}"
+
       - name: Upload via FTP
         uses: airvzxf/ftp-deployment-action@latest
         with:
@@ -35,6 +50,5 @@ jobs:
           user: ${{ secrets.FTP_LOGIN }}
           password: ${{ secrets.FTP_PASSWORD }}
           local_dir: "./dist/"
-          remote_dir: ${{ format('./{0}/', steps.package-version.outputs.current-version ) }}
+          remote_dir: ${{ format('./{0}/', steps.tag-version.outputs.current-version) }}
           delete: "true"
-      
