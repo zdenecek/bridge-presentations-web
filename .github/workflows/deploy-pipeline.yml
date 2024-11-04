@@ -34,7 +34,7 @@ jobs:
           TAG_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           VERSION=${TAG_NAME#v} # Remove the leading 'v' from the tag
-          echo "${TAG_MESSAGE}" > "./dist/message.txt"
+          echo "${TAG_MESSAGE}" > "./dist/message"
 
       - name: Upload via FTP
         uses: airvzxf/ftp-deployment-action@latest
