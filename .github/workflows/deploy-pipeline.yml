@@ -34,7 +34,7 @@ jobs:
           TAG_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           VERSION=${TAG_NAME#v} # Remove the leading 'v' from the tag
-          echo "${TAG_MESSAGE}" > "./dist/tag_message_${VERSION}"
+          echo "${TAG_MESSAGE}" > "./dist/message.txt"
 
       - name: Upload via FTP
         uses: airvzxf/ftp-deployment-action@latest
@@ -43,5 +43,4 @@ jobs:
           user: ${{ secrets.FTP_LOGIN }}
           password: ${{ secrets.FTP_PASSWORD }}
           local_dir: "./dist/"
-          remote_dir: "./${{ github.ref_name#v }}/" # Removes leading 'v' from tag for directory
-          delete: "true"
+          remote_dir: "./${{ github.ref_name }}/" 

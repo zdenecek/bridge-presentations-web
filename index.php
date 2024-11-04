@@ -6,7 +6,7 @@ function listFoldersWithMessage($directory) {
 
     foreach ($folders as $folder) {
         if ($folder !== '.' && $folder !== '..' && is_dir($directory . '/' . $folder)) {
-            $messageFile = $directory . '/' . $folder . '/commit_message';
+            $messageFile = $directory . '/' . $folder . '/message';
 
             $message = file_exists($messageFile) ? file_get_contents($messageFile) : '';
 
