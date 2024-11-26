@@ -89,11 +89,12 @@ $frame-width: 16%;
     }
 
     .label-nonvul {
-        background-color: green;
+        background-color: rgb(77, 117, 77);
     }
 
     .label-vul {
-        background-color: red;
+        background-color: rgb(172, 21, 0);
+        text-decoration: underline;
     }
 }
 
