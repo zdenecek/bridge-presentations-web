@@ -1,53 +1,51 @@
 <template>
-  <configurator v-show="state === 'configurator'" :onSubmit="play"></configurator>
+  <configurator
+    v-show="state === 'configurator'"
+    :onSubmit="play"
+  ></configurator>
   <presenter ref="presenter" v-show="state === 'presenter'"></presenter>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import Presenter from '@/presentations/components/Presenter.vue';
-import Configurator from '@/presentations/components/Configurator.vue';
-import { ConfiguratorOptions } from './class/ConfiguratorOptions';
-import { Application } from './class/Application';
+<script lang="ts" setup>
+/**
+ * This is the main component of the application.
+ * It is responsible for switching between the configurator and the presenter.
+ * It also listens for the Ctrl+Q key combination to switch between the two states.
+ */
+import Presenter from "@/presentations/components/Presenter.vue";
+import Configurator from "@/presentations/components/Configurator.vue";
+import { ConfiguratorOptions } from "./class/ConfiguratorOptions";
+import { Application } from "./class/Application";
+import { nextTick, ref } from "vue";
 
-export default defineComponent({
-  name: 'App',
-  created() {
-    window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === "q" && e.ctrlKey) {
-        e.preventDefault();
-        this.changeState();
-      }
-    });
-  },
-  data() {
-    return {
-      state: 'configurator' as 'configurator' | 'presenter',
+const state = ref("configurator" as "configurator" | "presenter");
+const presenter = ref(null as null | typeof Presenter);
 
-    };
-  },
-  methods: {
-    changeState(state?: 'configurator' | 'presenter') {
-
-      this.state = state ? state : (this.state == 'configurator' ? 'presenter' : 'configurator');
-      if (this.state == 'presenter') {
-        this.$nextTick(() => (this.$refs.presenter as typeof Presenter)?.updatePositions());
-      }
-
-      Application.state = this.state;
-    },
-    play(options: ConfiguratorOptions, otherOptions: { endMessage?: string }) {
-      this.changeState('presenter');
-      (this.$refs.presenter as typeof Presenter).startGame(options, otherOptions);
-    },
-
-  },
-
-  components: {
-    Presenter,
-    Configurator,
+window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "q" && e.ctrlKey) {
+    e.preventDefault();
+    changeState();
   }
 });
+
+function changeState(newState?: "configurator" | "presenter") {
+  if (newState) state.value = newState;
+  else
+    state.value = state.value == "configurator" ? "presenter" : "configurator";
+
+  if (newState === "presenter")
+    nextTick(() => presenter.value?.updatePositions());
+
+  Application.state = state.value;
+}
+
+function play(
+  options: ConfiguratorOptions,
+  otherOptions: { endMessage?: string }
+) {
+  changeState("presenter");
+  presenter.value?.startGame(options, otherOptions);
+}
 </script>
 
 <style lang="scss">
@@ -56,7 +54,6 @@ export default defineComponent({
   background-size: cover;
   filter: opacity(20%);
 }
-
 
 * {
   box-sizing: border-box;

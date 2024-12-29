@@ -167,8 +167,11 @@
     </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
+/**
+ * This component is responsible for configuring the game.
+ */
+import { ref, reactive, computed, watch, onMounted } from "vue";
 import { Suit } from "@/bridge/model/Suit";
 import { CardsInputValidator } from "../class/CardsInputValidator";
 import { Position, PositionHelper } from "@/bridge/model/Position";
@@ -177,145 +180,166 @@ import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations
 import { Contract, NonPassedContract } from "@/bridge/model/Contract";
 import { DummyOptions } from "@/presenter/views/GameView";
 import { validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
-import Arrow from "@/presentations/components/Arrow.vue";
+import Arrow from "@/presentations/components/partial/Arrow.vue";
 
-export default defineComponent({
-    components: {
-        Arrow
-    },
-    name: "Presenter",
-    props: {
-        onSubmit: {
-            type: Function,
-            required: true,
-        },
-    },
-    created() {
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "+") this.submit();
-        });
-    },
-    methods: {
-        submit() {
-            if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
-            this.onSubmit(this.options, { endMessage: this.endText.length > 0 ? this.endText : undefined });
-        },
-        clear() {
-            this.options.cards = {
-                north: "",
-                east: "",
-                west: "",
-                south: "",
-            };
-        },
-        save() {
-            const name = prompt("Enter file name");
-            if (name) downloadObjectAsJson(this.options, name + ".deal");
-        },
-        load(event: Event) {
-            (this.$refs.loadform as HTMLElement).blur();
-            loadJson(event.target as FileEventTarget).then(a => {
-                if (!a) return;
-                this.options = a
-                this.fakeTricks = a.fake?.ns > 0 || a.fake?.ew > 0;
-                this.specifyContract = a.contract !== undefined;
-                this.fakeAuction = a.bidding;
-                if (this.options.contract && this.options.contract !== "passed")
-                    this.options.contract = new NonPassedContract(this.options.contract.suit, this.options.contract.level, this.options.contract.declarer, this.options.contract.dbl);
-            });
-        },
-        loadClicked() {
-            (this.$refs.loadform as HTMLElement).click();
-        },
-        parseContract(value: string) {
-            const c = NonPassedContract.fromString(value);
-            if (c) this.options.contract = c;
-        },
-        setActiveNS() {
-            this.options.activePositions = [Position.North, Position.South]
-        },
-        setActiveEW() {
-            this.options.activePositions = [Position.East, Position.West]
-        },
-        setActiveAll() {
-            this.options.activePositions = [Position.North, Position.South, Position.East, Position.West]
-        },
-    },
+const props = defineProps({
+  onSubmit: {
+    type: Function,
+    required: true,
+  },
+});
 
-    data() {
-        return {
-            contractInput: "",
-            specifyContract: true,
-            fakeTricks: false,
-            fakeAuction: false,
-            endText: "Well done!",
+const loadform = ref(null as null | HTMLInputElement);
 
-            options: {
-                cards: {
-                    north: "",
-                    south: "",
-                    east: "",
-                    west: "",
-                },
-                fake: { ns: 0, ew: 0 },
-                firstPlayer: "west" as Position,
-                bidding: true,
-                contract: undefined as Contract | undefined,
-                trumps: Suit.Notrump as Suit | undefined,
-                dummy: "auto" as DummyOptions | undefined,
-                staticDummyPosition: "north" as Position | undefined,
-                vulnerability: Vulnerability.None,
-                activePositions: PositionHelper.all(),
-            },
+const contractInput = ref("");
+const specifyContract = ref(true);
+const fakeTricks = ref(false);
+const fakeAuction = ref(false);
+const endText = ref("Well done!");
 
-            positions: {
-                [Position.North]: "North",
-                [Position.East]: "East",
-                [Position.South]: "South",
-                [Position.West]: "West",
-            },
+const options = reactive({
+  cards: {
+    north: "",
+    south: "",
+    east: "",
+    west: "",
+  },
+  fake: { ns: 0, ew: 0 },
+  firstPlayer: "west" as Position,
+  bidding: true,
+  contract: undefined as Contract | undefined,
+  trumps: Suit.Notrump as Suit | undefined,
+  dummy: "auto" as DummyOptions | undefined,
+  staticDummyPosition: "north" as Position | undefined,
+  vulnerability: Vulnerability.None,
+  activePositions: PositionHelper.all(),
+});
 
-            vulnerabilities: {
-                [Vulnerability.Both]: "Both",
-                [Vulnerability.None]: "None",
-                [Vulnerability.NS]: "NS",
-                [Vulnerability.EW]: "EW",
-            },
-            suits: {
-                [Suit.Spades]: "♠",
-                [Suit.Hearts]: "♥",
-                [Suit.Diamonds]: "♦",
-                [Suit.Clubs]: "♣",
-                [Suit.Notrump]: "NT",
-            },
-        };
-    },
-    watch: {
-        contractInput(value: string) {
-            this.parseContract(value);
-        },
-        "options.bidding"(value: boolean) {
-            if (value) this.specifyContract = false;
-        },
-        specifyContract(value: boolean) {
-            if (!value) this.options.contract = undefined;
-            else this.parseContract(this.contractInput);
-        }
-    },
-    computed: {
-        contract() {
-            return this.options.contract && this.options.contract !== "passed" ? NonPassedContract.toString(this.options.contract) : "";
-        },
-        cardErrors() {
-            return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as unknown as Iterable<readonly [Position, string]>));
-        },
-        showCardInputErrors() {
-            return Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
-        },
-        errors() {
-            return validateConfiguratorOptions(this.options);
-        }
-    },
+const positions = reactive({
+  [Position.North]: "North",
+  [Position.East]: "East",
+  [Position.South]: "South",
+  [Position.West]: "West",
+});
+
+const vulnerabilities = reactive({
+  [Vulnerability.Both]: "Both",
+  [Vulnerability.None]: "None",
+  [Vulnerability.NS]: "NS",
+  [Vulnerability.EW]: "EW",
+});
+
+const suits = reactive({
+  [Suit.Spades]: "♠",
+  [Suit.Hearts]: "♥",
+  [Suit.Diamonds]: "♦",
+  [Suit.Clubs]: "♣",
+  [Suit.Notrump]: "NT",
+});
+
+// Methods
+const submit = () => {
+  if (!options.bidding && specifyContract.value && !options.contract) return;
+  props.onSubmit(options, { endMessage: endText.value.length > 0 ? endText.value : undefined });
+};
+
+const clear = () => {
+  options.cards = {
+    north: "",
+    east: "",
+    west: "",
+    south: "",
+  };
+};
+
+const save = () => {
+  const name = prompt("Enter file name");
+  if (name) downloadObjectAsJson(options, name + ".deal");
+};
+
+const load = (event: Event) => {
+    loadform.value?.blur();
+  loadJson(event.target as FileEventTarget).then((a) => {
+    if (!a) return;
+    Object.assign(options, a);
+    fakeTricks.value = a.fake?.ns > 0 || a.fake?.ew > 0;
+    specifyContract.value = a.contract !== undefined;
+    fakeAuction.value = a.bidding;
+    if (options.contract && options.contract !== "passed") {
+      options.contract = new NonPassedContract(
+        options.contract.suit,
+        options.contract.level,
+        options.contract.declarer,
+        options.contract.dbl
+      );
+    }
+  });
+};
+
+const loadClicked = () => {
+  (loadform.value as HTMLElement).click();
+};
+
+const parseContract = (value: string) => {
+  const c = NonPassedContract.fromString(value);
+  if (c) options.contract = c;
+};
+
+const setActiveNS = () => {
+  options.activePositions = [Position.North, Position.South];
+};
+
+const setActiveEW = () => {
+  options.activePositions = [Position.East, Position.West];
+};
+
+const setActiveAll = () => {
+  options.activePositions = [Position.North, Position.South, Position.East, Position.West];
+};
+
+// Computed Properties
+const contract = computed(() =>
+  options.contract && options.contract !== "passed"
+    ? NonPassedContract.toString(options.contract)
+    : ""
+);
+
+const cardErrors = computed(() =>
+  CardsInputValidator.validate(
+    new Map<Position, string>(
+      Object.entries(options.cards) as unknown as Iterable<readonly [Position, string]>
+    )
+  )
+);
+
+const showCardInputErrors = computed(() =>
+  Object.values(options.cards).map((s) => s.length).every((a) => a > 10)
+);
+
+const errors = computed(() => validateConfiguratorOptions(options));
+
+// Watchers
+watch(contractInput, (value) => {
+  parseContract(value);
+});
+
+watch(
+  () => options.bidding,
+  (value) => {
+    if (value) specifyContract.value = false;
+  }
+);
+
+watch(specifyContract, (value) => {
+  if (!value) options.contract = undefined;
+  else parseContract(contractInput.value);
+});
+
+// Lifecycle
+onMounted(() => {
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "+") submit();
+  });
 });
 </script>
 
