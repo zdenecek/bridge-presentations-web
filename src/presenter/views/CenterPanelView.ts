@@ -11,6 +11,6 @@ export default class CenterPanelView extends View {
   }
 
   public set bidding(value: boolean) {
-    this.root.toggleClass("center-panel-bidding", value);
+    this.toggleClass("center-panel-bidding", value);
   }
 }

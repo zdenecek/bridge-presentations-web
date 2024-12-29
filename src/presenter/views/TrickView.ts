@@ -56,7 +56,7 @@ export default class TrickView extends View {
       if (!view) return;
       view.reverse = false;
       view.hidden = false;
-      if (view) view.root.css("z-index", index + 100);
+      if (view) view.root.style.zIndex = `${index + 100}`;
     });
     PositionHelper.all().forEach((pos) => {
       const card = trick.getCards()[pos]?.card;

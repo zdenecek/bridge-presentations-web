@@ -1,19 +1,19 @@
 import { Card } from "@/bridge/model/Card";
 import { PositionList, PositionHelper, Position, Side } from "@/bridge/model/Position";
-import { Rotation } from "../classes/Rotation";
-import View from "./View";
-import AuctionView from "./AuctionView";
-import CardView from "./CardView";
-import CenterFrameView from "./CenterFrameView";
-import CenterPanelView from "./CenterPanelView";
-import GameView from "./GameView";
-import OneDimensionalHandView from "./OneDimensionalHandView";
-import TrickView from "./TrickView";
-import ControlPanel from "./ControlPanel";
-import BiddingBoxView from "./BiddingBoxView";
+import { Rotation } from "./classes/Rotation";
+import View from "./views/View";
+import AuctionView from "./views/AuctionView";
+import CardView from "./views/CardView";
+import CenterFrameView from "./views/CenterFrameView";
+import CenterPanelView from "./views/CenterPanelView";
+import GameView from "./views/GameView";
+import OneDimensionalHandView from "./views/OneDimensionalHandView";
+import TrickView from "./views/TrickView";
+import ControlPanel from "./views/ControlPanel";
+import BiddingBoxView from "./views/BiddingBoxView";
 import { PresentationGame } from "@/bridge/model/PresentationGame";
-import BiddingHistoryView from "./BiddingHistoryView";
-import TextView from "./TextView";
+import BiddingHistoryView from "./views/BiddingHistoryView";
+import TextView from "./views/TextView";
 import { SuitHelper } from "@/bridge/model/Suit";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
@@ -44,7 +44,7 @@ export default class GameViewFactory {
     ///
     this.makeBB(gameView, controlCenter);
 
-    new ResizeObserver(_.debounce(trick.update, 100)).observe(frameView.root[0]);
+    new ResizeObserver(_.debounce(trick.update, 100)).observe(frameView.root);
 
     return gameView;
   }
@@ -115,7 +115,7 @@ export default class GameViewFactory {
       _.debounce(() => {
         gameView.update();
       }, 100)
-    ).observe(centerPanelView.centerFrameView.root[0]);
+    ).observe(centerPanelView.centerFrameView.root);
 
     return centerPanelView;
   }
@@ -298,7 +298,7 @@ export default class GameViewFactory {
     gameView.onEachGame((game) => {
       game.stateChanged.sub(({ game }) => {
         if (game.state !== "finished") {
-          centerText.root.fadeOut();
+          centerText.fadeOut();
         } else {
           centerText.text = gameView.getEndText();
         }
@@ -306,11 +306,11 @@ export default class GameViewFactory {
     });
 
     gameView.updateDispatched.sub(({ game }) => {
-      if (game.state === "finished") centerText.root.fadeIn();
+      if (game.state === "finished") centerText.fadeIn();
     });
     gameView.onEachGame((game) =>
       game.claimMade.sub(() => {
-        if (game.tricks[game.tricks.length - 1].cards.length === 0) centerText.root.fadeIn();
+        if (game.tricks[game.tricks.length - 1].cards.length === 0) centerText.fadeIn();
       })
     );
     return centerText;

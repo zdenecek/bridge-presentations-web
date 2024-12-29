@@ -23,8 +23,8 @@ export default class CenterFrameView extends View {
   public set vulnerability(value: Vulnerability) {
     PositionHelper.all().forEach((pos) => {
       const vul = VulnerabilityHelper.IsVulnerable(pos, value);
-      this.labels.get(pos)?.root.toggleClass("label-vul", vul);
-      this.labels.get(pos)?.root.toggleClass("label-nonvul", !vul);
+      this.labels.get(pos)?.toggleClass("label-vul", vul);
+      this.labels.get(pos)?.toggleClass("label-nonvul", !vul);
     });
   }
 

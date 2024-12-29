@@ -7,6 +7,6 @@ export default class CenterFrameLabelView extends View {
   }
 
   public set focus(value: boolean) {
-    this.root.toggleClass("focused", value);
+    this.toggleClass("focused", value);
   }
 }

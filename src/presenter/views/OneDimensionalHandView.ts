@@ -105,7 +105,7 @@ export default class OneDimensionalHandView extends HandView {
       if (!view) return;
       view.reverse = this.reverse;
       view.position = currentPosition;
-      view.root.css("z-index", reverseZIndex ? cards.length - index : index);
+      view.root.style.zIndex = reverseZIndex ? `${cards.length - index}` : `${index}`;
       currentPosition = currentPosition.moveBy(offsetVector);
     });
   }
@@ -137,7 +137,7 @@ export default class OneDimensionalHandView extends HandView {
         view.position = currentSuitPos;
         view.reverse = false;
 
-        view.root.css("z-index", index + suitIndex * 10);
+        view.root.style.zIndex = `${index + suitIndex * 10}`;
         currentSuitPos = currentSuitPos.moveBy(cardOffset);
         index++;
       }
