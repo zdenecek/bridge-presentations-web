@@ -31,9 +31,8 @@ export default class GameViewFactory {
     const trick = this.makeTrickView(cardViews, gameView, frameView);
     this.makeAuctionView(gameView, centerPanelView);
     this.makeHandViews(gameView, cardViews, mainView);
-    this.makeAuctionHistoryView(gameView);
     this.makeCenterText(gameView, frameView);
-    this.makeSidePanel(gameView);
+    const sidePanel = this.makeSidePanel(gameView);
     // Control Panel
     const controlPanel = new ControlPanel(gameView);
     gameView.onEachGame((game) => controlPanel.attachGame(game));
@@ -41,6 +40,7 @@ export default class GameViewFactory {
     const controlCenter = new View('<div id="control-center">');
     controlCenter.addSubView(controlPanel);
     gameView.addSubView(controlCenter);
+    gameView.addSubView(sidePanel);
     ///
     this.makeBB(gameView, controlCenter);
 
@@ -167,11 +167,25 @@ export default class GameViewFactory {
     });
   }
 
-  static makeSidePanel(gameView: GameView): void {
-    const sidePanel = new View(`<div class="side-panel"><div class="t-label-tricks">Tricks</div><div class="t-label-contract">Contract</div></div>`);
+  static makeSidePanel(gameView: GameView): View {
+
+    const sidePanel = new View('<div class="side-panel">');
+
+    const statusPanel = new View(`<div class="status-panel">
+       <div class="t-label-tricks">Tricks</div>
+        <div class="t-label-contract">Contract</div>
+      </div>`);
+
+    const tricksCountPanel = new View(`<div class="trick-count-panel">
+          
+      </div>`);
+
 
     const nsContainer = new View(`<div class="c-tricks-ns c-tricks"><div class="t-label">NS</div></div>`);
     const ewContainer = new View(`<div class="c-tricks-ew c-tricks"><div class="t-label">EW</div></div>`);
+
+
+
 
     const ew = new TextView("t-count", "0");
     const ns = new TextView("t-count", "0");
@@ -179,9 +193,12 @@ export default class GameViewFactory {
 
     nsContainer.addSubView(ns);
     ewContainer.addSubView(ew);
-    sidePanel.addSubView(ewContainer);
-    sidePanel.addSubView(nsContainer);
-    sidePanel.addSubView(contract);
+
+    tricksCountPanel.addSubView(nsContainer);
+    tricksCountPanel.addSubView(ewContainer);
+
+    statusPanel.addSubView(tricksCountPanel);
+    statusPanel.addSubView(contract);
 
     gameView.onEachGame((game) => {
       ew.text = game.trickCount(Side.EW).toString();
@@ -195,8 +212,8 @@ export default class GameViewFactory {
 
     gameView.onEachGame((game) => {
       game.stateChanged.sub(({ game }) => {
-        sidePanel.hidden = !(game.state === "cardplay" || game.state === "finished");
-        if (!sidePanel.hidden) {
+        statusPanel.hidden = !(game.state === "cardplay" || game.state === "finished");
+        if (!statusPanel.hidden) {
           if (game.finalContract) contract.text = game.finalContract.toString();
           else if (game.trumps) contract.text = SuitHelper.toString(game.trumps);
           else contract.text = "Passed";
@@ -204,7 +221,12 @@ export default class GameViewFactory {
       });
     });
 
-    gameView.addSubView(sidePanel);
+    const auctionHistoryView = this.makeAuctionHistoryView(gameView);
+
+    sidePanel.addSubView(statusPanel);
+    sidePanel.addSubView(auctionHistoryView);
+
+    return sidePanel;
   }
 
   static makeHandViews(gameView: GameView, cardViews: Map<Card, CardView>, mainView: View): PositionList<OneDimensionalHandView> {
@@ -266,7 +288,6 @@ export default class GameViewFactory {
       });
     });
 
-    gameView.addSubView(auctionHistoryView);
 
     return auctionHistoryView;
   }
