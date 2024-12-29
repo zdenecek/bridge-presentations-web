@@ -11,19 +11,25 @@ export class BidStack extends View {
   element: View;
 
   constructor(position: Position) {
-    super(`<div class='bid-stack-container bid-stack-container-${position}'></div>`);
-    this.element = new View(`<div class='bid-stack bid-stack-${position}'></div>`);
+    super(
+      `<div class='bid-stack-container bid-stack-container-${position}'></div>`
+    );
+    this.element = new View(
+      `<div class='bid-stack bid-stack-${position}'></div>`
+    );
     this.addSubView(this.element);
     this.position = position;
 
     new ResizeObserver(() => {
       if (this.position == Position.East || this.position == Position.West) {
-        this.element.root.css({ transition: "none" });
-        this.element.root.css({ width: this.height, height: this.width, "transform-origin": "0 0" });
-        this.element.root.css({ transition: "initial" });
+        this.element.root.style.transition = "none";
+        this.element.root.style.width = `${this.height}px`;
+        this.element.root.style.height = `${this.width}px`;
+        this.element.root.style.transformOrigin = "0 0";
+        this.element.root.style.transition = "initial";
       }
       this.update();
-    }).observe(this.root[0]);
+    }).observe(this.root);
   }
 
   update(): void {
@@ -32,7 +38,10 @@ export class BidStack extends View {
 
   updateSpacing(): void {
     if (this.bidViews.length === 0) return;
-    const space = Math.min(40, Math.max(20, this.element.width / this.bidViews.length));
+    const space = Math.min(
+      40,
+      Math.max(20, this.element.width / this.bidViews.length)
+    );
 
     // interesting fix, the image doesnt load instantenously
     if (this.bidViews[0].width === 0) {
@@ -48,17 +57,26 @@ export class BidStack extends View {
     let pos = (this.element.width - len) / 2;
 
     this.bidViews.forEach((bidView) => {
-      bidView.root.css("left", `${pos}px`);
+      bidView.root.style.left = `${pos}px`;
       pos += space;
     });
   }
 
   addBid(bid: Bid): void {
     const bidView = new BidView(bid);
-    this.bidViews.push(bidView);
     bidView.hide();
+
+    this.bidViews.push(bidView);
     this.element.addSubView(bidView);
-    bidView.root.css("top", this.position === Position.South ? "10vh" : "-10vh").animate({ top: "0px" });
+
+    const isSouth = this.position === Position.South;
+
+    bidView.root.style.top = isSouth ? "10vh" : "-10vh";
+    bidView.root.style.transition = "top 0.5s ease";
+    setTimeout(() => {
+      bidView.root.style.top = "0px";
+    }, 0);
+
     this.updateSpacing();
   }
 
@@ -66,7 +84,17 @@ export class BidStack extends View {
     const bidView = this.bidViews.pop();
     if (!bidView) return;
 
-    bidView.root.animate({ top: this.position === Position.South ? "10vh" : "-10vh" }, () => bidView.root.remove());
+    const isSouth = this.position === Position.South;
+    bidView.root.style.transition = "top 0.5s ease"; // Add transition for the animation
+    bidView.root.style.top = isSouth ? "10vh" : "-10vh";
+
+    bidView.root.addEventListener(
+      "transitionend",
+      function handleTransitionEnd() {
+        bidView.detach();
+        bidView.root.removeEventListener("transitionend", handleTransitionEnd); // Clean up the event listener
+      }
+    );
   }
 
   reset(): void {

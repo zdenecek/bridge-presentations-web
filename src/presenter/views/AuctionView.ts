@@ -63,7 +63,7 @@ export default class AuctionView {
   }
 
   public set visible(visible: boolean) {
-    Object.values(this.bidStacks).forEach((b) => b.root.toggle(visible));
+    Object.values(this.bidStacks).forEach((b) => b.hidden = !visible);
     this.centerPanelView.bidding = visible;
   }
 

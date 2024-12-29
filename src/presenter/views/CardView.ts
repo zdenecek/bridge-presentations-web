@@ -32,7 +32,7 @@ export default class CardView extends View {
   static initTestCard(view: BaseView): void {
     this.testCard = new CardView(new Card());
     view.addSubView(this.testCard);
-    this.testCard.root.addClass("test-card");
+    this.testCard.addClass("test-card");
   }
 
   model: Card;
@@ -48,18 +48,19 @@ export default class CardView extends View {
   }
 
   public set onclick(value: (() => void) | undefined) {
-    this.root.off("click.cardplayed");
+    this.off("click.cardplayed");
     if (!value) return;
-    this.root.on("click.cardplayed", () => {
+    this.on("click.cardplayed", () => {
       if (!this._reverse) value();
     });
   }
 
   public setPlayable(value: boolean, dummy = false): void {
     if (value) {
-      this.root.addClass(dummy ? "playable-dummy" : "playable");
+      this.addClass(dummy ? "playable-dummy" : "playable");
     } else {
-      this.root.removeClass("playable playable-dummy");
+      this.removeClass("playable");
+      this.removeClass("playable-dummy");
     }
   }
 
@@ -84,7 +85,7 @@ export default class CardView extends View {
   }
 
   private updateTransform(): void {
-    this.root.css("transform", this._position.asTransform() + " " + CardView.rotations[this._rotation]);
+    this.root.style.transform = `${this._position.asTransform()} ${CardView.rotations[this._rotation]}`;
   }
 
   private _reverse = false;
@@ -97,6 +98,6 @@ export default class CardView extends View {
     this.hidden = false;
     if (this.reverse === value) return;
     this._reverse = value;
-    this.root.toggleClass("reverse", value);
+    this.toggleClass("reverse", value);
   }
 }

@@ -6,10 +6,9 @@
 import { Position, PositionHelper } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { defineComponent } from "vue";
-import $ from "jquery";
 import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
-import GameViewFactory from "@/presenter/views/GameViewFactory";
+import GameViewFactory from "@/presenter/GameViewFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
 import { Application } from "../class/Application";
 import { PassBid } from "@/bridge/model/Bid";
@@ -39,9 +38,8 @@ export default defineComponent({
         },
     },
     mounted() {
-        $(window)
-            .on("resize click", () => this.gameView.update())
-            .on("keydown", (e) => {
+        window.addEventListener("resize click", () => this.gameView.update())
+        window.addEventListener("keydown", (e) => {
                 if (Application.state !== 'presenter') return;
 
                 var arrowHelper = (ctrl: boolean, pos: Position) => {
