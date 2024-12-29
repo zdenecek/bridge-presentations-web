@@ -13,17 +13,12 @@ Demo available [here](http://bp.zdenektomis.eu/)
 
 Set up the presentation and click play.
 
-## Project setup
-```
-npm install
-```
-### Compiles and hot-reloads for development
-```
-npm run dev
-```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Development docs
+
+Development docs can be found [here](DEVELOPMENT.md).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
