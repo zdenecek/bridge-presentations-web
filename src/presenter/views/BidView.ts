@@ -48,7 +48,8 @@ export class BidView extends View {
   }
 
   public set position(value: Point) {
-    this.root.css("transition", "ease 1s");
-    this.root.css(value.asCoords());
+    this.root.style.transition = "ease 1s";
+    this.root.style.top = `${value.asCoords().top}`;
+    this.root.style.left = `${value.asCoords().left}`;
   }
 }

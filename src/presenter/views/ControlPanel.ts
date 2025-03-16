@@ -2,7 +2,6 @@ import { Game } from "@/bridge/model/Game";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import { SuitHelper } from "@/bridge/model/Suit";
 import { Application } from "@/presentations/class/Application";
-import $ from "jquery";
 import GameView from "./GameView";
 import View from "./View";
 
@@ -18,34 +17,44 @@ export default class ControlPanel extends View {
     this.addSubView(bs);
     this.buttons = [];
     for (let i = 0; i < 13; i++) {
-      const b = new View(`<button><div class='content-label'></div><div class='hotkey-label'>(${this.hotkeys[i]})</div></button>`);
+      const b = new View(
+        `<button><div class='content-label'></div><div class='hotkey-label'>(${this.hotkeys[i]})</div></button>`
+      );
       this.buttons.push(b);
-      b.root.on("click", () => this.handle(i));
+      b.on("click", () => this.handle(i));
       bs.addSubView(b);
     }
 
     const claimPanel = new View("<form  class='claim-panel'>");
-    const claimInput = new View(`<input  class="claim-input" type="number" placeholder="claim (claimed tricks NS)">`);
-    const defocuser = new View(`<input type="checkbox" style="filter: opacity(0); width: 0px;">`);
+    const claimInputView = new View(
+      `<input  class="claim-input" type="number" placeholder="claim (claimed tricks NS)">`
+    );
+    const defocuser = new View(
+      `<input type="checkbox" style="filter: opacity(0); width: 0px;">`
+    );
 
-    claimPanel.addSubView(claimInput);
+    claimPanel.addSubView(claimInputView);
     claimPanel.addSubView(defocuser);
     this.addSubView(claimPanel);
 
+    const claimInput = claimInputView.root as HTMLInputElement;
+
     gameView.onEachGame((game) => (this.game = game));
-    claimPanel.root.on("submit", (e) => {
+    claimPanel.on("submit", (e) => {
       e.preventDefault();
-      const v = claimInput.root.val();
+      const v = (claimInput as HTMLInputElement).value;
       if (v) this.game?.claim(parseInt(v as string));
-      defocuser.root.trigger("focus");
+      defocuser.root.focus();
     });
 
-    $(window).on("keydown", (e) => {
+   window.addEventListener("keydown", (e) => {
       if (Application.state !== "presenter") return;
 
-      if (claimInput.root.is(":focus")) {
+      if (document.activeElement === claimInput) {
         if (e.key.toLowerCase() === "c") {
-          claimPanel.root.trigger("submit");
+          (claimPanel.root as HTMLFormElement).dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+          );
           e.preventDefault();
         }
         return;
@@ -53,14 +62,14 @@ export default class ControlPanel extends View {
 
       for (let i = 0; i < 13; i++) {
         if (e.key === this.hotkeys[i]) {
-          this.buttons[i].root.trigger("click");
+          this.buttons[i].root.click();
           return;
         }
       }
       if (e.key.toLowerCase() === "c") {
-        claimInput.root.trigger("focus");
+        claimInput.focus();
         e.preventDefault();
-        claimInput.root.val("");
+        claimInput.value = "";
       }
     });
   }
@@ -84,16 +93,22 @@ export default class ControlPanel extends View {
       const cards = value.hand.cardsWithPlayInfo;
       this.buttons.forEach((button, index) => {
         if (index >= this.buttons.length) return;
-        button.root.toggleClass("clubs spades hearts diamonds", false);
-        button.root.prop("hidden", true);
+        button.toggleClass("clubs spades hearts diamonds", false);
+        button.hide();
 
         if (index >= cards.length) {
           return;
         }
-        button.root.children(".content-label")[0].innerText = cards[index].card.toShortString();
-        button.root.toggleClass(SuitHelper.toString(cards[index].card.suit).toLowerCase(), true);
-        button.root.prop("disabled", cards[index].played);
-        button.root.prop("hidden", false);
+        button.toggleClass(
+          SuitHelper.toString(cards[index].card.suit).toLowerCase(),
+          true
+        );
+        const label = button.root.querySelector(
+          ".content-label"
+        ) as HTMLElement;
+        label.innerText = cards[index].card.toShortString();
+        (button.root as HTMLButtonElement).disabled = cards[index].played;
+        button.root.hidden = false;
       });
     }
   }
@@ -101,13 +116,13 @@ export default class ControlPanel extends View {
   attachGame(game?: Game): void {
     if (!game) return;
 
-    this.root.hide();
+    this.hide();
 
     Object.values(game.players).forEach((player) => {
       player.playRequested.sub((e) => {
         if (e.player instanceof PresentationPlayer) {
           this.player = e.player;
-          this.root.show();
+          this.show();
         } else this.player = undefined;
       });
     });
