@@ -25,7 +25,7 @@ export class CardsInputValidator {
         ar.push(`Irregular card count: ${cards.length} instead of ${correct}`);
       }
       cards.forEach((card) => {
-        if (card.value === CardValue.Other) return;
+        if (card.value === CardValue.Other || card.value === CardValue.Honor || card.value === CardValue.X) return;
         if (unique.has(card.toString())) ar.push(`Duplicate card: ${card}`);
         unique.add(card.toString());
       });

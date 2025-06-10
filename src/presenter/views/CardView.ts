@@ -15,7 +15,7 @@ export default class CardView extends View {
   static getCardPath(model: Card): string {
     if (model.value === CardValue.Other) return CardView.images("O");
     const s = SuitHelper.toString(model.suit).charAt(0).toUpperCase();
-    const v = model.value <= 9 ? model.value.toString() : CardValueHelper.toString(model.value).charAt(0).toUpperCase();
+    const v = model.value <= 9 && model.value >= 2 ? model.value.toString() : CardValueHelper.toString(model.value).charAt(0).toUpperCase();
     return CardView.images(`${s}-${v}`);
   }
 

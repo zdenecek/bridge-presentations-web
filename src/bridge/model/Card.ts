@@ -14,7 +14,9 @@ enum CardValue {
   Jack = 11,
   Queen = 12,
   King = 13,
-  Ace = 14,
+  Ace = 15,
+  Honor = 14,
+  X = 0,
 }
 
 class CardValueHelper {
