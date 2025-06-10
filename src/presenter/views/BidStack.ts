@@ -2,7 +2,6 @@ import { Bid } from "../../bridge/model/Bid";
 import { Position } from "../../bridge/model/Position";
 import { BidView } from "./BidView";
 import View from "./View";
-import { runLater } from "@/bridge/utils/runLater";
 
 export class BidStack extends View {
   bidViews: BidView[] = [];
@@ -36,7 +35,7 @@ export class BidStack extends View {
 
     // interesting fix, the image doesnt load instantenously
     if (this.bidViews[0].width === 0) {
-      runLater(() => this.updateSpacing(), 2);
+      setTimeout(() => this.updateSpacing(), 2);
       return;
     }
 

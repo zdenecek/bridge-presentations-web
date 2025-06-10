@@ -1,5 +1,4 @@
 import { ISimpleEvent, SimpleEventDispatcher } from "ste-simple-events";
-import { runLater } from "../utils/runLater";
 import { Auction } from "./Auction";
 import { Bid } from "./Bid";
 import { Card } from "./Card";
@@ -43,8 +42,8 @@ export class UndoableGame extends Game {
 
     this.currentlyRequestedPlayer?.cancelRequestToBid();
 
-    runLater(() => this._undoMade.dispatch({ game: this }));
-    runLater(() => {
+    setTimeout(() => this._undoMade.dispatch({ game: this }));
+    setTimeout(() => {
       this.currentlyRequestedPlayer = this.players[lastBid.position];
       this.players[lastBid.position].requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, player));
     });
@@ -71,10 +70,10 @@ export class UndoableGame extends Game {
       card.played = false;
       lastTrick.currentToPlay = lastCard.player;
 
-      runLater(() => this._undoMade.dispatch({ game: this }));
-      if (lastTrick.cards.length === 3) runLater(() => this._trickCountChanged.dispatch({ game: this }));
+      setTimeout(() => this._undoMade.dispatch({ game: this }));
+      if (lastTrick.cards.length === 3) setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
 
-      runLater(() => {
+      setTimeout(() => {
         this.currentlyRequestedPlayer = this.players[lastCard.player];
         this.currentlyRequestedPlayer.requestPlay(this, lastTrick, (player: Player, card: Card) => this.addCard(lastTrick, card, player));
       });
@@ -84,10 +83,10 @@ export class UndoableGame extends Game {
   protected undoClaim(): void {
     this.claimed = false;
     this.claimedTricks = { ns: 0, ew: 0 };
-    runLater(() => this._undoMade.dispatch({ game: this }));
-    runLater(() => this._trickCountChanged.dispatch({ game: this }));
+    setTimeout(() => this._undoMade.dispatch({ game: this }));
+    setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
     const lastTrick = this.tricks[this.tricks.length - 1];
-    runLater(() => {
+    setTimeout(() => {
       if (lastTrick.currentToPlay == undefined) throw new Error("No current player");
       this.currentlyRequestedPlayer = this.players[lastTrick.currentToPlay];
       this.currentlyRequestedPlayer.requestPlay(this, lastTrick, (player: Player, card: Card) => this.addCard(lastTrick, card, player));

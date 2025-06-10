@@ -3,7 +3,6 @@ import { Position, PositionList } from "../../bridge/model/Position";
 import { BidStack } from "./BidStack";
 import { UndoableAuction } from "../../bridge/model/UndoableAuction";
 import CenterPanelView from "./CenterPanelView";
-import { runLater } from "@/bridge/utils/runLater";
 import { UndoableGame } from "@/bridge/model/UndoableGame";
 import { PresentationGame } from "@/bridge/model/PresentationGame";
 
@@ -49,7 +48,7 @@ export default class AuctionView {
 
     game?.biddingEnded.sub(() => {
       // check again because of undo :)
-      runLater(() => {
+      setTimeout(() => {
         if (game.state !== "bidding") this.visible = false;
       }, 1500);
     });

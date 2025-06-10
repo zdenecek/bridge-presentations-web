@@ -7,7 +7,6 @@ import { Bid } from "./Bid";
 import { Auction } from "./Auction";
 import { Contract } from "./Contract";
 import { ISimpleEvent, SimpleEventDispatcher } from "strongly-typed-events";
-import { runLater } from "../utils/runLater";
 import { Vulnerability } from "./Vulnerability";
 import { Result } from "./Result";
 
@@ -154,8 +153,8 @@ export class Game {
   }
 
   public start(firstToPlay: Position): void {
-    runLater(() => this._gameStarted.dispatch({ game: this }));
-    runLater(() => this.startBidding(firstToPlay));
+    setTimeout(() => this._gameStarted.dispatch({ game: this }));
+    setTimeout(() => this.startBidding(firstToPlay));
   }
 
   public claim(tricksNS: number): void {
@@ -168,9 +167,9 @@ export class Game {
 
     this.currentlyRequestedPlayer?.cancelRequestToPlay();
 
-    runLater(() => this._claimMade.dispatch({ game: this }));
-    runLater(() => this._trickCountChanged.dispatch({ game: this }));
-    runLater(() => this.endPlay());
+    setTimeout(() => this._claimMade.dispatch({ game: this }));
+    setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
+    setTimeout(() => this.endPlay());
   }
 
   protected end(): void {
@@ -181,18 +180,18 @@ export class Game {
         this.finalContract === "passed" ? undefined : this.trickCount(PositionHelper.side(this.finalContract.declarer))
       );
     this.state = "finished";
-    runLater(() => this._gameEnded.dispatch({ game: this }));
+    setTimeout(() => this._gameEnded.dispatch({ game: this }));
   }
 
   protected startPlay(firstToPlay: Position): void {
     this.state = "cardplay";
-    runLater(() => this._cardplayStarted.dispatch({ game: this }));
-    runLater(() => this.startNewTrick(firstToPlay));
+    setTimeout(() => this._cardplayStarted.dispatch({ game: this }));
+    setTimeout(() => this.startNewTrick(firstToPlay));
   }
 
   protected endPlay(): void {
-    runLater(() => this._cardplayEnded.dispatch({ game: this }));
-    runLater(() => this.end());
+    setTimeout(() => this._cardplayEnded.dispatch({ game: this }));
+    setTimeout(() => this.end());
   }
 
   protected makeAuction(dealer: Position): Auction {
@@ -204,8 +203,8 @@ export class Game {
     this.state = "bidding";
     const player = this.players[dealer];
 
-    runLater(() => this._biddingStarted.dispatch({ game: this }));
-    runLater(() => {
+    setTimeout(() => this._biddingStarted.dispatch({ game: this }));
+    setTimeout(() => {
       this.currentlyRequestedPlayer = player;
       player.requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, player));
     });
@@ -216,14 +215,14 @@ export class Game {
     if (!this.auction.isFinished || !this.auction.finalContract) throw Error("Bidding not finished");
     this.finalContract = this.auction.finalContract;
 
-    runLater(() => this._biddingEnded.dispatch({ game: this }));
+    setTimeout(() => this._biddingEnded.dispatch({ game: this }));
 
-    if (this.finalContract === "passed") runLater(() => this.end());
+    if (this.finalContract === "passed") setTimeout(() => this.end());
     else {
       const contract = this.finalContract;
       this.trumps = this.finalContract.suit;
-      if (this.cardplayShouldEnd()) runLater(() => this.endPlay());
-      else runLater(() => this.startPlay(this.nextToPlay(contract.declarer)));
+      if (this.cardplayShouldEnd()) setTimeout(() => this.endPlay());
+      else setTimeout(() => this.startPlay(this.nextToPlay(contract.declarer)));
     }
   }
 
@@ -237,8 +236,8 @@ export class Game {
     const player = this.players[firstToPlay];
     this.tricks.push(trick);
 
-    runLater(() => this._trickStarted.dispatch({ game: this, trick }));
-    runLater(() => {
+    setTimeout(() => this._trickStarted.dispatch({ game: this, trick }));
+    setTimeout(() => {
       this.currentlyRequestedPlayer = player;
       player.requestPlay(this, trick, (player: Player, card: Card) => this.addCard(trick, card, player));
     });
@@ -254,13 +253,13 @@ export class Game {
     const winner = trick.winner?.player;
     if (!winner) throw Error(`Cannot end unfinished trick: ${trick}`);
 
-    runLater(() => this._trickEnded.dispatch({ game: this, trick }));
-    runLater(() => this._trickCountChanged.dispatch({ game: this }));
+    setTimeout(() => this._trickEnded.dispatch({ game: this, trick }));
+    setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
 
     if (this.cardplayShouldEnd()) {
-      runLater(() => this.endPlay());
+      setTimeout(() => this.endPlay());
     } else {
-      runLater((() => this.startNewTrick(winner)).bind(this));
+      setTimeout((() => this.startNewTrick(winner)).bind(this));
     }
   }
 
@@ -277,13 +276,13 @@ export class Game {
     }
 
     trick.addCard(card);
-    runLater(() => this._cardPlayed.dispatch({ card, trick, player, game: this }));
-    if (this.tricks.length === 1 && trick.cards.length === 1) runLater(() => this._leadMade.dispatch({ card, trick, player, game: this }));
+    setTimeout(() => this._cardPlayed.dispatch({ card, trick, player, game: this }));
+    if (this.tricks.length === 1 && trick.cards.length === 1) setTimeout(() => this._leadMade.dispatch({ card, trick, player, game: this }));
 
-    if (trick.isFinished) runLater(() => this.endTrick());
+    if (trick.isFinished) setTimeout(() => this.endTrick());
     else {
       const nextPlayer = this.players[this.nextToPlay(player.position)];
-      runLater(() => {
+      setTimeout(() => {
         this.currentlyRequestedPlayer = nextPlayer;
         nextPlayer.requestPlay(this, trick, (_: Player, card: Card) => this.addCard(trick, card, nextPlayer));
       });
@@ -300,12 +299,12 @@ export class Game {
     const success = this.auction.addBid(bid, player.position);
     if (!success) return false;
 
-    runLater(() => this._bidMade.dispatch({ bid, player, game: this }));
-    if (this.auction.isFinished) runLater(() => this.endBidding());
+    setTimeout(() => this._bidMade.dispatch({ bid, player, game: this }));
+    if (this.auction.isFinished) setTimeout(() => this.endBidding());
     else {
       const nextPlayer = this.players[this.nextToPlay(player.position)];
       this.currentlyRequestedPlayer = nextPlayer;
-      runLater(() => nextPlayer.requestBid(this, (_: Player, bid: Bid) => this.addBid(bid, nextPlayer)));
+      setTimeout(() => nextPlayer.requestBid(this, (_: Player, bid: Bid) => this.addBid(bid, nextPlayer)));
     }
 
     return true;

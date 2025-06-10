@@ -1,4 +1,3 @@
-import { runLater } from "../utils/runLater";
 import { Auction } from "./Auction";
 import { Bid } from "./Bid";
 import { Contract } from "./Contract";
@@ -58,20 +57,20 @@ export class PresentationGame extends UndoableGame {
   }
 
   public start(firstToPlay: Position, trumps?: Suit | undefined): void {
-    runLater(() => this._gameStarted.dispatch({ game: this }));
+    setTimeout(() => this._gameStarted.dispatch({ game: this }));
 
-    if (this.bidding) runLater(() => this.startBidding(firstToPlay));
+    if (this.bidding) setTimeout(() => this.startBidding(firstToPlay));
     else {
       if (this.finalContract) {
         if (this.finalContract == "passed") {
-          runLater(() => this.end());
+          setTimeout(() => this.end());
           return;
         }
         firstToPlay = PositionHelper.nextPosition(this.finalContract.declarer);
       } else if (trumps) {
         this.trumps = trumps;
       }
-      runLater(() => this.startPlay(firstToPlay));
+      setTimeout(() => this.startPlay(firstToPlay));
     }
   }
 
