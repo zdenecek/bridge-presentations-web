@@ -74,8 +74,10 @@ export class Parser {
         return CardValue.King;
       case "A":
         return CardValue.Ace;
+      case "H":
+       return CardValue.Honor; 
       case "X":
-        return CardValue.Other;
+        return CardValue.X;
       default:
         if (strict) throw new Error(`Unknown character: ${input}`);
         return CardValue.Other;
