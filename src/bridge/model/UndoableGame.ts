@@ -57,7 +57,7 @@ export class UndoableGame extends Game {
     this.currentlyRequestedPlayer?.cancelRequestToPlay();
 
     if (lastTrick.cards.length === 0) {
-      this.tricks.pop();
+      this.tricks = this.tricks.slice(0, -1);
     }
 
     if (this.tricks.length === 0) {
@@ -110,11 +110,9 @@ export class UndoableGame extends Game {
   }
 
   protected popCard(trick: Trick): CardInTrick | undefined {
-    const lastCard = trick.cards.pop();
-    if (lastCard) {
-      delete trick.cardsByPosition[lastCard.player];
-      trick.currentToPlay = lastCard.player;
-    }
+    const lastCard = trick.cards[trick.cards.length - 1];
+    if (lastCard) trick.currentToPlay = lastCard.player;
+    trick.cards = trick.cards.slice(0, -1);
     return lastCard;
   }
 }

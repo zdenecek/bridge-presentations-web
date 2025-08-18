@@ -9,12 +9,14 @@ export interface CardInTrick {
 }
 
 export class Trick {
-  currentToPlay?: Position;
-  _winner: CardInTrick | undefined;
-  cardsByPosition: PartialPositionList<CardInTrick> = {};
-  cards: Array<CardInTrick> = [];
+  public currentToPlay?: Position;
+  public cards: Array<CardInTrick> = [];
+  public firstToPlay: Position;
+  public trumps: Suit;
 
-  constructor(public firstToPlay: Position, public trumps: Suit) {
+  constructor(firstToPlay: Position = Position.North, trumps: Suit = Suit.NoTrump) {
+    this.firstToPlay = firstToPlay;
+    this.trumps = trumps;
     this.currentToPlay = firstToPlay;
   }
 
@@ -27,36 +29,39 @@ export class Trick {
     if (this.currentToPlay === undefined) throw Error("Cannot add a card to finished trick");
 
     const c = { card, player: this.currentToPlay, trick: this };
-
-    this.cardsByPosition[this.currentToPlay] = c;
-    this.cards.push(c);
+    
+    // Use array methods that create new arrays for better reactivity
+    this.cards = [...this.cards, c];
 
     this.currentToPlay = this.nextToPlay();
   }
 
   getCards(): PartialPositionList<CardInTrick> {
-    return this.cardsByPosition;
+    // Create a position map from the cards array
+    const result: PartialPositionList<CardInTrick> = {};
+    this.cards.forEach(card => {
+      result[card.player] = card;
+    });
+    return result;
   }
 
+  // Use a computed property for reactive data
   get isFinished(): boolean {
     return this.cards.length == 4;
   }
 
-  public get winner(): CardInTrick | undefined {
+  get winner(): CardInTrick | undefined {
     if (!this.isFinished) return undefined;
-    if (this._winner) return this._winner;
 
-    this._winner = Object.values(this.cardsByPosition).reduce((current, next) => {
+    // Calculate winner on-the-fly without memoization
+    return this.cards.reduce((current, next) => {
       if (!current) return next;
-      if (!next) return current;
       if (current.card.suit == next.card.suit) {
         return current.card.value >= next.card.value ? current : next;
       } else {
         return next.card.suit == this.trumps ? next : current;
       }
     });
-
-    return this._winner;
   }
 
   suit(suit: Suit): Array<CardInTrick> {
@@ -65,5 +70,10 @@ export class Trick {
 
   toString(): string {
     return `(${this.firstToPlay} leads; ${this.cards.map((c) => c.card.toString()).join(", ")})`;
+  }
+
+  // Helper method specifically for Vue templates
+  getCardByPosition(position: Position): CardInTrick | undefined {
+    return this.cards.find(card => card.player === position);
   }
 }

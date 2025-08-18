@@ -234,8 +234,8 @@ export class Game {
   protected startNewTrick(firstToPlay: Position): void {
     const trick = this.makeTrick(firstToPlay);
     const player = this.players[firstToPlay];
-    this.tricks.push(trick);
-
+    this.tricks = [...this.tricks, trick];
+    
     setTimeout(() => this._trickStarted.dispatch({ game: this, trick }));
     setTimeout(() => {
       this.currentlyRequestedPlayer = player;

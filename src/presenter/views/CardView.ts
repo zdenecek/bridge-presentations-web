@@ -29,9 +29,10 @@ export default class CardView extends View {
 
   private static testCard?: CardView;
 
-  static initTestCard(view: BaseView): void {
+  static initTestCard(view: HTMLElement): void {
     this.testCard = new CardView(new Card());
-    view.addSubView(this.testCard);
+    console.log("testCard", this.testCard);
+    view.appendChild(this.testCard.root[0]);
     this.testCard.root.addClass("test-card");
   }
 

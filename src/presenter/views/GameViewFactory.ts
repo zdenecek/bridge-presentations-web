@@ -88,21 +88,21 @@ export default class GameViewFactory {
     return frameView;
   }
 
-  static makeTrickView(cardViews: Map<Card, CardView>, gameView: GameView, frameView: View): TrickView {
-    const trickView = new TrickView(cardViews);
-    frameView.addSubView(trickView);
+  // static makeTrickView(cardViews: Map<Card, CardView>, gameView: GameView, frameView: View): TrickView {
+  //   const trickView = new TrickView(cardViews);
+  //   frameView.addSubView(trickView);
 
-    gameView.updateDispatched.sub((e) => {
-      if (e.game.currentTrick) {
-        trickView.attachTrick(e.game.currentTrick);
-      } else {
-        trickView.detachTrick();
-      }
-      trickView.update();
-    });
+  //   gameView.updateDispatched.sub((e) => {
+  //     if (e.game.currentTrick) {
+  //       trickView.attachTrick(e.game.currentTrick);
+  //     } else {
+  //       trickView.detachTrick();
+  //     }
+  //     trickView.update();
+  //   });
 
-    return trickView;
-  }
+  //   return trickView;
+  // }
 
   static makeCenterPanelView(gameView: GameView, frameView: CenterFrameView): CenterPanelView {
     const centerPanelView = new CenterPanelView(frameView);
@@ -120,52 +120,52 @@ export default class GameViewFactory {
     return centerPanelView;
   }
 
-  static makeCards(gameView: GameView, cardViews: Map<Card, CardView>, game?: PresentationGame): void {
-    cardViews.forEach((cardView) => cardView.detach());
-    cardViews.clear();
+  // static makeCards(gameView: GameView, cardViews: Map<Card, CardView>, game?: PresentationGame): void {
+  //   cardViews.forEach((cardView) => cardView.detach());
+  //   cardViews.clear();
 
-    if (!game) return;
+  //   if (!game) return;
 
-    const trick_cards = game.tricks.flatMap((trick) => trick.cards);
-    trick_cards.forEach(({ card }) => {
-      const view = new CardView(card);
-      cardViews.set(card, view);
-    });
+  //   const trick_cards = game.tricks.flatMap((trick) => trick.cards);
+  //   trick_cards.forEach(({ card }) => {
+  //     const view = new CardView(card);
+  //     cardViews.set(card, view);
+  //   });
 
-    game.allPlayers.forEach((player) => {
-      player.hand?.cards.forEach((card) => {
-        const view = new CardView(card);
-        cardViews.set(card, view);
-      });
+  //   game.allPlayers.forEach((player) => {
+  //     player.hand?.cards.forEach((card) => {
+  //       const view = new CardView(card);
+  //       cardViews.set(card, view);
+  //     });
 
-      player.cardPlayed.sub((e) => {
-        e.player.hand.cards.forEach((card) => {
-          const cardView = this.getCardView(cardViews, card);
-          cardView.setPlayable(false);
-          cardView.onclick = undefined;
-        });
-        const cardView = this.getCardView(cardViews, e.card);
-        cardView.setPlayable(false);
-        cardView.onclick = undefined;
-      });
+  //     player.cardPlayed.sub((e) => {
+  //       e.player.hand.cards.forEach((card) => {
+  //         const cardView = this.getCardView(cardViews, card);
+  //         cardView.setPlayable(false);
+  //         cardView.onclick = undefined;
+  //       });
+  //       const cardView = this.getCardView(cardViews, e.card);
+  //       cardView.setPlayable(false);
+  //       cardView.onclick = undefined;
+  //     });
 
-      player.playRequestCancelled.sub((e) => {
-        e.player.hand.cards.forEach((card) => this.getCardView(cardViews, card).setPlayable(false));
-      });
+  //     player.playRequestCancelled.sub((e) => {
+  //       e.player.hand.cards.forEach((card) => this.getCardView(cardViews, card).setPlayable(false));
+  //     });
 
-      player.playRequested.sub((e) => {
-        let playables = e.player.hand.cards;
-        if (e.trick.cards.length > 0) playables = playables.filter((c) => c.suit == e.trick.cards[0]?.card.suit);
-        if (playables.length == 0) playables = e.player.hand.cards;
+  //     player.playRequested.sub((e) => {
+  //       let playables = e.player.hand.cards;
+  //       if (e.trick.cards.length > 0) playables = playables.filter((c) => c.suit == e.trick.cards[0]?.card.suit);
+  //       if (playables.length == 0) playables = e.player.hand.cards;
 
-        playables.forEach((card) => {
-          const cardView = this.getCardView(cardViews, card);
-          cardView.setPlayable(true, gameView.dummy === player.position);
-          cardView.onclick = () => (player as PresentationPlayer).playCard(card);
-        });
-      });
-    });
-  }
+  //       playables.forEach((card) => {
+  //         const cardView = this.getCardView(cardViews, card);
+  //         cardView.setPlayable(true, gameView.dummy === player.position);
+  //         cardView.onclick = () => (player as PresentationPlayer).playCard(card);
+  //       });
+  //     });
+  //   });
+  // }
 
   static makeSidePanel(gameView: GameView): View {
 
@@ -229,52 +229,52 @@ export default class GameViewFactory {
     return sidePanel;
   }
 
-  static makeHandViews(gameView: GameView, cardViews: Map<Card, CardView>, mainView: View): PositionList<OneDimensionalHandView> {
-    const handViews = {} as PositionList<OneDimensionalHandView>;
-    PositionHelper.all().forEach((position) => {
-      const rotation = position === Position.East ? Rotation.Right : position === Position.West ? Rotation.Left : Rotation.Top;
-      const view = new OneDimensionalHandView(cardViews, position, rotation);
-      view.addSubView;
-      handViews[position] = view;
-    });
-    Object.values(handViews).forEach((handView) => {
-      mainView.addSubView(handView);
-    });
-    gameView.updateDispatched.sub(() => Object.values(handViews).forEach((handView) => handView.update()));
+  // static makeHandViews(gameView: GameView, cardViews: Map<Card, CardView>, mainView: View): PositionList<OneDimensionalHandView> {
+  //   const handViews = {} as PositionList<OneDimensionalHandView>;
+  //   PositionHelper.all().forEach((position) => {
+  //     const rotation = position === Position.East ? Rotation.Right : position === Position.West ? Rotation.Left : Rotation.Top;
+  //     const view = new OneDimensionalHandView(cardViews, position, rotation);
+  //     view.addSubView;
+  //     handViews[position] = view;
+  //   });
+  //   Object.values(handViews).forEach((handView) => {
+  //     mainView.addSubView(handView);
+  //   });
+  //   gameView.updateDispatched.sub(() => Object.values(handViews).forEach((handView) => handView.update()));
 
-    gameView.onEachGame((game) => {
-      game.allPlayers.forEach((player) => {
-        handViews[player.position].hand = player.hand;
+  //   gameView.onEachGame((game) => {
+  //     game.allPlayers.forEach((player) => {
+  //       handViews[player.position].hand = player.hand;
 
-        player.hand.cardAdded.sub(() => {
-          handViews[player.position].update();
-        });
-      });
-    });
+  //       player.hand.cardAdded.sub(() => {
+  //         handViews[player.position].update();
+  //       });
+  //     });
+  //   });
 
-    gameView.dummyChanged.sub(({ gameView }) => {
-      Object.values(handViews).forEach((handView) => {
-        if (gameView.dummy && PositionHelper.side(handView.position) === PositionHelper.side(gameView.dummy))
-          handView.prioritizedSuit = gameView.game?.trumps;
-        else handView.prioritizedSuit = undefined;
-      });
-    });
+  //   gameView.dummyChanged.sub(({ gameView }) => {
+  //     Object.values(handViews).forEach((handView) => {
+  //       if (gameView.dummy && PositionHelper.side(handView.position) === PositionHelper.side(gameView.dummy))
+  //         handView.prioritizedSuit = gameView.game?.trumps;
+  //       else handView.prioritizedSuit = undefined;
+  //     });
+  //   });
 
-    gameView.gameChanged.sub(() => {
-      Object.values(handViews).forEach((handView) => {
-        handView.prioritizedSuit = undefined;
-      });
-    });
+  //   gameView.gameChanged.sub(() => {
+  //     Object.values(handViews).forEach((handView) => {
+  //       handView.prioritizedSuit = undefined;
+  //     });
+  //   });
 
-    gameView.visibilityToggle.sub(
-      ({ position, value }) => (handViews[position].reverse = value !== undefined ? !value : !handViews[position].reverse)
-    );
-    gameView.dummyChanged.sub(({ gameView }) => {
-      Object.entries(handViews).forEach(([position, handView]) => (handView.dummy = position === gameView.dummy));
-    });
+  //   gameView.visibilityToggle.sub(
+  //     ({ position, value }) => (handViews[position].reverse = value !== undefined ? !value : !handViews[position].reverse)
+  //   );
+  //   gameView.dummyChanged.sub(({ gameView }) => {
+  //     Object.entries(handViews).forEach(([position, handView]) => (handView.dummy = position === gameView.dummy));
+  //   });
 
-    return handViews;
-  }
+  //   return handViews;
+  // }
 
   static makeAuctionHistoryView(gameView: GameView): View {
     const auctionHistoryView = new BiddingHistoryView();

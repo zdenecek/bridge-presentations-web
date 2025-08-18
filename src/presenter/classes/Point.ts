@@ -26,6 +26,10 @@ class Point {
   moveBy(vector: Vector): Point {
     return new Point(this.x + vector.x, this.y + vector.y);
   }
+
+  toString(): string {
+    return `(${this.x.toFixed(2)}, ${this.y.toFixed(2)})`;
+  }
 }
 
 export { Point };

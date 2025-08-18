@@ -176,7 +176,7 @@ import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
 import { Contract, NonPassedContract } from "@/bridge/model/Contract";
 import { DummyOptions } from "@/presenter/views/GameView";
-import { validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
+import { ConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import Arrow from "@/presentations/components/Arrow.vue";
 
 export default defineComponent({
@@ -194,6 +194,12 @@ export default defineComponent({
         window.addEventListener("keydown", (e) => {
             if (e.key === "+") this.submit();
         });
+
+    },
+    mounted() {
+    
+        this.setOptions(  { "cards": { "north": "AKQJ AKQ AKQ AKQ", "south": "AKQJ AKQ AKQ AKQ", "east": "AKQJ AKQ AKQ AKQ", "west": "AKQJ AKQ AKQ AKQ" }, "fake": { "ns": 0, "ew": 0 }, "firstPlayer": "west", "bidding": true, "trumps": 5, "dummy": "auto", "staticDummyPosition": "north", "vulnerability": "none", "activePositions": ["north", "east", "south", "west"] } as ConfiguratorOptions )
+    
     },
     methods: {
         submit() {
@@ -214,7 +220,9 @@ export default defineComponent({
         },
         load(event: Event) {
             (this.$refs.loadform as HTMLElement).blur();
-            loadJson(event.target as FileEventTarget).then(a => {
+            loadJson(event.target as FileEventTarget).then(this.setOptions);
+        },
+        setOptions(a?: ConfiguratorOptions) {
                 if (!a) return;
                 this.options = a
                 this.fakeTricks = a.fake?.ns > 0 || a.fake?.ew > 0;
@@ -222,8 +230,7 @@ export default defineComponent({
                 this.fakeAuction = a.bidding;
                 if (this.options.contract && this.options.contract !== "passed")
                     this.options.contract = new NonPassedContract(this.options.contract.suit, this.options.contract.level, this.options.contract.declarer, this.options.contract.dbl);
-            });
-        },
+            },
         loadClicked() {
             (this.$refs.loadform as HTMLElement).click();
         },

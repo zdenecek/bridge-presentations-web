@@ -1,12 +1,7 @@
 @use "variables";
 @use "bidding";
 
-.test-card {
-    position: absolute;
-    filter: opacity(0);
-    // top: 100vh;
-    // left: 100vw;
-}
+
 
 .presenter-app {
     // background-color: blanchedalmond;
@@ -172,84 +167,7 @@ flex-direction: column;
     transform-origin: 50% 50%;
 }
 
-.main {
-    //border: variables.$primary solid 1px;
-    padding: variables.$margin;
-    padding-top: variables.$top-space;
 
-    aspect-ratio: 1;
-    grid-column: 2;
-    grid-row: 1;
-    display: grid;
-    $template: variables.$card-height calc(100vh - 2*variables.$card-height - variables.$margin - variables.$top-space) variables.$card-height;
-    grid-template-columns: $template;
-    grid-template-rows:  $template;
-
-    &.expanded {
-        grid-template-rows: calc(variables.$card-height * 1.6) auto variables.$card-height;
-    }
-
-    .hand-north {
-        grid-column: 2;
-    }
-    .hand-south {
-        grid-column: 2;
-        grid-row: 3;
-    }
-    .hand-west {
-        grid-column: 1;
-        grid-row: 2;
-    }
-    .hand-east {
-        grid-column: 3;
-        grid-row: 2;
-    }
-}
-
-.trick-view {
-    position: relative;
-}
-
-.trick-view-origin {
-    position: absolute;
-}
-
-.trick-view-origin-north {
-    width: 100%;
-    div {
-        margin: 0 auto;
-        height: variables.$card-height;
-        width: variables.$card-width;
-    }
-}
-.trick-view-origin-east {
-    height: 100%;
-    right: 0;
-    display: flex;
-    align-items: center;
-    div {
-        width: variables.$card-height;
-        height: variables.$card-width;
-    }
-}
-.trick-view-origin-south {
-    width: 100%;
-    bottom: 0;
-    div {
-        margin: 0 auto;
-        height: variables.$card-height;
-        width: variables.$card-width;
-    }
-}
-.trick-view-origin-west {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    div {
-        width: variables.$card-height;
-        height: variables.$card-width;
-    }
-}
 
 .card {
     height: variables.$card-height;
@@ -259,7 +177,6 @@ flex-direction: column;
     transition: transform ease 1s;
     top: 0;
     left: 0;
-    transform-origin: 0 0;
 
 
     &.playable img,
