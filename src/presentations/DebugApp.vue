@@ -1,6 +1,8 @@
 <template>
   <bid-stack :bids="bids" id="bid-stack" />
-  <bid-stack :bids="bids" :rotation="Orientation.Right" id="bid-stack2" />
+  <bid-stack :bids="bids" :rotation="Orientation.Right" id="bid-stack2" /> 
+  <bid-stack :bids="bids" :rotation="Orientation.Down" id="bid-stack3" />
+  <bid-stack :bids="bids" :rotation="Orientation.Left" id="bid-stack4" />
   <bid-view :bid="passBid" :rotation="rotation" id="bid-view"></bid-view>
 </template>
 
@@ -50,5 +52,17 @@ window.addEventListener('keydown', (e) => {
   width: 100px;
   height: 300px;
   background-color: blue;
+}
+
+#bid-stack3 {
+  width: 300px;
+  height: 100px;
+  background-color: green;
+}
+
+#bid-stack4 {
+  width: 100px;
+  height: 300px;
+  background-color: red;
 }
 </style>

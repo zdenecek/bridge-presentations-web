@@ -1,12 +1,13 @@
 <template>
   <div :class="['bid-stack-container']" ref="container">
     <BidView v-for="(bid, index) in bids" :key="index" :bid="bid" :style="{
-      left: bidPosition[index] + 'px',
+      [positionOrigin]: bidPosition[index] + 'px',
+      zIndex: reverseZIndex ? 30 - index : index,
       ...(isHorizontal(rotation) ? { width: 'auto', height: '100%' } :  { width: '100%' })
-    }" :rotation="rotation" :class="['bid-animate']" ref="bidRefs" />
-
+    }" :rotation="rotation" :class="['bid-animate']" ref="bidRefs" >
+    </BidView>
     <div class="debug" v-if="debug">
-      {{ width }} {{ usableWidth }}
+      {{ width }} {{ usableSize }}
     </div>
   </div>
 </template>
@@ -28,9 +29,18 @@ const props = withDefaults(defineProps<{
 const container = useTemplateRef<HTMLDivElement>('container');
 const bidRefs = useTemplateRef<typeof BidView[]>('bidRefs');
 
-const { width } = useElementSize(container);
-const bidWidth = computed(() => bidRefs.value?.[0].width);
-const usableWidth = computed(() => width.value - (bidWidth.value || 0));
+const { width, height } = useElementSize(container);
+const mainAxisSize = computed(() => isHorizontal(props.rotation) ? width.value : height.value);
+const bidMainAxisSize = computed(() => isHorizontal(props.rotation) ? bidRefs.value?.[0].width : bidRefs.value?.[0].height);
+const usableSize = computed(() => mainAxisSize.value - (bidMainAxisSize.value || 0));
+
+const reverseZIndex = computed(() => props.rotation === Orientation.Left || props.rotation === Orientation.Down);
+
+const positionOrigin = computed(() => ({[Orientation.Up]: 'left',
+[Orientation.Right]: 'top',
+[Orientation.Down]: 'left',
+[Orientation.Left]: 'top',
+})[props.rotation]);
 
 /**
  * Computes the horizontal positions (in pixels) for each bid in the stack.
@@ -48,8 +58,8 @@ const bidPosition = computed(() => {
   if (props.bids.length === 1) return [0];
 
 
-  const minSpace = bidWidth.value ? (bidWidth.value / 2) : 35;
-  const space = Math.min(minSpace, usableWidth.value / (props.bids.length - 1));
+  const minSpace = bidMainAxisSize.value ? (bidMainAxisSize.value / 2) : 35;
+  const space = Math.min(minSpace, usableSize.value / (props.bids.length - 1));
   return [...Array(props.bids.length).keys()].map((_, i) => i * space);
 });
 
@@ -65,10 +75,11 @@ const debug = inject("debug") as boolean;
   }
 
   .bid:hover {   
-    z-index: 10;
+    z-index: 100;
   }
 
   .bid-animate {
+    animation-fill-mode: initial;
     animation: flowFromTop 0.6s forwards;
     transform: translateY(-20px);
   }
