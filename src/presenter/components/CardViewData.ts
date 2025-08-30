@@ -1,6 +1,6 @@
 import { Card } from "../../bridge/model/Card";
 import { Point } from "../classes/Point";
-import { Orientation } from "../classes/Rotation";
+import { Orientation } from "../classes/Orientation";
 
 
 export class CardViewData {

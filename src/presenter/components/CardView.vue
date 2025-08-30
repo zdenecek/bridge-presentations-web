@@ -21,7 +21,7 @@
 import { computed, inject, useTemplateRef, watch } from 'vue';
 import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
 import { SuitHelper } from "../../bridge/model/Suit";
-import { Orientation } from "../classes/Rotation";
+import { Orientation } from "../classes/Orientation";
 import { CardViewData } from './CardViewData';
 
 // Props

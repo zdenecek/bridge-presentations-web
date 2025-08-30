@@ -2,12 +2,12 @@
   <div class="bidding-center-panel" :class="{ 'bidding-center-panel-auction': auctionVisible }">
     <div class="absolute" v-if="debug">
       <button @click="auctionVisible = !auctionVisible">Toggle auction</button>
-
     </div>
     <div class="bidding-center-panel-container">
       <slot></slot>
     </div>
     <BidStack v-for="position in positions" :key="position" :class="'bid-stack-'+ position "
+      :orientation="getOrientation(position)"
        :bids="getBidsForPosition(position)" />
   </div>
 </template>
@@ -18,6 +18,7 @@ import { Position, PositionHelper } from "../../bridge/model/Position";
 import { PresentationGame } from "../../bridge/model/PresentationGame";
 import { Bid } from "../../bridge/model/Bid";
 import BidStack from './BidStack.vue';
+import { Orientation } from '../classes/Orientation';
 
 const props = defineProps<{
   auctionVisible?: boolean;
@@ -39,6 +40,29 @@ const getBidsForPosition = (position: Position): Bid[] => {
     .map(bid => bid.bid) || [];
   console.log('bids', position, bids);
   return bids;
+};
+
+/**
+ * Maps bridge positions to orientations for proper bid stack display.
+ * Each position gets an orientation that matches the visual layout:
+ * - North: Up (bids flow down from top)
+ * - East: Right (bids flow left from right edge)
+ * - South: Down (bids flow up from bottom)
+ * - West: Left (bids flow right from left edge)
+ */
+const getOrientation = (position: Position): Orientation => {
+  switch (position) {
+    case Position.North:
+      return Orientation.Up;
+    case Position.East:
+      return Orientation.Right;
+    case Position.South:
+      return Orientation.Down;
+    case Position.West:
+      return Orientation.Left;
+    default:
+      return Orientation.Up;
+  }
 };
 </script>
 
@@ -89,11 +113,6 @@ const getBidsForPosition = (position: Position): Bid[] => {
       grid-row-start: 2;
       grid-row-end: 4;
       grid-column: 3;
-      flex-direction: column;
-      .bid-stack {
-        transform: rotate(90deg);
-        transform-origin: 50% 50%;
-      }
     }
 
     &-south {
@@ -103,17 +122,10 @@ const getBidsForPosition = (position: Position): Bid[] => {
     }
 
     &-west {
-      display: none;
       grid-column: 1;
       grid-row-start: 1;
       grid-row-end: 3;
-      flex-direction: column;
-
-      .bid-stack {
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
    
-      }
     }
   }
 }

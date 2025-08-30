@@ -23,7 +23,7 @@ import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
 import { Position } from "../../bridge/model/Position";
 import { Suit } from "../../bridge/model/Suit";
-import { Orientation, isHorizontal } from "../classes/Rotation";
+import { Orientation, isHorizontal } from "../classes/Orientation";
 import { Vector } from "../classes/Vector";
 import { Point } from "../classes/Point";
 import { getOffset } from '../utils/offset';

@@ -1,18 +1,18 @@
 <!--
   BidView.vue
 
-  This component displays a single bridge bid as an image, with support for rotation and dynamic sizing.
+  This component displays a single bridge bid as an image, with support for orientation and dynamic sizing.
   - The bid is rendered as an image (e.g., "1S", "Pass", "X", "XX") using preloaded PNG assets.
-  - The `rotation` prop controls the orientation of the bid (up, right, down, left), and the image is rotated accordingly using CSS classes.
+  - The `orientation` prop controls the orientation of the bid (up, right, down, left), and the image is rotated accordingly using CSS classes.
   - Sizing is controlled from the parent component.
   - The component exposes its DOM element and measured width/height for use by parent components (e.g., for stacking or layout).
 -->
 
 <template>
-  <div :class="['bid', bidClass, rotationClass]" ref="element" :style="isHorizontal(rotation) ? {} : {
+  <div :class="['bid', bidClass, rotationClass]" ref="element" :style="isHorizontal(orientation) ? {} : {
     height: width * ratio + 'px'
   }">
-    <img :src="imagePath" :alt="bid.toString()" :style="isHorizontal(rotation) ? {} : {
+    <img :src="imagePath" :alt="bid.toString()" :style="isHorizontal(orientation) ? {} : {
       height: width + 'px'
     }" />
   </div>
@@ -22,14 +22,14 @@
 import { computed, useTemplateRef } from 'vue';
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
-import { Orientation, isHorizontal } from '../classes/Rotation';
+import { Orientation, isHorizontal } from '../classes/Orientation';
 import { useElementSize } from '@vueuse/core';
 
 const props = withDefaults(defineProps<{
   bid: Bid;
-  rotation?: Orientation;
+  orientation?: Orientation;
 }>(), {
-  rotation: Orientation.Up
+  orientation: Orientation.Up
 });
 
 const element = useTemplateRef<HTMLDivElement>('element');
@@ -77,7 +77,7 @@ const imagePath = computed(() => getImagePath(props.bid));
 const bidClass = computed(() => getClass(props.bid));
 
 const rotationClass = computed(() => {
-  switch (props.rotation) {
+  switch (props.orientation) {
     case Orientation.Right:
       return 'rotate-90';
     case Orientation.Down:

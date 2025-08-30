@@ -1,6 +1,6 @@
 import { Card } from "@/bridge/model/Card";
 import { PositionList, PositionHelper, Position, Side } from "@/bridge/model/Position";
-import { Orientation } from "../classes/Rotation";
+import { Orientation } from "../classes/Orientation";
 import View from "./View";
 import AuctionView from "./AuctionView";
 import CardView from "./CardView";

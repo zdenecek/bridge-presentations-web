@@ -1,7 +1,7 @@
 import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
 import { SuitHelper } from "../../bridge/model/Suit";
 import { Point } from "../classes/Point";
-import { Orientation } from "../classes/Rotation";
+import { Orientation } from "../classes/Orientation";
 import View from "./View";
 import BaseView from "./BaseView";
 

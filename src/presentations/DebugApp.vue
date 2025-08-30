@@ -1,8 +1,8 @@
 <template>
   <bid-stack :bids="bids" id="bid-stack" />
-  <bid-stack :bids="bids" :rotation="Orientation.Right" id="bid-stack2" /> 
-  <bid-stack :bids="bids" :rotation="Orientation.Down" id="bid-stack3" />
-  <bid-stack :bids="bids" :rotation="Orientation.Left" id="bid-stack4" />
+  <bid-stack :bids="bids" :orientation="Orientation.Right" id="bid-stack2" /> 
+  <bid-stack :bids="bids" :orientation="Orientation.Down" id="bid-stack3" />
+  <bid-stack :bids="bids" :orientation="Orientation.Left" id="bid-stack4" />
   <bid-view :bid="passBid" :rotation="rotation" id="bid-view"></bid-view>
 </template>
 
@@ -13,7 +13,7 @@ import BidView from '@/presenter/components/BidView.vue';
 import { Bid, ContractBid, PassBid } from '@/bridge/model/Bid';
 import { provide, ref } from 'vue';
 import { Suit } from '@/bridge/model/Suit';
-import { Orientation } from '@/presenter/classes/Rotation';
+import { Orientation } from '@/presenter/classes/Orientation';
 
 
 const passBid = new PassBid();
