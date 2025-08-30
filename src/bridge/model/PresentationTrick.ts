@@ -3,7 +3,11 @@ import { Suit } from "./Suit";
 import { Trick } from "./Trick";
 
 export class PresentationTrick extends Trick {
-  constructor(firstToPlay: Position, trumps: Suit, private activePositions: Array<Position> = PositionHelper.all()) {
+  constructor(
+    firstToPlay: Position,
+    trumps: Suit,
+    private activePositions: Array<Position> = PositionHelper.all(),
+  ) {
     super(firstToPlay, trumps);
   }
 
@@ -12,7 +16,13 @@ export class PresentationTrick extends Trick {
   }
 
   protected nextToPlay(): Position | undefined {
-    if (this.currentToPlay === undefined) throw Error("Error, cannot play card in finished trick");
-    return this.isFinished ? undefined : PositionHelper.nextPosisitionFrom(this.activePositions, this.currentToPlay);
+    if (this.currentToPlay === undefined)
+      throw Error("Error, cannot play card in finished trick");
+    return this.isFinished
+      ? undefined
+      : PositionHelper.nextPosisitionFrom(
+          this.activePositions,
+          this.currentToPlay,
+        );
   }
 }

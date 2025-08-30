@@ -1,11 +1,14 @@
-import { Ref, ref, watch } from 'vue';
+import { Ref, ref, watch } from "vue";
 
-export function useElementSize(element: HTMLElement): { width: Ref<number>, height: Ref<number> } {
+export function useElementSize(element: HTMLElement): {
+  width: Ref<number>;
+  height: Ref<number>;
+} {
   const width = ref<number>(0);
   const height = ref<number>(0);
 
   let observer = null;
-   
+
   function disconnect() {
     if (observer !== null) {
       observer.disconnect();
@@ -26,14 +29,11 @@ export function useElementSize(element: HTMLElement): { width: Ref<number>, heig
     observer.observe(element);
   }
 
-  watch(
-    element,
-    (el) => {
-      if (el) connect(el);
-      else disconnect();
-    }
-  )
-  
+  watch(element, (el) => {
+    if (el) connect(el);
+    else disconnect();
+  });
+
   return {
     width,
     height,

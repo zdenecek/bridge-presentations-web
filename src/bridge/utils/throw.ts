@@ -1,4 +1,3 @@
-
 /**
  * Throws error, can be used in an expression.
  */

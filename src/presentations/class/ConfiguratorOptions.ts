@@ -22,7 +22,9 @@ export interface ConfiguratorOptions {
   activePositions: Array<Position>;
 }
 
-export function normalizeConfiguratorOptions(obj: unknown): ConfiguratorOptions {
+export function normalizeConfiguratorOptions(
+  obj: unknown,
+): ConfiguratorOptions {
   const result = {
     cards: {
       north: "",
@@ -45,10 +47,13 @@ export function normalizeConfiguratorOptions(obj: unknown): ConfiguratorOptions 
   return result;
 }
 
-export function validateConfiguratorOptions(opts: ConfiguratorOptions): Record<string, string | Record<string, string>> {
+export function validateConfiguratorOptions(
+  opts: ConfiguratorOptions,
+): Record<string, string | Record<string, string>> {
   const errors = [] as Array<Record<string, string | Record<string, string>>>;
 
-  if (!opts.activePositions.includes(opts.firstPlayer)) errors.push({ firstPlayer: "First player must be active" });
+  if (!opts.activePositions.includes(opts.firstPlayer))
+    errors.push({ firstPlayer: "First player must be active" });
 
   return errors.reduce((acc, cur) => ({ ...acc, ...cur }), {});
 }

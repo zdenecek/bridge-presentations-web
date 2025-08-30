@@ -12,7 +12,12 @@ export class NonPassedContract {
   dbl: ContractDoubledState;
   declarer: Position;
 
-  constructor(suit: Suit, level: ContractLevel, declarer: Position, dbl: ContractDoubledState = "undoubled") {
+  constructor(
+    suit: Suit,
+    level: ContractLevel,
+    declarer: Position,
+    dbl: ContractDoubledState = "undoubled",
+  ) {
     this.suit = suit;
     this.level = level;
     this.declarer = declarer;
@@ -24,7 +29,8 @@ export class NonPassedContract {
   }
 
   static toString(c: NonPassedContract): string {
-    const doubled = c.dbl === "doubled" ? "x" : c.dbl === "redoubled" ? "xx" : "";
+    const doubled =
+      c.dbl === "doubled" ? "x" : c.dbl === "redoubled" ? "xx" : "";
     return `${c.level}${SuitHelper.toSymbol(c.suit)}${doubled} ${c.declarer[0].toUpperCase()}`;
   }
 
@@ -38,6 +44,12 @@ export class NonPassedContract {
     if (cs.includes("xx")) d = "redoubled";
     else if (cs.includes("x")) d = "doubled";
 
-    if (0 < lvl && lvl < 8 && suit && decl) return new NonPassedContract(suit, lvl as ContractLevel, decl, d as ContractDoubledState);
+    if (0 < lvl && lvl < 8 && suit && decl)
+      return new NonPassedContract(
+        suit,
+        lvl as ContractLevel,
+        decl,
+        d as ContractDoubledState,
+      );
   }
 }

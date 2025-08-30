@@ -1,15 +1,13 @@
 <template>
-  <span :class="classes" v-html="formattedText"></span>
+  <span  v-html="formattedText"></span>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
-  classes?: string;
   text?: string;
 }>(), {
-  classes: '',
   text: ''
 });
 

@@ -14,22 +14,29 @@ export class Trick {
   public firstToPlay: Position;
   public trumps: Suit;
 
-  constructor(firstToPlay: Position = Position.North, trumps: Suit = Suit.NoTrump) {
+  constructor(
+    firstToPlay: Position = Position.North,
+    trumps: Suit = Suit.NoTrump,
+  ) {
     this.firstToPlay = firstToPlay;
     this.trumps = trumps;
     this.currentToPlay = firstToPlay;
   }
 
   protected nextToPlay(): Position | undefined {
-    if (this.currentToPlay === undefined) throw Error("Error, cannot play card in finished trick");
-    return this.isFinished ? undefined : PositionHelper.nextPosition(this.currentToPlay);
+    if (this.currentToPlay === undefined)
+      throw Error("Error, cannot play card in finished trick");
+    return this.isFinished
+      ? undefined
+      : PositionHelper.nextPosition(this.currentToPlay);
   }
 
   addCard(card: Card): void {
-    if (this.currentToPlay === undefined) throw Error("Cannot add a card to finished trick");
+    if (this.currentToPlay === undefined)
+      throw Error("Cannot add a card to finished trick");
 
     const c = { card, player: this.currentToPlay, trick: this };
-    
+
     // Use array methods that create new arrays for better reactivity
     this.cards = [...this.cards, c];
 
@@ -39,7 +46,7 @@ export class Trick {
   getCards(): PartialPositionList<CardInTrick> {
     // Create a position map from the cards array
     const result: PartialPositionList<CardInTrick> = {};
-    this.cards.forEach(card => {
+    this.cards.forEach((card) => {
       result[card.player] = card;
     });
     return result;
@@ -74,6 +81,6 @@ export class Trick {
 
   // Helper method specifically for Vue templates
   getCardByPosition(position: Position): CardInTrick | undefined {
-    return this.cards.find(card => card.player === position);
+    return this.cards.find((card) => card.player === position);
   }
 }

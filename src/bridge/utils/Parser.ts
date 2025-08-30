@@ -5,7 +5,11 @@ export class Parser {
   static parseHandString(input: string): Array<Card> {
     const cards = new Array<Card>();
     let suit = Suit.Spades;
-    const strs = input.trim().replace(/ +/g, " ").replace(/10/g, "T").split(" ");
+    const strs = input
+      .trim()
+      .replace(/ +/g, " ")
+      .replace(/10/g, "T")
+      .split(" ");
 
     for (const str of strs) {
       if (str !== "-") {
@@ -23,7 +27,11 @@ export class Parser {
   static parseHandStringStrict(input: string): [Array<Card>, Array<string>] {
     const cards = new Array<Card>();
     let suit = Suit.Spades;
-    const strs = input.trim().replace(/ +/g, " ").replace(/10/g, "T").split(" ");
+    const strs = input
+      .trim()
+      .replace(/ +/g, " ")
+      .replace(/10/g, "T")
+      .split(" ");
 
     const errors = new Array<string>();
     if (strs.length != 4) errors.push(`Malformed string: ${strs.length} suits`);
@@ -75,7 +83,7 @@ export class Parser {
       case "A":
         return CardValue.Ace;
       case "H":
-       return CardValue.Honor; 
+        return CardValue.Honor;
       case "X":
         return CardValue.X;
       default:

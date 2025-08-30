@@ -1,15 +1,24 @@
-import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
+import {
+  Bid,
+  ContractBid,
+  DoubleBid,
+  PassBid,
+  RedoubleBid,
+} from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
 import { Point } from "../classes/Point";
 import View from "./View";
 
 export class BidView extends View {
-  static _images = import.meta.glob(
-    ['@/presenter/assets/bidding-c/*.png'], { eager: true })
+  static _images = import.meta.glob(["@/presenter/assets/bidding-c/*.png"], {
+    eager: true,
+  });
 
   // TODO: prettify
   static images(path: string): string {
-    return (BidView._images["/src/presenter/assets/bidding-c/" + path + ".png"] as any).default as string;
+    return (
+      BidView._images["/src/presenter/assets/bidding-c/" + path + ".png"] as any
+    ).default as string;
   }
 
   bid: Bid;

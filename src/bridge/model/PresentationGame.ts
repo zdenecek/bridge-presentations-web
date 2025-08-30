@@ -26,7 +26,7 @@ export class PresentationGameOptions {
     fakeEWTricks = 0,
     contract?: Contract,
     trumps?: Suit,
-    activePositions: Array<Position> = PositionHelper.all()
+    activePositions: Array<Position> = PositionHelper.all(),
   ) {
     this.bidding = bidding;
     this.fakeEWTricks = fakeEWTricks;
@@ -48,7 +48,11 @@ export class PresentationGame extends UndoableGame {
     return this.options.bidding;
   }
 
-  constructor(players: PositionList<Player>, options: PresentationGameOptions, vulnerability = Vulnerability.None) {
+  constructor(
+    players: PositionList<Player>,
+    options: PresentationGameOptions,
+    vulnerability = Vulnerability.None,
+  ) {
     super(players, vulnerability);
     this.options = options;
 
@@ -75,11 +79,19 @@ export class PresentationGame extends UndoableGame {
   }
 
   public trickCount(side: Side): number {
-    return super.trickCount(side) + (side === Side.NS ? this.options.fakeNSTricks : this.options.fakeEWTricks);
+    return (
+      super.trickCount(side) +
+      (side === Side.NS ? this.options.fakeNSTricks : this.options.fakeEWTricks)
+    );
   }
 
   protected undoCardplay(): void {
-    if (!this.bidding && this.tricks.length === 1 && this.tricks[0].cards.length === 0) return;
+    if (
+      !this.bidding &&
+      this.tricks.length === 1 &&
+      this.tricks[0].cards.length === 0
+    )
+      return;
     else super.undoCardplay();
   }
 
@@ -88,7 +100,10 @@ export class PresentationGame extends UndoableGame {
   }
 
   protected nextToPlay(position: Position): Position {
-    return PositionHelper.nextPosisitionFrom(this.options.activePositions, position);
+    return PositionHelper.nextPosisitionFrom(
+      this.options.activePositions,
+      position,
+    );
   }
 
   protected makeAuction(dealer: Position): Auction {
@@ -97,10 +112,20 @@ export class PresentationGame extends UndoableGame {
 
   protected makeTrick(firstToPlay: Position): Trick {
     if (!this.trumps) throw new Error("Trumps not set");
-    return new PresentationTrick(firstToPlay, this.trumps, this.options.activePositions);
+    return new PresentationTrick(
+      firstToPlay,
+      this.trumps,
+      this.options.activePositions,
+    );
   }
 
   protected cardplayShouldEnd(): boolean {
-    return Math.min(...this.options.activePositions.map((p) => this.player(p).hand.cards.length)) === 0;
+    return (
+      Math.min(
+        ...this.options.activePositions.map(
+          (p) => this.player(p).hand.cards.length,
+        ),
+      ) === 0
+    );
   }
 }

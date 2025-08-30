@@ -20,7 +20,9 @@ export default class TrickView extends View {
     super('<div class="trick-view"></trick>');
     this.cardViews = cardViews;
     PositionHelper.all().forEach((position) => {
-      const v = new View(`<div class="trick-view-origin trick-view-origin-${position}">`);
+      const v = new View(
+        `<div class="trick-view-origin trick-view-origin-${position}">`,
+      );
       this.addSubView(v);
       const target = new View("<div>");
       v.addSubView(target);
@@ -47,7 +49,8 @@ export default class TrickView extends View {
   }
 
   public update(): void {
-    if (this.currentlyDisplayedTrick) this.positionTrick(this.currentlyDisplayedTrick);
+    if (this.currentlyDisplayedTrick)
+      this.positionTrick(this.currentlyDisplayedTrick);
   }
 
   private positionTrick(trick: Trick) {

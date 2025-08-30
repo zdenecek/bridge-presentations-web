@@ -10,15 +10,23 @@ export class BidStack extends View {
   element: View;
 
   constructor(position: Position) {
-    super(`<div class='bid-stack-container bid-stack-container-${position}'></div>`);
-    this.element = new View(`<div class='bid-stack bid-stack-${position}'></div>`);
+    super(
+      `<div class='bid-stack-container bid-stack-container-${position}'></div>`,
+    );
+    this.element = new View(
+      `<div class='bid-stack bid-stack-${position}'></div>`,
+    );
     this.addSubView(this.element);
     this.position = position;
 
     new ResizeObserver(() => {
       if (this.position == Position.East || this.position == Position.West) {
         this.element.root.css({ transition: "none" });
-        this.element.root.css({ width: this.height, height: this.width, "transform-origin": "0 0" });
+        this.element.root.css({
+          width: this.height,
+          height: this.width,
+          "transform-origin": "0 0",
+        });
         this.element.root.css({ transition: "initial" });
       }
       this.update();
@@ -31,7 +39,10 @@ export class BidStack extends View {
 
   updateSpacing(): void {
     if (this.bidViews.length === 0) return;
-    const space = Math.min(40, Math.max(20, this.element.width / this.bidViews.length));
+    const space = Math.min(
+      40,
+      Math.max(20, this.element.width / this.bidViews.length),
+    );
 
     // interesting fix, the image doesnt load instantenously
     if (this.bidViews[0].width === 0) {
@@ -57,7 +68,9 @@ export class BidStack extends View {
     this.bidViews.push(bidView);
     bidView.hide();
     this.element.addSubView(bidView);
-    bidView.root.css("top", this.position === Position.South ? "10vh" : "-10vh").animate({ top: "0px" });
+    bidView.root
+      .css("top", this.position === Position.South ? "10vh" : "-10vh")
+      .animate({ top: "0px" });
     this.updateSpacing();
   }
 
@@ -65,7 +78,10 @@ export class BidStack extends View {
     const bidView = this.bidViews.pop();
     if (!bidView) return;
 
-    bidView.root.animate({ top: this.position === Position.South ? "10vh" : "-10vh" }, () => bidView.root.remove());
+    bidView.root.animate(
+      { top: this.position === Position.South ? "10vh" : "-10vh" },
+      () => bidView.root.remove(),
+    );
   }
 
   reset(): void {

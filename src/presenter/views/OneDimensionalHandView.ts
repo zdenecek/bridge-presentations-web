@@ -1,4 +1,8 @@
-import { sortCards, sortCardsByPrioritizedSuit, sortSuits } from "@/bridge/utils/CardSorter";
+import {
+  sortCards,
+  sortCardsByPrioritizedSuit,
+  sortSuits,
+} from "@/bridge/utils/CardSorter";
 import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
 import { Position } from "../../bridge/model/Position";
@@ -13,7 +17,9 @@ export default class OneDimensionalHandView extends HandView {
     return isHorizontal(this.rotation) ? "x" : "y";
   }
   private make1DVector(size: number, perpendicular = false): Vector {
-    return isHorizontal(this.rotation) === perpendicular ? new Vector(0, size) : new Vector(size, 0);
+    return isHorizontal(this.rotation) === perpendicular
+      ? new Vector(0, size)
+      : new Vector(size, 0);
   }
 
   private maximumCardOffset: () => number;
@@ -27,7 +33,7 @@ export default class OneDimensionalHandView extends HandView {
     rotation = Orientation.Up,
     maximumCardOffset?: () => number,
     dummySuitOffset?: () => number,
-    dummyCardOffset?: () => number
+    dummyCardOffset?: () => number,
   ) {
     super(cardViews, position);
 
@@ -61,39 +67,51 @@ export default class OneDimensionalHandView extends HandView {
     const remainingSpace = this.primaryDimensionSize - CardView.width;
     let cardOffset = 0;
     if (this._hand && this._hand.cards.length > 1) {
-      cardOffset = Math.min(remainingSpace / this._hand.cards.length, this.maximumCardOffset());
+      cardOffset = Math.min(
+        remainingSpace / this._hand.cards.length,
+        this.maximumCardOffset(),
+      );
     }
     return this.make1DVector(cardOffset);
   }
 
   private getCardsBySuit(): Record<Suit, Array<Card>> {
     if (!this._hand) return {} as Record<Suit, Card[]>;
-    return this._hand.cards.reduce((groups, card) => {
-      (groups[card.suit] ||= []).push(card);
-      return groups;
-    }, {} as Record<Suit, Card[]>);
+    return this._hand.cards.reduce(
+      (groups, card) => {
+        (groups[card.suit] ||= []).push(card);
+        return groups;
+      },
+      {} as Record<Suit, Card[]>,
+    );
   }
 
   private getHandSuits(): Array<Suit> {
     if (!this._hand) return new Array<Suit>();
-    const suits = Object.keys(this.getCardsBySuit()).map((suit) => parseInt(suit)) as Suit[];
+    const suits = Object.keys(this.getCardsBySuit()).map((suit) =>
+      parseInt(suit),
+    ) as Suit[];
     return sortSuits(suits, this.prioritizedSuit);
   }
 
   updateNonDummy(): void {
     if (!this._hand) return;
     const offsetVector = this.getCardOffsetVector();
-    const primarySize = CardView.width + offsetVector[this.primaryDimension()] * (this._hand.cards.length - 1);
+    const primarySize =
+      CardView.width +
+      offsetVector[this.primaryDimension()] * (this._hand.cards.length - 1);
 
-    const center = this.start.moveBy(this.make1DVector(this.primaryDimensionSize / 2));
+    const center = this.start.moveBy(
+      this.make1DVector(this.primaryDimensionSize / 2),
+    );
     let currentPosition = center.moveBy(this.make1DVector(-primarySize / 2));
 
     const cards = [...this._hand.cards];
 
-
     const reverseZIndex = this.rotation === Orientation.Left;
 
-    if (this.prioritizedSuit) sortCardsByPrioritizedSuit(cards, this.prioritizedSuit);
+    if (this.prioritizedSuit)
+      sortCardsByPrioritizedSuit(cards, this.prioritizedSuit);
     else {
       sortCards(cards);
       // patch for Milan: West is sorted other way around
@@ -115,14 +133,21 @@ export default class OneDimensionalHandView extends HandView {
 
     const suits = this.getHandSuits();
     const suitCount = suits.length;
-    const primarySize = (CardView.width + this.dummySuitOffset()) * suitCount - this.dummySuitOffset();
+    const primarySize =
+      (CardView.width + this.dummySuitOffset()) * suitCount -
+      this.dummySuitOffset();
 
-    const center = this.start.moveBy(this.make1DVector(this.primaryDimensionSize / 2));
+    const center = this.start.moveBy(
+      this.make1DVector(this.primaryDimensionSize / 2),
+    );
     let currentPosition = center.moveBy(this.make1DVector(-primarySize / 2));
 
-    const suitOffset = this.make1DVector(this.dummySuitOffset() + CardView.width);
+    const suitOffset = this.make1DVector(
+      this.dummySuitOffset() + CardView.width,
+    );
     let c = this.dummyCardOffset();
-    if (this.rotation == Orientation.Right || this.rotation == Orientation.Down) c *= -1;
+    if (this.rotation == Orientation.Right || this.rotation == Orientation.Down)
+      c *= -1;
 
     const cardOffset = this.make1DVector(c, true);
 

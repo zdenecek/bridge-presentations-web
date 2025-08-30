@@ -83,12 +83,16 @@ export class Player {
 
   cancelRequestToBid(): void {
     this.bidCallback = undefined;
-    setTimeout(() => this._bidRequestCancelled.dispatch({ player: this, game: this.game }));
+    setTimeout(() =>
+      this._bidRequestCancelled.dispatch({ player: this, game: this.game }),
+    );
   }
 
   cancelRequestToPlay(): void {
     this.playCallback = undefined;
-    setTimeout(() => this._playRequestCancelled.dispatch({ player: this, game: this.game }));
+    setTimeout(() =>
+      this._playRequestCancelled.dispatch({ player: this, game: this.game }),
+    );
   }
 
   requestBid(game: Game, addBid: (player: Player, bid: Bid) => boolean): void {
@@ -97,11 +101,21 @@ export class Player {
     setTimeout(() => this._bidRequested.dispatch({ player: this, game: game }));
   }
 
-  requestPlay(game: Game, toTrick: Trick, addCard: (player: Player, card: Card) => boolean): void {
+  requestPlay(
+    game: Game,
+    toTrick: Trick,
+    addCard: (player: Player, card: Card) => boolean,
+  ): void {
     this.game = game;
     this.playCallback = addCard;
 
-    setTimeout(() => this._playRequested.dispatch({ player: this, game: game, trick: toTrick }));
+    setTimeout(() =>
+      this._playRequested.dispatch({
+        player: this,
+        game: game,
+        trick: toTrick,
+      }),
+    );
   }
 
   protected playCard(card: Card): boolean {
@@ -111,7 +125,9 @@ export class Player {
     this.playCallback = undefined;
     this.hand.removeCard(card);
 
-    setTimeout(() => this._cardPlayer.dispatch({ player: this, game: this.game, card: card }));
+    setTimeout(() =>
+      this._cardPlayer.dispatch({ player: this, game: this.game, card: card }),
+    );
     return true;
   }
 
@@ -121,7 +137,9 @@ export class Player {
 
     this.bidCallback = undefined;
 
-    setTimeout(() => this._bidMade.dispatch({ player: this, game: this.game, bid: bid }));
+    setTimeout(() =>
+      this._bidMade.dispatch({ player: this, game: this.game, bid: bid }),
+    );
     return true;
   }
 }

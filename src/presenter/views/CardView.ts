@@ -6,16 +6,23 @@ import View from "./View";
 import BaseView from "./BaseView";
 
 export default class CardView extends View {
-  static _images = import.meta.glob(['@/presenter/assets/cards/*.png'], { eager: true });
+  static _images = import.meta.glob(["@/presenter/assets/cards/*.png"], {
+    eager: true,
+  });
   // TODO: prettify
   static images(path: string): string {
-    return (CardView._images["/src/presenter/assets/cards/" + path + ".png"] as any).default as string;
+    return (
+      CardView._images["/src/presenter/assets/cards/" + path + ".png"] as any
+    ).default as string;
   }
 
   static getCardPath(model: Card): string {
     if (model.value === CardValue.Other) return CardView.images("O");
     const s = SuitHelper.toString(model.suit).charAt(0).toUpperCase();
-    const v = model.value <= 9 && model.value >= 2 ? model.value.toString() : CardValueHelper.toString(model.value).charAt(0).toUpperCase();
+    const v =
+      model.value <= 9 && model.value >= 2
+        ? model.value.toString()
+        : CardValueHelper.toString(model.value).charAt(0).toUpperCase();
     return CardView.images(`${s}-${v}`);
   }
 
@@ -85,7 +92,10 @@ export default class CardView extends View {
   }
 
   private updateTransform(): void {
-    this.root.css("transform", this._position.asTransform() + " " + CardView.rotations[this._rotation]);
+    this.root.css(
+      "transform",
+      this._position.asTransform() + " " + CardView.rotations[this._rotation],
+    );
   }
 
   private _reverse = false;

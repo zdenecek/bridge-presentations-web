@@ -1,5 +1,8 @@
 import { Position, PositionHelper } from "@/bridge/model/Position";
-import { Vulnerability, VulnerabilityHelper } from "@/bridge/model/Vulnerability";
+import {
+  Vulnerability,
+  VulnerabilityHelper,
+} from "@/bridge/model/Vulnerability";
 import CenterFrameLabelView from "./CenterFrameLabelView";
 import View from "./View";
 

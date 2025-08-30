@@ -1,181 +1,174 @@
-@use 'variables';
-
-
+@use "variables";
 
 .bidding-box {
-    display: inline-grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    padding: 20px;
+  display: inline-grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
 
-    .bidding-box-bid {
-        padding: 2px 4px;
-        outline: solid 1px;
-        border-radius: 4px;
-        cursor: pointer;
+  .bidding-box-bid {
+    padding: 2px 4px;
+    outline: solid 1px;
+    border-radius: 4px;
+    cursor: pointer;
 
-        .level {
-            color: black;
-        }
-
-        &.suit-clubs {
-            color: #3575af;
-            background-color: lighten( #3575af,  50%);
-        }
-        &.suit-diamonds {
-            color: #d26d2a;
-            background-color: lighten( #d26d2a,  50%);
-        }
-        &.suit-hearts {
-            color: #e90202;
-            background-color: lighten( #e90202,  50%);
-        }
-        &.suit-spades {
-            color: black;
-            background-color: gainsboro;
-        }
-
-        &.suit-notrump {
-            color: black;
-            background-color: lightgray;
-        }
+    .level {
+      color: black;
     }
 
-    .pass {
-        grid-column: span 3;
-        background-color: green;
-        color: white;
+    &.suit-clubs {
+      color: #3575af;
+      background-color: lighten(#3575af, 50%);
+    }
+    &.suit-diamonds {
+      color: #d26d2a;
+      background-color: lighten(#d26d2a, 50%);
+    }
+    &.suit-hearts {
+      color: #e90202;
+      background-color: lighten(#e90202, 50%);
+    }
+    &.suit-spades {
+      color: black;
+      background-color: gainsboro;
     }
 
-    .double {
-        background-color: red;
-        color: white;
+    &.suit-notrump {
+      color: black;
+      background-color: lightgray;
     }
+  }
 
-    .redouble {
-        background-color: blue;
-        color: white;
-    }
+  .pass {
+    grid-column: span 3;
+    background-color: green;
+    color: white;
+  }
+
+  .double {
+    background-color: red;
+    color: white;
+  }
+
+  .redouble {
+    background-color: blue;
+    color: white;
+  }
 }
 
 .bidding {
-    transition: all 1s ease;
+  transition: all 1s ease;
 
-    height: 40%;
-    aspect-ratio: 1;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    margin: auto;
+  height: 40%;
+  aspect-ratio: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
 }
 
 .bid-stack {
+  height: variables.$bid-card-height;
+  width: 100%;
+  overflow: visible;
+  position: relative;
+  // clip-path: polygon(-10% -10%, 100% -10%, 100% 100%, 200% 100%, 200% 200%, -10% 200%);
+  transition: all 1s ease;
 
-    height:  variables.$bid-card-height;
-    width: 100%;
+  .bid-stack-container {
     overflow: visible;
-    position: relative;
-    // clip-path: polygon(-10% -10%, 100% -10%, 100% 100%, 200% 100%, 200% 200%, -10% 200%);
-    transition: all 1s ease;
+  }
 
-    .bid-stack-container {
+  .bid {
     overflow: visible;
+    position: absolute;
+    top: 0;
+    height: variables.$bid-card-height;
+    transition: 0.1s ease;
 
+    img {
+      height: 100%;
     }
-
-    .bid {
-        overflow: visible;
-        position: absolute;
-        top: 0;
-        height:  variables.$bid-card-height;
-        transition: 0.1s ease;
-
-        img {
-            height: 100%;
-        }
-    }
+  }
 }
 
 .bid-stack-container-north {
-    grid-column: 2;
+  grid-column: 2;
 }
 
 .bid-stack-container-east {
-    grid-row: 2;
-    grid-column: 3;
+  grid-row: 2;
+  grid-column: 3;
 
-    .bid-stack {
-        transform: rotate(90deg) translateY(-100%);
-    }
-
+  .bid-stack {
+    transform: rotate(90deg) translateY(-100%);
+  }
 }
 .bid-stack-container-south {
-    grid-column: 2;
-    grid-row: 3;
+  grid-column: 2;
+  grid-row: 3;
 }
 
 .bid-stack-container-west {
-    grid-row: 2;
-    .bid-stack {
-        transform: rotate(-90deg) translateX(-100%) ;
-    }
-
+  grid-row: 2;
+  .bid-stack {
+    transform: rotate(-90deg) translateX(-100%);
+  }
 }
 
- $shadow: 0.5px;
+$shadow: 0.5px;
 
 .bid.clubs img {
-    filter: drop-shadow(0 0  $shadow #3574af67);
+  filter: drop-shadow(0 0 $shadow #3574af67);
 }
 .bid.hearts img {
-    filter: drop-shadow(0 0  $shadow #e9020262);
+  filter: drop-shadow(0 0 $shadow #e9020262);
 }
 .bid.spades img {
-    filter: drop-shadow(0 0  $shadow rgba(10, 0, 0, 0.489));
+  filter: drop-shadow(0 0 $shadow rgba(10, 0, 0, 0.489));
 }
 .bid.diamonds img {
-    filter: drop-shadow(0 0  $shadow #d26d2a7c);
+  filter: drop-shadow(0 0 $shadow #d26d2a7c);
 }
 .bid.notrump img {
-    filter: drop-shadow(0 0  $shadow rgba(128, 128, 128, 0.432));
+  filter: drop-shadow(0 0 $shadow rgba(128, 128, 128, 0.432));
 }
 
-
 .bidding-history {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  grid-template-rows: min-content;
 
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    grid-template-rows: min-content;
+  font-size: 2.4vh;
 
-    font-size: 2.4vh;
+  text-align: center;
+  margin-top: 1.5em;
 
-    text-align: center;
-    margin-top: 1.5em;
+  .separator {
+    grid-column: 1 / span 4;
+    height: 0;
+    height: 1px;
+    background-color: variables.$primary;
+  }
 
-    .separator {
-        grid-column: 1/ span 4;
-        height: 0;
-        height: 1px;
-        background-color: variables.$primary;
-    }
+  .header {
+    padding: 2px 10px;
+  }
 
-    .header {
-        padding: 2px 10px;
-    }
+  .header-south,
+  .header-north,
+  .bid-view-south,
+  .bid-view-north {
+    color: goldenrod;
+  }
 
-    .header-south, .header-north, .bid-view-south, .bid-view-north {
-        color: goldenrod;
-    }
-
-    .bid-view {
-        padding-bottom: 6px;
-    }
-
-
+  .bid-view {
+    padding-bottom: 6px;
+  }
 }

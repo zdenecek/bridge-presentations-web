@@ -1,12 +1,23 @@
 import $ from "jquery";
-import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
+import {
+  Bid,
+  ContractBid,
+  DoubleBid,
+  PassBid,
+  RedoubleBid,
+} from "../../bridge/model/Bid";
 import { ContractLevel } from "../../bridge/model/Contract";
 import { Suit, SuitHelper } from "../../bridge/model/Suit";
 import View from "./View";
 
 export default class BiddingBoxView extends View {
-  contractBidElements = new Map<{ suit: Suit; level: ContractLevel }, JQuery<HTMLElement>>();
-  otherBidElements: { [key in "pass" | "double" | "redouble"]: JQuery<HTMLElement> };
+  contractBidElements = new Map<
+    { suit: Suit; level: ContractLevel },
+    JQuery<HTMLElement>
+  >();
+  otherBidElements: {
+    [key in "pass" | "double" | "redouble"]: JQuery<HTMLElement>;
+  };
 
   callback: ((bid: Bid) => void) | undefined;
 
@@ -23,12 +34,15 @@ export default class BiddingBoxView extends View {
         const element = $(
           `<div class="bidding-box-bid  level-${level} suit-${SuitHelper.toString(suit).toLowerCase()}">
                     <span class="level">${level}</span><span class="suit">${SuitHelper.toSymbol(suit)}</span>
-                    </div>`
+                    </div>`,
         );
         element.on("click", () => {
           this.callback?.(new ContractBid(suit, level as ContractLevel));
         });
-        this.contractBidElements.set({ suit: suit, level: level as ContractLevel }, element);
+        this.contractBidElements.set(
+          { suit: suit, level: level as ContractLevel },
+          element,
+        );
         this.root.append(element);
       }
     }

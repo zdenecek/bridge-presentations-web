@@ -55,7 +55,10 @@ export class Game {
     this._finalContract = value;
   }
 
-  constructor(players: PositionList<Player>, vulnerability = Vulnerability.None) {
+  constructor(
+    players: PositionList<Player>,
+    vulnerability = Vulnerability.None,
+  ) {
     this.players = players;
     this._state = "notStarted";
     this.vulnerability = vulnerability;
@@ -149,7 +152,11 @@ export class Game {
   }
 
   public trickCount(side: Side): number {
-    return this.tricks.filter((t) => t.winner && PositionHelper.side(t.winner.player) === side).length + this.claimedTricks[side];
+    return (
+      this.tricks.filter(
+        (t) => t.winner && PositionHelper.side(t.winner.player) === side,
+      ).length + this.claimedTricks[side]
+    );
   }
 
   public start(firstToPlay: Position): void {
@@ -161,7 +168,8 @@ export class Game {
     if (this.state !== "cardplay") return;
 
     this.claimedTricks.ns = tricksNS;
-    this.claimedTricks.ew = 13 - this.tricks.filter((t) => t.isFinished).length - tricksNS;
+    this.claimedTricks.ew =
+      13 - this.tricks.filter((t) => t.isFinished).length - tricksNS;
 
     this.claimed = true;
 
@@ -177,7 +185,9 @@ export class Game {
       this._result = Result.make(
         this.finalContract,
         this.vulnerability,
-        this.finalContract === "passed" ? undefined : this.trickCount(PositionHelper.side(this.finalContract.declarer))
+        this.finalContract === "passed"
+          ? undefined
+          : this.trickCount(PositionHelper.side(this.finalContract.declarer)),
       );
     this.state = "finished";
     setTimeout(() => this._gameEnded.dispatch({ game: this }));
@@ -206,13 +216,16 @@ export class Game {
     setTimeout(() => this._biddingStarted.dispatch({ game: this }));
     setTimeout(() => {
       this.currentlyRequestedPlayer = player;
-      player.requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, player));
+      player.requestBid(this, (player: Player, bid: Bid) =>
+        this.addBid(bid, player),
+      );
     });
   }
 
   protected endBidding(): void {
     if (!this.auction) throw Error("No auction");
-    if (!this.auction.isFinished || !this.auction.finalContract) throw Error("Bidding not finished");
+    if (!this.auction.isFinished || !this.auction.finalContract)
+      throw Error("Bidding not finished");
     this.finalContract = this.auction.finalContract;
 
     setTimeout(() => this._biddingEnded.dispatch({ game: this }));
@@ -235,11 +248,13 @@ export class Game {
     const trick = this.makeTrick(firstToPlay);
     const player = this.players[firstToPlay];
     this.tricks = [...this.tricks, trick];
-    
+
     setTimeout(() => this._trickStarted.dispatch({ game: this, trick }));
     setTimeout(() => {
       this.currentlyRequestedPlayer = player;
-      player.requestPlay(this, trick, (player: Player, card: Card) => this.addCard(trick, card, player));
+      player.requestPlay(this, trick, (player: Player, card: Card) =>
+        this.addCard(trick, card, player),
+      );
     });
   }
 
@@ -272,19 +287,27 @@ export class Game {
     if (this.state !== "cardplay") return false;
     if (trick.cards.length > 0) {
       const suit = trick.cards[0].card.suit;
-      if (suit !== card.suit && player.hand.cardsWithSuit(suit).length > 0) return false;
+      if (suit !== card.suit && player.hand.cardsWithSuit(suit).length > 0)
+        return false;
     }
 
     trick.addCard(card);
-    setTimeout(() => this._cardPlayed.dispatch({ card, trick, player, game: this }));
-    if (this.tricks.length === 1 && trick.cards.length === 1) setTimeout(() => this._leadMade.dispatch({ card, trick, player, game: this }));
+    setTimeout(() =>
+      this._cardPlayed.dispatch({ card, trick, player, game: this }),
+    );
+    if (this.tricks.length === 1 && trick.cards.length === 1)
+      setTimeout(() =>
+        this._leadMade.dispatch({ card, trick, player, game: this }),
+      );
 
     if (trick.isFinished) setTimeout(() => this.endTrick());
     else {
       const nextPlayer = this.players[this.nextToPlay(player.position)];
       setTimeout(() => {
         this.currentlyRequestedPlayer = nextPlayer;
-        nextPlayer.requestPlay(this, trick, (_: Player, card: Card) => this.addCard(trick, card, nextPlayer));
+        nextPlayer.requestPlay(this, trick, (_: Player, card: Card) =>
+          this.addCard(trick, card, nextPlayer),
+        );
       });
     }
     return true;
@@ -304,7 +327,11 @@ export class Game {
     else {
       const nextPlayer = this.players[this.nextToPlay(player.position)];
       this.currentlyRequestedPlayer = nextPlayer;
-      setTimeout(() => nextPlayer.requestBid(this, (_: Player, bid: Bid) => this.addBid(bid, nextPlayer)));
+      setTimeout(() =>
+        nextPlayer.requestBid(this, (_: Player, bid: Bid) =>
+          this.addBid(bid, nextPlayer),
+        ),
+      );
     }
 
     return true;

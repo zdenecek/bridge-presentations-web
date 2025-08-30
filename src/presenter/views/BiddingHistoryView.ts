@@ -42,6 +42,8 @@ export default class BiddingHistoryView extends View {
 
 class BidView extends View {
   constructor(bid: PositionedBid) {
-    super(`<span class="bid-view bid-view-${bid.position}">${bid.bid.toString()}</span>`);
+    super(
+      `<span class="bid-view bid-view-${bid.position}">${bid.bid.toString()}</span>`,
+    );
   }
 }

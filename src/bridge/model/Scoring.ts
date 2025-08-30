@@ -12,7 +12,9 @@ export class Scoring {
     if (contract === "passed") return 0;
 
     const points = this.Score(contract, vul, result);
-    return PositionHelper.side(contract.declarer) === Side.NS ? points : -points;
+    return PositionHelper.side(contract.declarer) === Side.NS
+      ? points
+      : -points;
   }
 
   static Score(contract: Contract, vul: boolean, res?: number): number {
@@ -98,10 +100,15 @@ export class Scoring {
 
     let points = 0;
     if (result >= 0) {
-      if (contract.level == 1) points += points_contract[contract.suit - 1][0][this.doubles[contract.dbl]];
+      if (contract.level == 1)
+        points +=
+          points_contract[contract.suit - 1][0][this.doubles[contract.dbl]];
       else if (contract.level > 1) {
-        points += points_contract[contract.suit - 1][0][this.doubles[contract.dbl]];
-        points += (contract.level - 1) * points_contract[contract.suit - 1][1][this.doubles[contract.dbl]];
+        points +=
+          points_contract[contract.suit - 1][0][this.doubles[contract.dbl]];
+        points +=
+          (contract.level - 1) *
+          points_contract[contract.suit - 1][1][this.doubles[contract.dbl]];
       }
 
       if (points < 100) points += bonus_game[0][vuln];
@@ -111,7 +118,10 @@ export class Scoring {
 
       points += bonus_double[this.doubles[contract.dbl]];
 
-      if (result > 0) points += result * overtrick[contract.suit - 1][vuln][this.doubles[contract.dbl]];
+      if (result > 0)
+        points +=
+          result *
+          overtrick[contract.suit - 1][vuln][this.doubles[contract.dbl]];
     } else if (result < 0) {
       for (let i = 0; i < -result; i++) {
         const j = i > 3 ? 3 : i;

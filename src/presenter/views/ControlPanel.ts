@@ -18,15 +18,21 @@ export default class ControlPanel extends View {
     this.addSubView(bs);
     this.buttons = [];
     for (let i = 0; i < 13; i++) {
-      const b = new View(`<button><div class='content-label'></div><div class='hotkey-label'>(${this.hotkeys[i]})</div></button>`);
+      const b = new View(
+        `<button><div class='content-label'></div><div class='hotkey-label'>(${this.hotkeys[i]})</div></button>`,
+      );
       this.buttons.push(b);
       b.root.on("click", () => this.handle(i));
       bs.addSubView(b);
     }
 
     const claimPanel = new View("<form  class='claim-panel'>");
-    const claimInput = new View(`<input  class="claim-input" type="number" placeholder="claim (claimed tricks NS)">`);
-    const defocuser = new View(`<input type="checkbox" style="filter: opacity(0); width: 0px;">`);
+    const claimInput = new View(
+      `<input  class="claim-input" type="number" placeholder="claim (claimed tricks NS)">`,
+    );
+    const defocuser = new View(
+      `<input type="checkbox" style="filter: opacity(0); width: 0px;">`,
+    );
 
     claimPanel.addSubView(claimInput);
     claimPanel.addSubView(defocuser);
@@ -90,8 +96,12 @@ export default class ControlPanel extends View {
         if (index >= cards.length) {
           return;
         }
-        button.root.children(".content-label")[0].innerText = cards[index].card.toShortString();
-        button.root.toggleClass(SuitHelper.toString(cards[index].card.suit).toLowerCase(), true);
+        button.root.children(".content-label")[0].innerText =
+          cards[index].card.toShortString();
+        button.root.toggleClass(
+          SuitHelper.toString(cards[index].card.suit).toLowerCase(),
+          true,
+        );
         button.root.prop("disabled", cards[index].played);
         button.root.prop("hidden", false);
       });

@@ -1,5 +1,10 @@
 import { Card } from "@/bridge/model/Card";
-import { PositionList, PositionHelper, Position, Side } from "@/bridge/model/Position";
+import {
+  PositionList,
+  PositionHelper,
+  Position,
+  Side,
+} from "@/bridge/model/Position";
 import { Orientation } from "../classes/Orientation";
 import View from "./View";
 import AuctionView from "./AuctionView";
@@ -44,7 +49,9 @@ export default class GameViewFactory {
     ///
     this.makeBB(gameView, controlCenter);
 
-    new ResizeObserver(_.debounce(trick.update, 100)).observe(frameView.root[0]);
+    new ResizeObserver(_.debounce(trick.update, 100)).observe(
+      frameView.root[0],
+    );
 
     return gameView;
   }
@@ -104,17 +111,24 @@ export default class GameViewFactory {
   //   return trickView;
   // }
 
-  static makeCenterPanelView(gameView: GameView, frameView: CenterFrameView): CenterPanelView {
+  static makeCenterPanelView(
+    gameView: GameView,
+    frameView: CenterFrameView,
+  ): CenterPanelView {
     const centerPanelView = new CenterPanelView(frameView);
 
     centerPanelView.addSubView(frameView);
 
-    gameView.gameChanged.sub(({ game }) => (centerPanelView.centerFrameView.vulnerability = game?.vulnerability ?? Vulnerability.None));
+    gameView.gameChanged.sub(
+      ({ game }) =>
+        (centerPanelView.centerFrameView.vulnerability =
+          game?.vulnerability ?? Vulnerability.None),
+    );
 
     new ResizeObserver(
       _.debounce(() => {
         gameView.update();
-      }, 100)
+      }, 100),
     ).observe(centerPanelView.centerFrameView.root[0]);
 
     return centerPanelView;
@@ -168,7 +182,6 @@ export default class GameViewFactory {
   // }
 
   static makeSidePanel(gameView: GameView): View {
-
     const sidePanel = new View('<div class="side-panel">');
 
     const statusPanel = new View(`<div class="status-panel">
@@ -180,12 +193,12 @@ export default class GameViewFactory {
           
       </div>`);
 
-
-    const nsContainer = new View(`<div class="c-tricks-ns c-tricks"><div class="t-label">NS</div></div>`);
-    const ewContainer = new View(`<div class="c-tricks-ew c-tricks"><div class="t-label">EW</div></div>`);
-
-
-
+    const nsContainer = new View(
+      `<div class="c-tricks-ns c-tricks"><div class="t-label">NS</div></div>`,
+    );
+    const ewContainer = new View(
+      `<div class="c-tricks-ew c-tricks"><div class="t-label">EW</div></div>`,
+    );
 
     const ew = new TextView("t-count", "0");
     const ns = new TextView("t-count", "0");
@@ -212,10 +225,13 @@ export default class GameViewFactory {
 
     gameView.onEachGame((game) => {
       game.stateChanged.sub(({ game }) => {
-        statusPanel.hidden = !(game.state === "cardplay" || game.state === "finished");
+        statusPanel.hidden = !(
+          game.state === "cardplay" || game.state === "finished"
+        );
         if (!statusPanel.hidden) {
           if (game.finalContract) contract.text = game.finalContract.toString();
-          else if (game.trumps) contract.text = SuitHelper.toString(game.trumps);
+          else if (game.trumps)
+            contract.text = SuitHelper.toString(game.trumps);
           else contract.text = "Passed";
         }
       });
@@ -284,10 +300,11 @@ export default class GameViewFactory {
         auctionHistoryView.attachAuction(game.auction);
       });
       game?.stateChanged.sub(({ game }) => {
-        auctionHistoryView.hidden = !(game.state === "cardplay" || game.state === "finished") || !(game as PresentationGame).bidding;
+        auctionHistoryView.hidden =
+          !(game.state === "cardplay" || game.state === "finished") ||
+          !(game as PresentationGame).bidding;
       });
     });
-
 
     return auctionHistoryView;
   }
@@ -310,13 +327,17 @@ export default class GameViewFactory {
     });
     gameView.onEachGame((game) =>
       game.claimMade.sub(() => {
-        if (game.tricks[game.tricks.length - 1].cards.length === 0) centerText.root.fadeIn();
-      })
+        if (game.tricks[game.tricks.length - 1].cards.length === 0)
+          centerText.root.fadeIn();
+      }),
     );
     return centerText;
   }
 
-  static makeAuctionView(gameView: GameView, centerPanelView: CenterPanelView): AuctionView {
+  static makeAuctionView(
+    gameView: GameView,
+    centerPanelView: CenterPanelView,
+  ): AuctionView {
     const auctionView = new AuctionView(centerPanelView);
     gameView.updateDispatched.sub(() => auctionView.update());
     gameView.gameChanged.sub(({ game }) => {

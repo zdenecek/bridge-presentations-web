@@ -1,6 +1,12 @@
-import { ConfiguratorOptions, normalizeConfiguratorOptions } from "./ConfiguratorOptions";
+import {
+  ConfiguratorOptions,
+  normalizeConfiguratorOptions,
+} from "./ConfiguratorOptions";
 
-export function downloadObjectAsJson(exportObj: unknown, exportName: string): void {
+export function downloadObjectAsJson(
+  exportObj: unknown,
+  exportName: string,
+): void {
   const json = [JSON.stringify(exportObj)];
   const blob1 = new Blob(json, { type: "text/plain;charset=utf-8" });
 
@@ -18,11 +24,18 @@ export interface FileEventTarget {
   files?: FileList;
 }
 
-export function loadJson(input: FileEventTarget): Promise<ConfiguratorOptions | undefined> {
+export function loadJson(
+  input: FileEventTarget,
+): Promise<ConfiguratorOptions | undefined> {
   return new Promise((resolve, reject) => {
-    if (typeof window.FileReader !== "function") reject("The file API isn't supported on this browser.");
-    else if (!input) reject("The browser does not properly implement the event object");
-    else if (!input.files) reject("This browser does not support the `files` property of the file input.");
+    if (typeof window.FileReader !== "function")
+      reject("The file API isn't supported on this browser.");
+    else if (!input)
+      reject("The browser does not properly implement the event object");
+    else if (!input.files)
+      reject(
+        "This browser does not support the `files` property of the file input.",
+      );
     else if (!input.files[0]) resolve(undefined);
     else {
       const file = input.files[0];
