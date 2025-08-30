@@ -1,28 +1,51 @@
+<!--
+  BidView.vue
+
+  This component displays a single bridge bid as an image, with support for rotation and dynamic sizing.
+  - The bid is rendered as an image (e.g., "1S", "Pass", "X", "XX") using preloaded PNG assets.
+  - The `rotation` prop controls the orientation of the bid (up, right, down, left), and the image is rotated accordingly using CSS classes.
+  - Sizing is controlled from the parent component.
+  - The component exposes its DOM element and measured width/height for use by parent components (e.g., for stacking or layout).
+-->
+
 <template>
-  <div :class="['bid', bidClass]" ref="element">
-    <img :src="imagePath" :alt="bid.toString()"/>
+  <div :class="['bid', bidClass, rotationClass]" ref="element" :style="isHorizontal(rotation) ? {} : {
+    height: width * ratio + 'px'
+  }">
+    <img :src="imagePath" :alt="bid.toString()" :style="isHorizontal(rotation) ? {} : {
+      height: width + 'px'
+    }" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed,  useTemplateRef } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
-import { Rotation } from '../classes/Rotation';
+import { Orientation, isHorizontal } from '../classes/Rotation';
+import { useElementSize } from '@vueuse/core';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   bid: Bid;
-  rotation: Rotation;
-}>();
+  rotation?: Orientation;
+}>(), {
+  rotation: Orientation.Up
+});
 
 const element = useTemplateRef<HTMLDivElement>('element');
-
+const { width, height } = useElementSize(element);
 
 // Static image imports
 const _images = import.meta.glob(
-  ['@/presenter/assets/bidding-c/*.png'], 
+  ['@/presenter/assets/bidding-c/*.png'],
   { eager: true }
 );
+
+// ratio for the images in use.
+const BIDDING_RATIO = 764 / 882;
+const BIDDING_RATIO_PASS = 501 / 425;
+const BIDDING_RATIO_DOUBLE = 733 / 622;
+const ratio = computed(() => props.bid instanceof PassBid ? BIDDING_RATIO_PASS : (props.bid instanceof DoubleBid || props.bid instanceof RedoubleBid) ? BIDDING_RATIO_DOUBLE : BIDDING_RATIO);
 
 const getImagePath = (bid: Bid): string => {
   if (bid instanceof ContractBid) {
@@ -53,9 +76,25 @@ const getClass = (bid: Bid): string => {
 const imagePath = computed(() => getImagePath(props.bid));
 const bidClass = computed(() => getClass(props.bid));
 
+const rotationClass = computed(() => {
+  switch (props.rotation) {
+    case Orientation.Right:
+      return 'rotate-90';
+    case Orientation.Down:
+      return 'rotate-180';
+    case Orientation.Left:
+      return 'rotate-270';
+    case Orientation.Up:
+    default:
+      return 'rotate-0';
+  }
+});
+
 
 defineExpose({
-  element
+  element,
+  width,
+  height
 });
 </script>
 
@@ -63,11 +102,26 @@ defineExpose({
 .bid {
   display: inline-block;
   transition: ease 1s;
-  height: 100%;
 
-  img {
+  &.rotate-180 img,
+  &.rotate-0 img {
     max-height: 100%;
     max-width: 100%;
+    // for the vertical case the heigh is set manually
   }
 }
-</style> 
+
+.rotate-90 img {
+  transform: rotate(90deg) translateY(-100%);
+  transform-origin: top left;
+}
+
+.rotate-180 img {
+  transform: rotate(180deg);
+}
+
+.rotate-270 img {
+  transform: rotate(270deg) translateX(-100%);
+  transform-origin: top left;
+}
+</style>

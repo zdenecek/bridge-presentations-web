@@ -3,28 +3,28 @@ import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
 import { Position } from "../../bridge/model/Position";
 import { Suit } from "../../bridge/model/Suit";
-import { Rotation, RotationHelper } from "../classes/Rotation";
+import { Orientation, isHorizontal } from "../classes/Rotation";
 import { Vector } from "../classes/Vector";
 import CardView from "./CardView";
 import HandView from "./HandView";
 
 export default class OneDimensionalHandView extends HandView {
   private primaryDimension(): "x" | "y" {
-    return RotationHelper.isHorizontal(this.rotation) ? "x" : "y";
+    return isHorizontal(this.rotation) ? "x" : "y";
   }
   private make1DVector(size: number, perpendicular = false): Vector {
-    return RotationHelper.isHorizontal(this.rotation) === perpendicular ? new Vector(0, size) : new Vector(size, 0);
+    return isHorizontal(this.rotation) === perpendicular ? new Vector(0, size) : new Vector(size, 0);
   }
 
   private maximumCardOffset: () => number;
   private dummySuitOffset: () => number;
   private dummyCardOffset: () => number;
-  private rotation: Rotation;
+  private rotation: Orientation;
 
   constructor(
     cardViews: Map<Card, CardView>,
     position: Position,
-    rotation = Rotation.Top,
+    rotation = Orientation.Up,
     maximumCardOffset?: () => number,
     dummySuitOffset?: () => number,
     dummyCardOffset?: () => number
@@ -54,7 +54,7 @@ export default class OneDimensionalHandView extends HandView {
   }
 
   private get primaryDimensionSize() {
-    return RotationHelper.isHorizontal(this.rotation) ? this.width : this.height;
+    return isHorizontal(this.rotation) ? this.width : this.height;
   }
 
   getCardOffsetVector(): Vector {
@@ -91,7 +91,7 @@ export default class OneDimensionalHandView extends HandView {
     const cards = [...this._hand.cards];
 
 
-    const reverseZIndex = this.rotation === Rotation.Left;
+    const reverseZIndex = this.rotation === Orientation.Left;
 
     if (this.prioritizedSuit) sortCardsByPrioritizedSuit(cards, this.prioritizedSuit);
     else {
@@ -122,7 +122,7 @@ export default class OneDimensionalHandView extends HandView {
 
     const suitOffset = this.make1DVector(this.dummySuitOffset() + CardView.width);
     let c = this.dummyCardOffset();
-    if (this.rotation == Rotation.Right || this.rotation == Rotation.Upside) c *= -1;
+    if (this.rotation == Orientation.Right || this.rotation == Orientation.Down) c *= -1;
 
     const cardOffset = this.make1DVector(c, true);
 

@@ -23,7 +23,7 @@ import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
 import { Position } from "../../bridge/model/Position";
 import { Suit } from "../../bridge/model/Suit";
-import { Rotation, RotationHelper } from "../classes/Rotation";
+import { Orientation, isHorizontal } from "../classes/Rotation";
 import { Vector } from "../classes/Vector";
 import { Point } from "../classes/Point";
 import { getOffset } from '../utils/offset';
@@ -33,7 +33,7 @@ import { CardViewData } from './CardViewData';
 const props = withDefaults(defineProps<{
   hand?: Hand;
   position: Position;
-  rotation?: Rotation;
+  rotation?: Orientation;
   dummy?: boolean;
   reverse?: boolean;
   prioritizedSuit?: Suit;
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<{
   dummySuitOffset?: number;
   dummyCardOffset?: number;
 }>(), {
-  rotation: Rotation.Top,
+  rotation: Orientation.Up,
   dummy: false,
   reverse: false,
 });
@@ -53,7 +53,7 @@ const cardDimensions = inject('cardDimensions', { width: 100, height: 150 });
 const debug = inject('debug', false);
 
 const componentStyle = computed(() => {
-  if (props.rotation === Rotation.Top || props.rotation === Rotation.Upside) {
+  if (props.rotation === Orientation.Up || props.rotation === Orientation.Down) {
     return {
       height: cardDimensions.height + 'px',
       minHeight: cardDimensions.height + 'px',
@@ -124,16 +124,16 @@ function getStart(): Point {
 
 // Computed properties
 const primaryDimension = computed((): "x" | "y" => {
-  return RotationHelper.isHorizontal(props.rotation) ? "x" : "y";
+  return isHorizontal(props.rotation) ? "x" : "y";
 });
 
 function getPrimaryDimensionSize(): number {
-  return RotationHelper.isHorizontal(props.rotation) ? getWidth() : getHeight();
+  return isHorizontal(props.rotation) ? getWidth() : getHeight();
 }
 
 // Helper methods
 const make1DVector = (size: number, perpendicular = false): Vector => {
-  return RotationHelper.isHorizontal(props.rotation) === perpendicular 
+  return isHorizontal(props.rotation) === perpendicular 
     ? new Vector(0, size) 
     : new Vector(size, 0);
 };
@@ -176,7 +176,7 @@ const updateNonDummy = (): void => {
   let currentPosition = center.moveBy(make1DVector(-primarySize / 2));
 
   const cards = [...props.hand.cards];
-  const reverseZIndex = props.rotation === Rotation.Left;
+  const reverseZIndex = props.rotation === Orientation.Left;
 
   if (props.prioritizedSuit) {
     sortCardsByPrioritizedSuit(cards, props.prioritizedSuit);
@@ -209,7 +209,7 @@ const updateDummy = (): void => {
 
   const suitOffset = make1DVector(effectiveDummySuitOffset.value + cardDimensions.width);
   let c = effectiveDummyCardOffset.value;
-  if (props.rotation == Rotation.Right || props.rotation == Rotation.Upside) c *= -1;
+  if (props.rotation == Orientation.Right || props.rotation == Orientation.Down) c *= -1;
 
   const cardOffset = make1DVector(c, true);
   const cardsBySuit = getCardsBySuit();

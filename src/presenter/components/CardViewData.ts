@@ -1,6 +1,6 @@
 import { Card } from "../../bridge/model/Card";
 import { Point } from "../classes/Point";
-import { Rotation } from "../classes/Rotation";
+import { Orientation } from "../classes/Rotation";
 
 
 export class CardViewData {
@@ -10,7 +10,7 @@ export class CardViewData {
       public onclick: () => void = () => {},
       public playable: boolean = false,
       public reverse: boolean = false,
-      public rotation: Rotation = Rotation.Top,
+      public rotation: Orientation = Orientation.Up,
       public dummy: boolean = false,
       public z: number = 10,
       public hidden: boolean = false

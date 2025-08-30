@@ -1,7 +1,7 @@
 import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
 import { SuitHelper } from "../../bridge/model/Suit";
 import { Point } from "../classes/Point";
-import { Rotation } from "../classes/Rotation";
+import { Orientation } from "../classes/Rotation";
 import View from "./View";
 import BaseView from "./BaseView";
 
@@ -71,15 +71,15 @@ export default class CardView extends View {
     this.updateTransform();
   }
 
-  private _rotation = Rotation.Top;
+  private _rotation = Orientation.Up;
   private static rotations = {
-    [Rotation.Left]: "rotate(-90deg) translateX(-100%)",
-    [Rotation.Right]: "rotate(90deg) translateY(-100%)",
-    [Rotation.Upside]: "rotate(180deg)",
-    [Rotation.Top]: "",
+    [Orientation.Left]: "rotate(-90deg) translateX(-100%)",
+    [Orientation.Right]: "rotate(90deg) translateY(-100%)",
+    [Orientation.Down]: "rotate(180deg)",
+    [Orientation.Up]: "",
   };
 
-  set rotation(value: Rotation) {
+  set rotation(value: Orientation) {
     this._rotation = value;
     this.updateTransform();
   }

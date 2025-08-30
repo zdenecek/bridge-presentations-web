@@ -21,7 +21,7 @@
 import { computed, inject, useTemplateRef, watch } from 'vue';
 import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
 import { SuitHelper } from "../../bridge/model/Suit";
-import { Rotation } from "../classes/Rotation";
+import { Orientation } from "../classes/Rotation";
 import { CardViewData } from './CardViewData';
 
 // Props
@@ -56,10 +56,10 @@ const cardDimensions = inject('cardDimensions', { width: 100, height: 150 });
 
 // Rotation transforms (same as original)
 const rotationTransforms = {
-  [Rotation.Left]: "rotate(-90deg) translateX(-100%)",
-  [Rotation.Right]: "rotate(90deg) translateY(-100%)",
-  [Rotation.Upside]: "rotate(180deg)",
-  [Rotation.Top]: "",
+  [Orientation.Left]: "rotate(-90deg) translateX(-100%)",
+  [Orientation.Right]: "rotate(90deg) translateY(-100%)",
+  [Orientation.Down]: "rotate(180deg)",
+  [Orientation.Up]: "",
 };
 
 const transform = computed(() => `${props.data.position.asTransform()} ${rotationTransforms[props.data.rotation]}`);

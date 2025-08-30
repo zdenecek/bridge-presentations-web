@@ -1,16 +1,9 @@
 <template>
   <div :class="['bid-stack-container']" ref="container">
-    <BidView
-      v-for="(bid, index) in bids"
-      :key="index"
-      :bid="bid"
-      :style="{ 
-        left: bidPosition[index] + 'px',
-      }"
-      :rotation="rotation"
-      :class="['bid-animate']"
-      ref="bidRefs"
-    />
+    <BidView v-for="(bid, index) in bids" :key="index" :bid="bid" :style="{
+      left: bidPosition[index] + 'px',
+      ...(isHorizontal(rotation) ? { width: 'auto', height: '100%' } :  { width: '100%' })
+    }" :rotation="rotation" :class="['bid-animate']" ref="bidRefs" />
 
     <div class="debug" v-if="debug">
       {{ width }} {{ usableWidth }}
@@ -23,19 +16,21 @@ import { computed, inject, useTemplateRef } from "vue";
 import { Bid } from "../../bridge/model/Bid";
 import BidView from './BidView.vue';
 import { useElementSize } from "@vueuse/core";
-import { Rotation } from "../classes/Rotation";
+import { Orientation, isHorizontal } from "../classes/Rotation";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   bids: Bid[];
-  rotation: Rotation;
-}>();
+  rotation?: Orientation;
+}>(), {
+  rotation: Orientation.Up
+});
 
 const container = useTemplateRef<HTMLDivElement>('container');
 const bidRefs = useTemplateRef<typeof BidView[]>('bidRefs');
 
 const { width } = useElementSize(container);
 const bidWidth = computed(() => bidRefs.value?.[0].width);
-const usableWidth = computed(() => width.value - ( bidWidth.value || 0));
+const usableWidth = computed(() => width.value - (bidWidth.value || 0));
 
 /**
  * Computes the horizontal positions (in pixels) for each bid in the stack.
@@ -54,7 +49,7 @@ const bidPosition = computed(() => {
 
 
   const minSpace = bidWidth.value ? (bidWidth.value / 2) : 35;
-  const space = Math.min( minSpace, usableWidth.value / (props.bids.length - 1));
+  const space = Math.min(minSpace, usableWidth.value / (props.bids.length - 1));
   return [...Array(props.bids.length).keys()].map((_, i) => i * space);
 });
 
@@ -67,13 +62,10 @@ const debug = inject("debug") as boolean;
 
   .bid {
     position: absolute;
-    min-height: 100%;
   }
 
-  .bid:hover {
-    transform: translateX(-30px) translateY(0);
+  .bid:hover {   
     z-index: 10;
-    transition: transform 0.2s ease;
   }
 
   .bid-animate {
@@ -86,9 +78,9 @@ const debug = inject("debug") as boolean;
   0% {
     transform: translateY(-20px);
   }
+
   100% {
     transform: translateY(0);
   }
 }
-
 </style>

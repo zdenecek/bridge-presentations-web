@@ -6,14 +6,14 @@
           ref="handViewWest"
           :hand="game?.players[Position.West].hand"
           :position="Position.West"
-          :rotation="Rotation.Left"
+          :rotation="Orientation.Left"
         ></OneDimensionalHandView>
         <div class="center-column">
           <OneDimensionalHandView
             ref="handViewNorth"
             :hand="game?.players[Position.North].hand"
             :position="Position.North"
-            :rotation="Rotation.Top"
+            :rotation="Orientation.Up"
           ></OneDimensionalHandView>
 
           <BiddingCenterPanel
@@ -32,7 +32,7 @@
             ref="handViewSouth"
             :hand="game?.players[Position.South].hand"
             :position="Position.South"
-            :rotation="Rotation.Top"
+            :rotation="Orientation.Up"
           ></OneDimensionalHandView>
         </div>
 
@@ -40,7 +40,7 @@
           ref="handViewEast"
           :hand="game?.players[Position.East].hand"
           :position="Position.East"
-          :rotation="Rotation.Right"
+          :rotation="Orientation.Right"
         ></OneDimensionalHandView>
         <DebugView></DebugView>
       </div>
@@ -56,7 +56,7 @@
 import { PresentationGame } from "@/bridge/model/PresentationGame";
 import OneDimensionalHandView from "./OneDimensionalHandView.vue";
 import { Position } from "@/bridge/model/Position";
-import { Rotation } from "@/presenter/classes/Rotation";
+import { Orientation } from "@/presenter/classes/Rotation";
 import CenterNSEWFrame from "./CenterNSEWFrame.vue";
 import {
   onMounted,
