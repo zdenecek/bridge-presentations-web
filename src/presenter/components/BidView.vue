@@ -8,12 +8,14 @@
 import { computed,  useTemplateRef } from 'vue';
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
+import { useElementSize } from "@vueuse/core";
 
 const props = defineProps<{
   bid: Bid;
 }>();
 
 const element = useTemplateRef<HTMLDivElement>('element');
+const { width } = useElementSize(element);
 
 
 // Static image imports
@@ -53,7 +55,8 @@ const bidClass = computed(() => getClass(props.bid));
 
 
 defineExpose({
-  element
+  element,
+  width
 });
 </script>
 
@@ -61,39 +64,13 @@ defineExpose({
 .bid {
   display: inline-block;
   transition: ease 1s;
-
+  height: 100px;
+  width: auto;
 
   img {
-    max-height: 100%;
-    max-width: 100%;
-  }
-
-  &.hearts {
-    color: red;
-  }
-
-  &.diamonds {
-    color: darkgoldenrod;
-  }
-
-  &.spades {
-    color: blue;
-  }
-
-  &.clubs {
-    color: green;
-  }
-
-  &.pass {
-    color: gray;
-  }
-
-  &.double {
-    color: orange;
-  }
-
-  &.redouble {
-    color: red;
+    height: 100px;
+    width: auto;
+    object-fit: contain;
   }
 }
 </style> 
