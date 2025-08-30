@@ -11,25 +11,16 @@ import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
 import GameView from '@/presenter/components/GameView.vue';
 
-// Setup - same as original setup() function
-
 const gameView = ref<typeof GameView>();
 const players = PlayerFactory.makeObservablePlayers();
 const game = ref<PresentationGame>(new PresentationGame(players, PresentationGameOptions.Default));
 
-// Methods - exactly the same as original methods
-const updatePositions = () => {
-};
-
-const startGame = (options: ConfiguratorOptions, { endMessage }: { endMessage?: string }) => {
+const startGame = (options: ConfiguratorOptions) => {
     const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew, options.contract, options.trumps, options.activePositions)
-
-
     const gm = GameFactory.makeObservableGame(players, gameOpts, options.vulnerability);
+    
     game.value = gm;
     PlayerFactory.putHands(players, options.cards);
-    
-    
     nextTick(() => game.value.start(options.firstPlayer as Position, options.trumps));
 };
 
@@ -62,7 +53,6 @@ const startGame = (options: ConfiguratorOptions, { endMessage }: { endMessage?: 
 
 // Expose methods for parent component (same as original methods)
 defineExpose({
-    updatePositions,
     startGame
 });
 </script>

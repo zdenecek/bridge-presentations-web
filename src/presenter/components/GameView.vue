@@ -2,52 +2,26 @@
   <div ref="gameView" @click="update" :class="{ debug: debug }">
     <CardProvider :game="game">
       <div class="main-view" ref="mainView">
-        <OneDimensionalHandView
-          ref="handViewWest"
-          :hand="game?.players[Position.West].hand"
-          :position="Position.West"
-          :rotation="Orientation.Left"
-        ></OneDimensionalHandView>
+        <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
+          :rotation="Orientation.Left"></OneDimensionalHandView>
         <div class="center-column">
-          <OneDimensionalHandView
-            ref="handViewNorth"
-            :hand="game?.players[Position.North].hand"
-            :position="Position.North"
-            :rotation="Orientation.Up"
-          ></OneDimensionalHandView>
+          <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
+            :position="Position.North" :rotation="Orientation.Up"></OneDimensionalHandView>
 
-          <BiddingCenterPanel
-            class="bidding-center-panel"
-            :auction-visible="auctionVisible"
-          >
-            <CenterNSEWFrame
-              ref="centerFrame"
-              :vulnerability="game?.vulnerability"
-              class="center-frame"
-            >
+          <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible">
+            <CenterNSEWFrame ref="centerFrame" :vulnerability="game?.vulnerability" class="center-frame">
               <TrickView ref="trickView" class="trick-view"></TrickView>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
-          <OneDimensionalHandView
-            ref="handViewSouth"
-            :hand="game?.players[Position.South].hand"
-            :position="Position.South"
-            :rotation="Orientation.Up"
-          ></OneDimensionalHandView>
+          <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
+            :position="Position.South" :rotation="Orientation.Up"></OneDimensionalHandView>
         </div>
 
-        <OneDimensionalHandView
-          ref="handViewEast"
-          :hand="game?.players[Position.East].hand"
-          :position="Position.East"
-          :rotation="Orientation.Right"
-        ></OneDimensionalHandView>
+        <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
+          :rotation="Orientation.Right"></OneDimensionalHandView>
         <DebugView></DebugView>
       </div>
-      <BiddingBox
-        v-show="game?.state === 'bidding'"
-        @bid="biddingBoxCallback"
-      ></BiddingBox>
+      <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
     </CardProvider>
   </div>
 </template>
@@ -76,6 +50,11 @@ import BiddingCenterPanel from "./BiddingCenterPanel.vue";
 import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 
+/**
+ * GAME 
+ * Wire game events to Vue reactive system
+ */
+
 const props = defineProps<{
   game: PresentationGame;
 }>();
@@ -90,59 +69,29 @@ watch(
 );
 
 provide("game", gameRef);
-const auctionVisible = computed(() => {
-  return gameRef.value?.state === "bidding";
-});
-provide("auctionVisible", auctionVisible);
 
 watch(
   () => props.game,
   (gm) => {
-    gm.cardPlayed.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.trickEnded.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.trickStarted.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.biddingStarted.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.cardplayStarted.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.cardplayEnded.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.gameStarted.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.gameEnded.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.stateChanged.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.biddingEnded.sub(() => {
-      triggerRef(gameRef);
-    });
-
-    gm.undoMade.sub(() => {
-      triggerRef(gameRef);
-    });
+    [
+      gm.cardPlayed,
+      gm.trickEnded,
+      gm.trickStarted,
+      gm.biddingStarted,
+      gm.cardplayStarted,
+      gm.cardplayEnded,
+      gm.gameStarted,
+      gm.gameEnded,
+      gm.stateChanged,
+      gm.biddingEnded,
+      gm.undoMade,
+    ].forEach(ev => ev.sub(() => triggerRef(gameRef)));
   }
 );
+
+/** 
+ * BIDDING BOX
+ */
 
 const biddingBoxCallback = ref<((bid: Bid) => void) | undefined>(undefined);
 watch(
@@ -157,18 +106,22 @@ watch(
           (player as PresentationPlayer).bid(bid);
       });
 
-      player.bidRequestCancelled.sub(() => {
-        biddingBoxCallback.value = undefined;
-      });
+      player.bidRequestCancelled.sub(() => 
+        biddingBoxCallback.value = undefined
+      );
 
-      player.bidMade.sub(() => {
-        biddingBoxCallback.value = undefined;
-      });
+      player.bidMade.sub(() => 
+        biddingBoxCallback.value = undefined
+      );
     });
   }
 );
 
+/**
+ * RESIZE OBSERVER
+ */
 let resizeObserver: ResizeObserver | null = null;
+const gameView = ref<HTMLDivElement>();
 
 onMounted(() => {
   // Update on window resize
@@ -189,7 +142,9 @@ onUnmounted(() => {
   resizeObserver?.disconnect();
 });
 
-const gameView = ref<HTMLDivElement>();
+/**
+ * MANUAL UI UPDATE
+ */
 const trickView = useTemplateRef<typeof TrickView>("trickView");
 const centerFrame = useTemplateRef<typeof CenterNSEWFrame>("centerFrame");
 const handViewWest =
@@ -209,7 +164,50 @@ function update() {
   trickView.value?.update?.();
 }
 
-const debug = ref(true);
+/** 
+ * AUCTION VISIBILITY
+ * After the bidding ends, wait for the user to click the screen to continue to the card play
+ */
+const auctionVisible = computed(() => {
+  return gameRef.value?.state === "bidding" || waitForClick.value;
+});
+
+const waitForClick = ref(false);
+watch(gameRef, (game) => {
+  game.biddingEnded.sub(() => {
+    console.log("bidding ended");
+    waitForClick.value = true;
+  });
+  game.cardPlayed.sub(() => {
+    waitForClick.value = false;
+  });
+});
+
+function handleClick() {
+  waitForClick.value = false;
+}
+onMounted(() => {
+  window.addEventListener("click", handleClick);
+});
+onUnmounted(() => {
+  window.removeEventListener("click", handleClick);
+});
+
+provide("auctionVisible", auctionVisible);
+
+/**
+ * DUMMY LOGIC
+ */
+
+const dummy = computed(() => {
+  if (gameRef.value?.options.) return undefined;
+});
+
+/**
+ * DEBUG
+ */
+
+const debug = ref(false);
 provide("debug", debug);
 </script>
 

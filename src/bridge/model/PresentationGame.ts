@@ -42,7 +42,7 @@ export class PresentationGameOptions {
 }
 
 export class PresentationGame extends UndoableGame {
-  private options: PresentationGameOptions;
+  public readonly options: PresentationGameOptions;
 
   public get bidding(): boolean {
     return this.options.bidding;
