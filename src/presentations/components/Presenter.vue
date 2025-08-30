@@ -3,20 +3,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import { Position  } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
 import GameView from '@/presenter/components/GameView.vue';
+import { registerKeyboardShortcut } from '@/presenter/utils/shortcuts';
+import { PassBid } from "@/bridge/model/Bid";
+import { Player } from "@/bridge/model/Player";
+import { PositionHelper } from "@/bridge/model/Position";
+
+const props = defineProps<{
+    visible: boolean;
+}>();
 
 const gameView = ref<typeof GameView>();
 const players = PlayerFactory.makeObservablePlayers();
 const game = ref<PresentationGame>(new PresentationGame(players, PresentationGameOptions.Default));
 
 const startGame = (options: ConfiguratorOptions) => {
-    const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew, options.contract, options.trumps, options.activePositions)
+    const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew, 
+    options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
     const gm = GameFactory.makeObservableGame(players, gameOpts, options.vulnerability);
     
     game.value = gm;
@@ -24,32 +33,48 @@ const startGame = (options: ConfiguratorOptions) => {
     nextTick(() => game.value.start(options.firstPlayer as Position, options.trumps));
 };
 
-// // Mounted - exactly the same as original mounted()
-// onMounted(() => {
-//     $(window)
-//         .on("keydown", (e) => {
-//             if (Application.state !== 'presenter') return;
+onMounted(() => {
+    // Arrow key shortcuts
+    registerKeyboardShortcut('ArrowLeft', null, (e) => {
+        arrowHelper(e.ctrlKey, Position.West);
+    });
 
-//             var arrowHelper = (ctrl: boolean, pos: Position) => {
-//                 if (!ctrl) {
-//                     // gameView.toggleVisible(pos);
-//                     return;
-//                 }
+    registerKeyboardShortcut('ArrowRight', null, (e) => {
+        arrowHelper(e.ctrlKey, Position.East);
+    });
 
-//                 PositionHelper.all().forEach((p) => {
-//                     // if (p !== gameView.dummy) gameView.toggleVisible(p, p === pos);
-//                 });
-//             }
+    registerKeyboardShortcut('ArrowDown', null, (e) => {
+        arrowHelper(e.ctrlKey, Position.South);
+    });
 
-//             if (e.key === "ArrowLeft") arrowHelper(e.ctrlKey, Position.West);
-//             if (e.key === "ArrowRight") arrowHelper(e.ctrlKey, Position.East);
-//             if (e.key === "ArrowDown") arrowHelper(e.ctrlKey, Position.South);
-//             if (e.key === "ArrowUp") arrowHelper(e.ctrlKey, Position.North);
-//             if (e.key === "Z" || e.key === "z") game.value.undo();
-//             if (e.key === " " && game.value.state === "bidding" && game.value.currentlyRequestedPlayer) game.value.tryAddBid(new PassBid(), game.value.currentlyRequestedPlayer as Player);
+    registerKeyboardShortcut('ArrowUp', null, (e) => {
+        arrowHelper(e.ctrlKey, Position.North);
+    });
 
-//         });
-// });
+    // Undo shortcut
+    registerKeyboardShortcut('z', null, () => {
+        game.value.undo();
+    });
+
+    // Pass bid shortcut
+    registerKeyboardShortcut(' ', null, (e) => {
+        if (game.value.state === "bidding" && game.value.currentlyRequestedPlayer) {
+            game.value.tryAddBid(new PassBid(), game.value.currentlyRequestedPlayer as Player);
+        }
+    });
+
+    // TODO
+    const arrowHelper = (ctrl: boolean, pos: Position) => {
+        if (!ctrl) {
+            // gameView.toggleVisible(pos);
+            return;
+        }
+
+        PositionHelper.all().forEach((p) => {
+            // if (p !== gameView.dummy) gameView.toggleVisible(p, p === pos);
+        });
+    }
+});
 
 // Expose methods for parent component (same as original methods)
 defineExpose({

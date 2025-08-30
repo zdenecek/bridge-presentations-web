@@ -198,7 +198,9 @@ export default defineComponent({
     },
     mounted() {
     
-        this.setOptions(  { "cards": { "north": "AKQJ AKQ AKQ AKQ", "south": "AKQJ AKQ AKQ AKQ", "east": "AKQJ AKQ AKQ AKQ", "west": "AKQJ AKQ AKQ AKQ" }, "fake": { "ns": 0, "ew": 0 }, "firstPlayer": "west", "bidding": true, "trumps": 5, "dummy": "auto", "staticDummyPosition": "north", "vulnerability": "none", "activePositions": ["north", "east", "south", "west"] } as ConfiguratorOptions )
+        this.setOptions(  { "cards": { "north": "AKQJ AKQ AKQ AKQ", "south": "AKQJ AKQ AKQ AKQ", "east": "AKQJ AKQ AKQ AKQ", "west": "AKQJ AKQ AKQ AKQ" }, "fake": { "ns": 0, "ew": 0 }, "firstPlayer": "west", 
+        "bidding": false, "trumps": 5, 
+        "dummy": "auto", "staticDummyPosition": "north", "vulnerability": "none", "activePositions": ["north", "east", "south", "west"] } as ConfiguratorOptions )
     
     },
     methods: {

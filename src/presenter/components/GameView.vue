@@ -3,10 +3,10 @@
     <CardProvider :game="game">
       <div class="main-view" ref="mainView">
         <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
-          :rotation="Orientation.Left"></OneDimensionalHandView>
+          :rotation="Orientation.Left" :dummy="dummy === Position.West"></OneDimensionalHandView>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
-            :position="Position.North" :rotation="Orientation.Up"></OneDimensionalHandView>
+            :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"></OneDimensionalHandView>
 
           <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible">
             <CenterNSEWFrame ref="centerFrame" :vulnerability="game?.vulnerability" class="center-frame">
@@ -14,12 +14,12 @@
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
-            :position="Position.South" :rotation="Orientation.Up"></OneDimensionalHandView>
+            :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"></OneDimensionalHandView>
         </div>
 
         <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
-          :rotation="Orientation.Right"></OneDimensionalHandView>
-        <DebugView></DebugView>
+          :rotation="Orientation.Right" :dummy="dummy === Position.East"></OneDimensionalHandView>
+        <DebugView v-if="debug"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
     </CardProvider>
@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { PresentationGame } from "@/bridge/model/PresentationGame";
 import OneDimensionalHandView from "./OneDimensionalHandView.vue";
-import { Position } from "@/bridge/model/Position";
+import { Position, PositionHelper } from "@/bridge/model/Position";
 import { Orientation } from "@/presenter/classes/Orientation";
 import CenterNSEWFrame from "./CenterNSEWFrame.vue";
 import {
@@ -41,6 +41,7 @@ import {
   triggerRef,
   onUnmounted,
   computed,
+  nextTick,
 } from "vue";
 import TrickView from "./TrickView.vue";
 import CardProvider from "./CardProvider.vue";
@@ -85,7 +86,9 @@ watch(
       gm.stateChanged,
       gm.biddingEnded,
       gm.undoMade,
-    ].forEach(ev => ev.sub(() => triggerRef(gameRef)));
+    ].forEach(ev => ev.sub(() => {
+      triggerRef(gameRef)
+    }));
   }
 );
 
@@ -157,12 +160,15 @@ const handViewEast =
   useTemplateRef<typeof OneDimensionalHandView>("handViewEast");
 
 function update() {
+  console.log("update");
   handViewWest.value?.update?.();
   handViewNorth.value?.update?.();
   handViewSouth.value?.update?.();
   handViewEast.value?.update?.();
   trickView.value?.update?.();
 }
+
+window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
 
 /** 
  * AUCTION VISIBILITY
@@ -200,7 +206,22 @@ provide("auctionVisible", auctionVisible);
  */
 
 const dummy = computed(() => {
-  if (gameRef.value?.options.) return undefined;
+  if (gameRef.value?.options.dummy === "auto") {
+    if (auctionVisible.value) return undefined;
+    if (gameRef.value.auction?.finalContract == "passed") return undefined;
+    const declarer = gameRef.value.auction?.finalContract?.declarer;
+    if (declarer) return PositionHelper.nextPosition(declarer, 2);
+  }
+  else if (gameRef.value?.options.dummy === "static" && gameRef.value?.options.staticDummyPosition) {
+    return gameRef.value?.options.staticDummyPosition;
+  }
+  else if (gameRef.value?.options.dummy === "none") {
+    return undefined;
+  }
+  else {
+    console.warn("Unknown dummy option", gameRef.value?.options.dummy);
+    return undefined;
+  }
 });
 
 /**

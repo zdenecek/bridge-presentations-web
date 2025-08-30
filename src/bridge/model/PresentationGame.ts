@@ -1,3 +1,4 @@
+import { DummyOptions } from "@/presenter/views/GameView";
 import { Auction } from "./Auction";
 import { Bid } from "./Bid";
 import { Contract } from "./Contract";
@@ -16,6 +17,8 @@ export class PresentationGameOptions {
   fakeEWTricks: number;
   contract?: Contract;
   trumps?: Suit;
+  dummy: DummyOptions;
+  staticDummyPosition?: Position;
   activePositions: Array<Position>;
 
   static Default = new PresentationGameOptions(true, 0, 0, undefined);
@@ -26,12 +29,16 @@ export class PresentationGameOptions {
     fakeEWTricks = 0,
     contract?: Contract,
     trumps?: Suit,
+    dummy: DummyOptions = "auto",
+    staticDummyPosition?: Position,
     activePositions: Array<Position> = PositionHelper.all(),
   ) {
     this.bidding = bidding;
     this.fakeEWTricks = fakeEWTricks;
     this.fakeNSTricks = fakeNSTricks;
     this.activePositions = activePositions;
+    this.dummy = dummy;
+    this.staticDummyPosition = staticDummyPosition;
     if (!bidding) {
       if (contract) {
         this.contract = contract;
