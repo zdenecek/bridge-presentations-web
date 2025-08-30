@@ -5,10 +5,9 @@
 
     </div>
     <div class="bidding-center-panel-container">
-      
       <slot></slot>
     </div>
-    <BidStack v-for="position in positions" :key="position" :position="position"
+    <BidStack v-for="position in positions" :key="position" :class="'bid-stack-'+ position "
        :bids="getBidsForPosition(position)" />
   </div>
 </template>
@@ -32,7 +31,6 @@ watch(() => props.auctionVisible, (newAuctionVisible) => {
 const game = inject('game', ref<PresentationGame>());
 const debug = inject('debug', ref(false));
 
-// Computed properties
 const positions = computed(() => PositionHelper.all());
 
 const getBidsForPosition = (position: Position): Bid[] => {
@@ -78,21 +76,8 @@ const getBidsForPosition = (position: Position): Bid[] => {
     position: relative;
   }
 
-  .bid-stack-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-  height: 100%;
-  transition: 300ms;
-
   .bid-stack {
-    position: relative;
-        width: 100%;
-        height: 100%;
-        transition: 300ms;
-  }
+
 
     &-north {
       grid-row: 1;
@@ -118,6 +103,7 @@ const getBidsForPosition = (position: Position): Bid[] => {
     }
 
     &-west {
+      display: none;
       grid-column: 1;
       grid-row-start: 1;
       grid-row-end: 3;
@@ -132,27 +118,6 @@ const getBidsForPosition = (position: Position): Bid[] => {
   }
 }
 
-
-// .bidding-center-panel {
-//   position: relative;
-//   aspect-ratio: 1;
-//   display: grid;
-
-//   grid-template-columns: 0px auto 0px;
-//     grid-template-rows: 0px auto 0px;
-
-//   gap: 3px;
-//   padding: 10px;
-//   transition: all 300ms ease;
-
-//   &.bidding-center-panel-auction {
-//     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-//     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-//   }
-// }
-
-
-// }
 .absolute {
   position: absolute;
 }
@@ -161,20 +126,19 @@ const getBidsForPosition = (position: Position): Bid[] => {
 <style scoped lang="scss">
 .debug {
 
-
-  .bid-stack-container-north {
+  .bid-stack-north {
     background-color: lightblue;
   }
 
-  .bid-stack-container-east {
+  .bid-stack-east {
     background-color: lightgoldenrodyellow;
   }
 
-  .bid-stack-container-south {
+  .bid-stack-south {
     background-color: lightgreen;
   }
 
-  .bid-stack-container-west {
+  .bid-stack-west {
     background-color: lightpink;
   }
 }

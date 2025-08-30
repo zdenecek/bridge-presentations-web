@@ -4,7 +4,11 @@
       v-for="(bid, index) in bids"
       :key="index"
       :bid="bid"
-      :style="{ left: bidPosition[index] + 'px' }"
+      :style="{ 
+        left: bidPosition[index] + 'px',
+      }"
+      :rotation="rotation"
+      :class="['bid-animate']"
       ref="bidRefs"
     />
 
@@ -19,16 +23,19 @@ import { computed, inject, useTemplateRef } from "vue";
 import { Bid } from "../../bridge/model/Bid";
 import BidView from './BidView.vue';
 import { useElementSize } from "@vueuse/core";
+import { Rotation } from "../classes/Rotation";
 
 const props = defineProps<{
   bids: Bid[];
+  rotation: Rotation;
 }>();
 
 const container = useTemplateRef<HTMLDivElement>('container');
 const bidRefs = useTemplateRef<typeof BidView[]>('bidRefs');
 
 const { width } = useElementSize(container);
-const usableWidth = computed(() => width.value - ( bidRefs.value?.[0].width || 0));
+const bidWidth = computed(() => bidRefs.value?.[0].width);
+const usableWidth = computed(() => width.value - ( bidWidth.value || 0));
 
 /**
  * Computes the horizontal positions (in pixels) for each bid in the stack.
@@ -45,7 +52,9 @@ const bidPosition = computed(() => {
   if (props.bids.length === 0) return [];
   if (props.bids.length === 1) return [0];
 
-  const space = Math.min(35, usableWidth.value / (props.bids.length - 1));
+
+  const minSpace = bidWidth.value ? (bidWidth.value / 2) : 35;
+  const space = Math.min( minSpace, usableWidth.value / (props.bids.length - 1));
   return [...Array(props.bids.length).keys()].map((_, i) => i * space);
 });
 
@@ -59,6 +68,26 @@ const debug = inject("debug") as boolean;
   .bid {
     position: absolute;
     min-height: 100%;
+  }
+
+  .bid:hover {
+    transform: translateX(-30px) translateY(0);
+    z-index: 10;
+    transition: transform 0.2s ease;
+  }
+
+  .bid-animate {
+    animation: flowFromTop 0.6s forwards;
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes flowFromTop {
+  0% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
