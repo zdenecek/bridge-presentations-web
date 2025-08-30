@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, nextTick, computed, inject, shallowRef, triggerRef } from 'vue';
+import { watch, ref, nextTick, inject, shallowRef, triggerRef } from 'vue';
 import { CardViewData } from "./CardViewData";
 import { Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";
@@ -45,12 +45,6 @@ watch(() => game.value, (newGame) => {
 
 }, { immediate: true });
 
-
-
-// Computed property to get card at position
-const getCardAtPosition = (position: Position) => {
-  return trick.value?.getCardByPosition(position)?.card.toString() || '';
-};
 
 const originElements = ref<Map<Position, HTMLElement>>(new Map());
 

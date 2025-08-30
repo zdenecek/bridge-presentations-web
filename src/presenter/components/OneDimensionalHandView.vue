@@ -1,8 +1,6 @@
 <template>
   <div class="v-one-dimensional-hand-view" :class="`hand-${position}`" 
   :style="componentStyle"
-
-  
   ref="root">
   <template v-if="debug">
     <div class="debug-item">
@@ -73,9 +71,6 @@ const _height = ref(0);
 const _debug_dummy = ref(false);
 
 const update = (): void => {
-  // Wait for layout to be ready
-  nextTick(() => {
-    // Double nextTick to ensure DOM is fully painted
     nextTick(() => {
       _offset.value = getStart();
       _width.value = getWidth();
@@ -89,7 +84,6 @@ const update = (): void => {
         updateNonDummy();
       }
     });
-  });
 };
 
 
@@ -197,6 +191,7 @@ const updateNonDummy = (): void => {
 };
 
 const updateDummy = (): void => {
+
   const start = getStart();
   if (!props.hand || !start) return;
 

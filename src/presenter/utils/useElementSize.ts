@@ -7,7 +7,7 @@ export function useElementSize(element: HTMLElement): {
   const width = ref<number>(0);
   const height = ref<number>(0);
 
-  let observer = null;
+  let observer: ResizeObserver | null = null;
 
   function disconnect() {
     if (observer !== null) {

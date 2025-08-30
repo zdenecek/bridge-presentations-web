@@ -38,7 +38,6 @@ const getBidsForPosition = (position: Position): Bid[] => {
   const bids = game.value?.auction?.bids
     .filter(bid => bid.position === position)
     .map(bid => bid.bid) || [];
-  console.log('bids', position, bids);
   return bids;
 };
 

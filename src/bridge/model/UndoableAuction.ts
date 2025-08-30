@@ -19,9 +19,9 @@ export class UndoableAuction extends Auction {
     const lastBid = this.bids[this.bids.length - 1];
     if (!lastBid) return;
     this._isFinished = false;
-    this.bids = this.bids.slice(0, -1);
+    this._bids = this.bids.slice(0, -1);
     this.resetStanding();
-    this.bids.forEach((bid) => this.updateStanding(bid));
+    this._bids.forEach((bid) => this.updateStanding(bid));
 
     this._bidRemoved.dispatch(lastBid);
 

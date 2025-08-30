@@ -3,16 +3,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, reactive, shallowRef, triggerRef } from 'vue';
-import { Position, PositionHelper } from "@/bridge/model/Position";
+import { ref, nextTick } from 'vue';
+import { Position  } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
-import $ from "jquery";
 import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
-import { Application } from "../class/Application";
-import { PassBid } from "@/bridge/model/Bid";
-import { Player } from '@/bridge/model/Player';
 import GameView from '@/presenter/components/GameView.vue';
 
 // Setup - same as original setup() function

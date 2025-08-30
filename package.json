@@ -23,8 +23,8 @@
     "lodash": "^4.17.21",
     "sass": "^1.64.1",
     "strongly-typed-events": "^3.0.9",
-    "typescript": "^5.0.2",
+    "typescript": "^5.9.2",
     "vite": "^4.4.5",
-    "vue-tsc": "^1.8.5"
+    "vue-tsc": "^3.0.6"
   }
 }

@@ -118,7 +118,6 @@ onUnmounted(() => {
 watch(() => props.game, (game) => {
 
   cardViews.value = makeCards(game);
-  console.log("cardViews", cardViews.value);
 }, { flush: 'pre' });
 
 
@@ -132,7 +131,6 @@ function getCardView(card: Card): CardViewData {
 
 function makeCards(game?: PresentationGame): Map<Card, CardViewData> {
   const cardViews = new Map<Card, CardViewData>()
-  console.log("makeCards", game);
   if (!game) return cardViews;
 
   const trick_cards = game.tricks.flatMap((trick) => trick.cards);

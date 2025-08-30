@@ -16,7 +16,7 @@ export class Trick {
 
   constructor(
     firstToPlay: Position = Position.North,
-    trumps: Suit = Suit.NoTrump,
+    trumps: Suit = Suit.Notrump,
   ) {
     this.firstToPlay = firstToPlay;
     this.trumps = trumps;
