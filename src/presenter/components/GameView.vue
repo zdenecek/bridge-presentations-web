@@ -4,25 +4,29 @@
       <div class="main-view" ref="mainView">
         <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
           :rotation="Orientation.Left" :dummy="dummy === Position.West"
-          :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
+          :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :reverse="!handsVisible.get(Position.West)"></OneDimensionalHandView>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
-            :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
+            :cardViews="cardViews" :cardDimensions="cardDimensions"
+            :reverse="!handsVisible.get(Position.North)"></OneDimensionalHandView>
 
           <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
-            <CenterNSEWFrame ref="centerFrame" :vulnerability="game?.vulnerability" :game="game" class="center-frame">
-              <TrickView :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
+            <CenterNSEWFrame  :vulnerability="game?.vulnerability" :game="game" class="center-frame">
+              <TrickView ref="trickView" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
             :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"
-            :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
+            :cardViews="cardViews" :cardDimensions="cardDimensions"
+            :reverse="!handsVisible.get(Position.South)"></OneDimensionalHandView>
         </div>
 
         <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
           :rotation="Orientation.Right" :dummy="dummy === Position.East"
-          :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
+          :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :reverse="!handsVisible.get(Position.East)"></OneDimensionalHandView>
         <DebugView v-if="debug" :game="game" :cardViews="cardViews"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
@@ -60,6 +64,7 @@ import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 
 const props = defineProps<{
   game: PresentationGame;
+  handsVisible: Map<Position, boolean>;
 }>();
 
 /** 

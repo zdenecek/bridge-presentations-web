@@ -122,11 +122,11 @@ const handleClick = () => {
   display: block;
 }
 
-.card.playable {
+.card.playable:not(.reverse) {
   cursor: pointer;
 }
 
-.card.playable-dummy {
+.card.playable-dummy:not(.reverse) {
   cursor: pointer;
 }
 

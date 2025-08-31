@@ -78,7 +78,7 @@ const update = (): void => {
       if (!props.hand) return;
 
       
-      if (props.dummy) {
+      if (props.dummy && !props.reverse) {
         updateDummy();
       } else {
         updateNonDummy();

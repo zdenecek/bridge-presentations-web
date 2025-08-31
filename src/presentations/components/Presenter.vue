@@ -1,5 +1,5 @@
 <template>
-    <MainView ref="mainView" :game="game" />
+    <presenter-view :game="game" :handsVisible="handsVisible" />
 </template>
 
 <script setup lang="ts">
@@ -9,7 +9,7 @@ import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
-import MainView from '@/presenter/components/MainView.vue';
+import PresenterView from '@/presenter/components/PresenterView.vue';
 import { registerKeyboardShortcut } from '@/presenter/utils/shortcuts';
 import { PassBid } from "@/bridge/model/Bid";
 import { Player } from "@/bridge/model/Player";
@@ -19,9 +19,13 @@ const props = defineProps<{
     visible: boolean;
 }>();
 
-const mainView = ref<typeof MainView>();
 const players = PlayerFactory.makeObservablePlayers();
 const game = ref<PresentationGame>(new PresentationGame(players, PresentationGameOptions.Default));
+
+// Hide or show hands for presentation purposes
+const handsVisible = ref<Map<Position, boolean>>(new Map(
+    PositionHelper.all().map((position) => [position, true])
+));
 
 const startGame = (options: ConfiguratorOptions) => {
     const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew, 
@@ -35,25 +39,20 @@ const startGame = (options: ConfiguratorOptions) => {
 
 onMounted(() => {
     // Arrow key shortcuts
-    registerKeyboardShortcut('ArrowLeft', null, (e) => {
-        arrowHelper(e.ctrlKey, Position.West);
+    [
+        { key: 'ArrowLeft', pos: Position.West },
+        { key: 'ArrowRight', pos: Position.East },
+        { key: 'ArrowDown', pos: Position.South },
+        { key: 'ArrowUp', pos: Position.North }
+    ].forEach(({ key, pos }) => {
+        registerKeyboardShortcut(key, null, () => {
+            if (props.visible) handsVisible.value.set(pos, !handsVisible.value.get(pos));
+            console.log('handsVisible', handsVisible.value);
+        });
     });
 
-    registerKeyboardShortcut('ArrowRight', null, (e) => {
-        arrowHelper(e.ctrlKey, Position.East);
-    });
-
-    registerKeyboardShortcut('ArrowDown', null, (e) => {
-        arrowHelper(e.ctrlKey, Position.South);
-    });
-
-    registerKeyboardShortcut('ArrowUp', null, (e) => {
-        arrowHelper(e.ctrlKey, Position.North);
-    });
-
-    // Undo shortcut
     registerKeyboardShortcut('z', null, () => {
-        game.value.undo();
+        if (props.visible) game.value.undo();
     });
 
     // Pass bid shortcut
@@ -62,18 +61,6 @@ onMounted(() => {
             game.value.tryAddBid(new PassBid(), game.value.currentlyRequestedPlayer as Player);
         }
     });
-
-    // TODO
-    const arrowHelper = (ctrl: boolean, pos: Position) => {
-        if (!ctrl) {
-            // gameView.toggleVisible(pos);
-            return;
-        }
-
-        PositionHelper.all().forEach((p) => {
-            // if (p !== gameView.dummy) gameView.toggleVisible(p, p === pos);
-        });
-    }
 });
 
 // Expose methods for parent component (same as original methods)
