@@ -1,5 +1,5 @@
 <template>
-    <MainView v-if="game" ref="mainView" :game="game" />
+    <MainView ref="mainView" :game="game" />
 </template>
 
 <script setup lang="ts">
@@ -83,9 +83,6 @@ defineExpose({
 </script>
 
 <style lang="scss">
-// @import "@/presenter/assets/style/presenter.scss";
-// @import '@/presenter/assets/style/debug.scss';
-
 .presenter {
     width: 100%;
     height: 100%;

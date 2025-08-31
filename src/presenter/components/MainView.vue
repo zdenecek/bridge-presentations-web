@@ -1,54 +1,25 @@
 <template>
-   <GameView :game="game" />
+    <div class="main-view-wrapper">
+        <game-provider :game="game" v-slot="{game}">
+        <GameView :game="game" />
+        </game-provider>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { PresentationGame } from '@/bridge/model/PresentationGame';
-import { provide, ref, shallowRef, triggerRef, watch } from 'vue';
 import GameView from './GameView.vue';
-
-/**
- * GAME 
- * Wire game events to Vue reactive system
- */
+import GameProvider from './GameProvider.vue';
 
 const props = defineProps<{
-  game: PresentationGame;
+    game: PresentationGame;
 }>();
-
-const gameRef = shallowRef(props.game);
-watch(
-  () => props.game,
-  (newGame) => {
-    console.log("gameRef", newGame);
-    gameRef.value = newGame;
-  }
-);
-
-provide("game", gameRef);
-
-watch(
-  () => props.game,
-  (gm) => {
-    [
-      gm.cardPlayed,
-      gm.trickEnded,
-      gm.trickStarted,
-      gm.biddingStarted,
-      gm.cardplayStarted,
-      gm.cardplayEnded,
-      gm.gameStarted,
-      gm.gameEnded,
-      gm.stateChanged,
-      gm.biddingEnded,
-      gm.undoMade,
-    ].forEach(ev => ev.sub(() => {
-      triggerRef(gameRef)
-    }));
-  }
-);
 
 </script>
 
 <style scoped lang="scss">
+.main-view-wrapper {
+    width: 100%;
+    height: 100%;
+}
 </style>
