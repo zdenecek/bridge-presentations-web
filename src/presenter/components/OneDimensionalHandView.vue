@@ -77,6 +77,7 @@ const update = (): void => {
       _height.value = getHeight();
       
       if (!props.hand) return;
+
       
       if (props.dummy) {
         updateDummy();
@@ -185,6 +186,7 @@ const updateNonDummy = (): void => {
     if (!view) return;
     view.reverse = props.reverse;
     view.position = currentPosition;
+    view.hidden = false;
     view.z = reverseZIndex ? cards.length - index : index;
     currentPosition = currentPosition.moveBy(offsetVector);
   });
@@ -217,7 +219,7 @@ const updateDummy = (): void => {
       if (!view) return;
       view.position = currentSuitPos;
       view.reverse = false;
-
+      view.hidden = false;
       view.z = index + suitIndex * 10;
       currentSuitPos = currentSuitPos.moveBy(cardOffset);
       index++;

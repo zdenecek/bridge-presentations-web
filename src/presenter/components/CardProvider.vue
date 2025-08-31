@@ -1,13 +1,10 @@
 <template>
   <div ref="element">
     <div id="cards">
-
       <CardView v-for="card in cardViews.values()" :data="card" :key="card.card.toString()"></CardView>
     </div>
     <slot></slot>
   </div>
-
-
 </template>
 
 <style scoped>

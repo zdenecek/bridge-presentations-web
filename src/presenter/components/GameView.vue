@@ -160,7 +160,6 @@ const handViewEast =
   useTemplateRef<typeof OneDimensionalHandView>("handViewEast");
 
 function update() {
-  console.log("update");
   handViewWest.value?.update?.();
   handViewNorth.value?.update?.();
   handViewSouth.value?.update?.();
@@ -169,6 +168,15 @@ function update() {
 }
 
 window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
+
+watch(gameRef, (game) => {
+  game.cardPlayed.sub(() => {
+    update();
+  });
+  game.undoMade.sub(() => {
+    update();
+  });
+});
 
 /** 
  * AUCTION VISIBILITY
