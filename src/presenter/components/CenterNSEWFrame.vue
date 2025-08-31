@@ -99,10 +99,7 @@ defineExpose({
     font-size: 2vh;
     font-weight: bold;
 
-    &.focused {
-      background-color: yellow;
-      color: black;
-    }
+
 
     &.label-nonvul {
       background-color: rgb(77, 117, 77);
@@ -111,6 +108,11 @@ defineExpose({
     &.label-vul {
       background-color: rgb(172, 21, 0);
       text-decoration: underline;
+    }
+    
+    &.focused {
+      background-color: yellow;
+      color: black;
     }
   }
 

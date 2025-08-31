@@ -1,8 +1,9 @@
 <template>
     <div class="presenter-view">
-        <GameView :game="game" :handsVisible="handsVisible" class="game-view" />
+        <game-view :game="game" :handsVisible="handsVisible" class="game-view" />
         <div class="side-panel">
-            <BiddingHistoryView :auction="game?.auction" v-show="showBiddingHistory" />
+            <status-panel :game="game" />
+            <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" />
         </div>
     </div>
 </template>
@@ -13,6 +14,7 @@ import GameView from './GameView.vue';
 import { Position } from '@/bridge/model/Position';
 import { computed } from 'vue';
 import BiddingHistoryView from './BiddingHistoryView.vue';
+import StatusPanel from './StatusPanel.vue';
 
 const props = defineProps<{
     game: PresentationGame;

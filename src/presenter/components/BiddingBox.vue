@@ -56,8 +56,6 @@ const emit = defineEmits<{
 }>();
 
 
-
-
 const handleBidClick = (bid: Bid) => {
   emit('bid', bid);
 };
