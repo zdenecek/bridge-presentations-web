@@ -22,6 +22,7 @@ import { Orientation } from '../classes/Orientation';
 
 const props = defineProps<{
   auctionVisible?: boolean;
+  game?: PresentationGame;
 }>();
 
 const auctionVisible = ref(props.auctionVisible);
@@ -29,13 +30,11 @@ watch(() => props.auctionVisible, (newAuctionVisible) => {
   auctionVisible.value = newAuctionVisible;
 });
 
-const game = inject('game', ref<PresentationGame>());
 const debug = inject('debug', ref(false));
-
 const positions = computed(() => PositionHelper.all());
 
 const getBidsForPosition = (position: Position): Bid[] => {
-  const bids = game.value?.auction?.bids
+  const bids = props.game?.auction?.bids
     .filter(bid => bid.position === position)
     .map(bid => bid.bid) || [];
   return bids;

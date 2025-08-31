@@ -8,9 +8,9 @@
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"></OneDimensionalHandView>
 
-          <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible">
-            <CenterNSEWFrame ref="centerFrame" :vulnerability="game?.vulnerability" class="center-frame">
-              <TrickView ref="trickView" class="trick-view"></TrickView>
+          <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
+            <CenterNSEWFrame ref="centerFrame" :vulnerability="game?.vulnerability" :game="game" class="center-frame">
+              <TrickView :game="game" class="trick-view"></TrickView>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
@@ -19,7 +19,7 @@
 
         <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
           :rotation="Orientation.Right" :dummy="dummy === Position.East"></OneDimensionalHandView>
-        <DebugView v-if="debug"></DebugView>
+        <DebugView v-if="debug" :game="game"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
     </CardProvider>
@@ -38,10 +38,8 @@ import {
   useTemplateRef,
   watch,
   provide,
-  triggerRef,
   onUnmounted,
   computed,
-  nextTick,
 } from "vue";
 import TrickView from "./TrickView.vue";
 import CardProvider from "./CardProvider.vue";
@@ -59,38 +57,6 @@ import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 const props = defineProps<{
   game: PresentationGame;
 }>();
-
-const gameRef = ref(props.game);
-watch(
-  () => props.game,
-  (newGame) => {
-    console.log("gameRef", newGame);
-    gameRef.value = newGame;
-  }
-);
-
-provide("game", gameRef);
-
-watch(
-  () => props.game,
-  (gm) => {
-    [
-      gm.cardPlayed,
-      gm.trickEnded,
-      gm.trickStarted,
-      gm.biddingStarted,
-      gm.cardplayStarted,
-      gm.cardplayEnded,
-      gm.gameStarted,
-      gm.gameEnded,
-      gm.stateChanged,
-      gm.biddingEnded,
-      gm.undoMade,
-    ].forEach(ev => ev.sub(() => {
-      triggerRef(gameRef)
-    }));
-  }
-);
 
 /** 
  * BIDDING BOX
@@ -169,25 +135,25 @@ function update() {
 
 window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
 
-watch(gameRef, (game) => {
+watch(props.game, (game) => {
   game.cardPlayed.sub(() => {
     update();
   });
   game.undoMade.sub(() => {
     update();
   });
-});
+}, { deep: false});
 
 /** 
  * AUCTION VISIBILITY
  * After the bidding ends, wait for the user to click the screen to continue to the card play
  */
 const auctionVisible = computed(() => {
-  return gameRef.value?.state === "bidding" || waitForClick.value;
+  return props.game?.state === "bidding" || waitForClick.value;
 });
 
 const waitForClick = ref(false);
-watch(gameRef, (game) => {
+watch(props.game, (game) => {
   game.biddingEnded.sub(() => {
     console.log("bidding ended");
     waitForClick.value = true;
@@ -195,7 +161,7 @@ watch(gameRef, (game) => {
   game.cardPlayed.sub(() => {
     waitForClick.value = false;
   });
-});
+}, { deep: false});
 
 function handleClick() {
   waitForClick.value = false;
@@ -207,27 +173,25 @@ onUnmounted(() => {
   window.removeEventListener("click", handleClick);
 });
 
-provide("auctionVisible", auctionVisible);
-
 /**
  * DUMMY LOGIC
  */
 
 const dummy = computed(() => {
-  if (gameRef.value?.options.dummy === "auto") {
+  if (props.game?.options.dummy === "auto") {
     if (auctionVisible.value) return undefined;
-    if (gameRef.value.auction?.finalContract == "passed") return undefined;
-    const declarer = gameRef.value.auction?.finalContract?.declarer;
+    if (props.game.auction?.finalContract == "passed") return undefined;
+    const declarer = props.game.auction?.finalContract?.declarer;
     if (declarer) return PositionHelper.nextPosition(declarer, 2);
   }
-  else if (gameRef.value?.options.dummy === "static" && gameRef.value?.options.staticDummyPosition) {
-    return gameRef.value?.options.staticDummyPosition;
+  else if (props.game?.options.dummy === "static" && props.game?.options.staticDummyPosition) {
+    return props.game?.options.staticDummyPosition;
   }
-  else if (gameRef.value?.options.dummy === "none") {
+  else if (props.game?.options.dummy === "none") {
     return undefined;
   }
   else {
-    console.warn("Unknown dummy option", gameRef.value?.options.dummy);
+    console.warn("Unknown dummy option", props.game?.options.dummy);
     return undefined;
   }
 });

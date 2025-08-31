@@ -21,16 +21,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Position, PositionHelper } from "../../bridge/model/Position";
 import { Vulnerability, VulnerabilityHelper } from "../../bridge/model/Vulnerability";
 import { PresentationGame } from "../../bridge/model/PresentationGame";
 
 const props = defineProps<{
   vulnerability?: Vulnerability;
+  game?: PresentationGame;
 }>();
 
-const game = inject('game', ref<PresentationGame>());
 const focus = ref<Position | undefined>(undefined);
 
 const isVulnerable = (position: Position): boolean => {
@@ -38,7 +38,7 @@ const isVulnerable = (position: Position): boolean => {
 };
 
 // Watch for game changes and set up event listeners
-watch(() => game.value, (newGame) => {
+watch(() => props.game, (newGame) => {
   if (!newGame) return;
 
   // Set up listeners for each player

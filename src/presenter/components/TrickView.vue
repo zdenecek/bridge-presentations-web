@@ -22,13 +22,15 @@ import { PresentationGame } from '../../bridge/model/PresentationGame';
 
 
 const cardViews = inject('cardViews', ref(new Map<Card, CardViewData>()));
-const game = inject('game', ref<PresentationGame>());
 const trick = shallowRef<Trick | undefined>(undefined);
+const props = defineProps<{
+  game?: PresentationGame;
+}>();
 const debug = inject('debug', false);
 
 // Update method for external calls
 const update = () => {
-  trick.value = game.value?.currentTrick;
+  trick.value = props.game?.currentTrick;
   triggerRef(trick);
   nextTick(() => {
     if (trick.value) {
@@ -38,12 +40,12 @@ const update = () => {
 };
 
 
-watch(() => game.value, (newGame) => {
+watch(() => props.game, (newGame) => {
 
   newGame?.cardPlayed.sub(update);
   newGame?.trickCountChanged.sub(update);
 
-}, { immediate: true });
+}, { immediate: true, deep: false });
 
 
 const originElements = ref<Map<Position, HTMLElement>>(new Map());

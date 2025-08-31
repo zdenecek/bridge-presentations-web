@@ -35,10 +35,13 @@
 import { CardViewData } from './CardViewData';
 import { Card } from '@/bridge/model/Card';
 import { PresentationGame } from '@/bridge/model/PresentationGame';
-import { inject, ref, shallowRef, computed } from 'vue';
+import { inject, ref, computed } from 'vue';
+
+defineProps<{
+  game?: PresentationGame;
+}>();
 
 const cardViews = inject('cardViews', ref(new Map<Card, CardViewData>()));
-const game = inject('game', shallowRef<PresentationGame>());
 const visibleCards = computed(() => {
     return [...cardViews.value.values()].filter((cardView) => !cardView.hidden);
 });

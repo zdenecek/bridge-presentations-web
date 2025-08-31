@@ -1,5 +1,5 @@
 <template>
-    <GameView v-if="game" ref="gameView" :game="game" />
+    <MainView v-if="game" ref="mainView" :game="game" />
 </template>
 
 <script setup lang="ts">
@@ -9,7 +9,7 @@ import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
-import GameView from '@/presenter/components/GameView.vue';
+import MainView from '@/presenter/components/MainView.vue';
 import { registerKeyboardShortcut } from '@/presenter/utils/shortcuts';
 import { PassBid } from "@/bridge/model/Bid";
 import { Player } from "@/bridge/model/Player";
@@ -19,7 +19,7 @@ const props = defineProps<{
     visible: boolean;
 }>();
 
-const gameView = ref<typeof GameView>();
+const mainView = ref<typeof MainView>();
 const players = PlayerFactory.makeObservablePlayers();
 const game = ref<PresentationGame>(new PresentationGame(players, PresentationGameOptions.Default));
 
