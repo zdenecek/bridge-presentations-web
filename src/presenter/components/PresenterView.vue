@@ -4,6 +4,7 @@
         <div class="side-panel">
             <status-panel :game="game" />
             <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" />
+            <control-panel :game="game" class="control-panel" />
         </div>
     </div>
 </template>
@@ -15,6 +16,7 @@ import { Position } from '@/bridge/model/Position';
 import { computed } from 'vue';
 import BiddingHistoryView from './BiddingHistoryView.vue';
 import StatusPanel from './StatusPanel.vue';
+import ControlPanel from './ControlPanel.vue';
 
 const props = defineProps<{
     game: PresentationGame;
@@ -52,6 +54,12 @@ const showBiddingHistory = computed(() =>
         flex-direction: column;
         gap: 40px;
         align-items: center;
+    }
+
+    .control-panel {
+        position: absolute;
+        bottom: 0;
+        right: 0;
     }
 }
 </style>
