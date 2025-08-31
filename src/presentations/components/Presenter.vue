@@ -1,8 +1,6 @@
 <template>
     <div id="presenter">
-        <game-provider :game="game" v-slot="{ game }">
-            <presenter-view :game="game" :handsVisible="handsVisible" />
-        </game-provider>
+        <presenter-view :game="game" :handsVisible="handsVisible" />
     </div>
 </template>
 
@@ -18,7 +16,7 @@ import { registerKeyboardShortcut } from '@/presenter/utils/shortcuts';
 import { PassBid } from "@/bridge/model/Bid";
 import { Player } from "@/bridge/model/Player";
 import { PositionHelper } from "@/bridge/model/Position";
-import GameProvider from '@/presenter/components/GameProvider.vue';
+import { useGameRef } from '@/presenter/composables/useGameRef';
 
 
 const props = defineProps<{
@@ -26,7 +24,7 @@ const props = defineProps<{
 }>();
 
 const players = PlayerFactory.makeObservablePlayers();
-const game = ref<PresentationGame>(new PresentationGame(players, PresentationGameOptions.Default));
+const game = useGameRef(new PresentationGame(players, PresentationGameOptions.Default));
 
 // Hide or show hands for presentation purposes
 const handsVisible = ref<Map<Position, boolean>>(new Map(
