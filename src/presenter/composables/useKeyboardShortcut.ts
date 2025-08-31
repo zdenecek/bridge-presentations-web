@@ -1,10 +1,12 @@
+import { onMounted, onUnmounted } from "vue";
 
 
-export function registerKeyboardShortcut(
+export function useKeyboardShortcut(
   key: string,
   modifier: string | null,
   handler: (event: KeyboardEvent) => void
-): (event: KeyboardEvent) => void {
+) {
+
   const eventHandler = (event: KeyboardEvent) => {
     // Check if the pressed key matches
     if (event.key.toLowerCase() !== key.toLowerCase()) {
@@ -26,8 +28,10 @@ export function registerKeyboardShortcut(
     handler(event);
   };
 
-  // Automatically register on window
-  window.addEventListener('keydown', eventHandler);
-
-  return eventHandler;
+  onMounted(() => {
+    window.addEventListener('keydown', eventHandler);
+  });
+  onUnmounted(() => {
+    window.removeEventListener('keydown', eventHandler);
+  });
 }

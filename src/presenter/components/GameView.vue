@@ -57,12 +57,7 @@ import BiddingBox from "./BiddingBox.vue";
 import BiddingCenterPanel from "./BiddingCenterPanel.vue";
 import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
-import { useWaitForClick } from "../utils/usewaitForClick";
-
-/**
- * GAME 
- * Wire game events to Vue reactive system
- */
+import { useWaitForClick } from "../composables/usewaitForClick";
 
 const props = defineProps<{
   game: PresentationGame;
