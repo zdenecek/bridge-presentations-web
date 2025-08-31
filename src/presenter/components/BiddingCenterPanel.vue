@@ -30,7 +30,7 @@ watch(() => props.auctionVisible, (newAuctionVisible) => {
   auctionVisible.value = newAuctionVisible;
 });
 
-const debug = inject('debug', ref(false));
+const debug = inject('debug', false);
 const positions = computed(() => PositionHelper.all());
 
 const getBidsForPosition = (position: Position): Bid[] => {

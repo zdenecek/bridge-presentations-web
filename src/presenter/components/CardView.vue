@@ -27,6 +27,7 @@ import { CardViewData } from './CardViewData';
 // Props
 const props = defineProps<{
   data: CardViewData;
+  dimensions: { width: number; height: number };
 }>();
 
 const element = useTemplateRef<HTMLDivElement>('element');
@@ -52,7 +53,6 @@ const frontImageSrc = computed(() => getImagePath(getCardImageFilename(props.dat
 const backImageSrc = computed(() => getImagePath("back"));
 
 // Inject card dimensions from parent
-const cardDimensions = inject('cardDimensions', { width: 100, height: 150 });
 
 // Rotation transforms (same as original)
 const rotationTransforms = {
@@ -72,8 +72,8 @@ watch(transform, (newTransform) => {
 
 // Computed style with position and rotation
 const cardStyle = computed(() => ({
-  width: `${cardDimensions.width}px`,
-  height: `${cardDimensions.height}px`,
+  width: `${props.dimensions.width}px`,
+  height: `${props.dimensions.height}px`,
   zIndex: props.data.z
 }));
 

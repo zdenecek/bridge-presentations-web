@@ -1,9 +1,9 @@
 <template>
   <div ref="element">
     <div id="cards">
-      <CardView v-for="card in cardViews.values()" :data="card" :key="card.card.toString()"></CardView>
+      <CardView v-for="card in cardViews.values()" :data="card" :key="card.card.toString()" :dimensions="cardDimensions"></CardView>
     </div>
-    <slot></slot>
+    <slot :cardViews="cardViews" :cardDimensions="cardDimensions"></slot>
   </div>
 </template>
 

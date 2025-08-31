@@ -37,13 +37,13 @@ import { Card } from '@/bridge/model/Card';
 import { PresentationGame } from '@/bridge/model/PresentationGame';
 import { inject, ref, computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   game?: PresentationGame;
+  cardViews: Map<Card, CardViewData>;
 }>();
 
-const cardViews = inject('cardViews', ref(new Map<Card, CardViewData>()));
 const visibleCards = computed(() => {
-    return [...cardViews.value.values()].filter((cardView) => !cardView.hidden);
+    return [...props.cardViews.values()].filter((cardView) => !cardView.hidden);
 });
 </script>
 

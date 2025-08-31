@@ -38,30 +38,29 @@ const props = withDefaults(defineProps<{
   maximumCardOffset?: number;
   dummySuitOffset?: number;
   dummyCardOffset?: number;
+  cardViews: Map<Card, CardViewData>;
+  cardDimensions: { width: number; height: number };
 }>(), {
   rotation: Orientation.Up,
   dummy: false,
   reverse: false,
 });
 
-const cardViews = inject('cardViews', ref(new Map<Card, CardViewData>()));
 
-// Inject card dimensions from parent
-const cardDimensions = inject('cardDimensions', { width: 100, height: 150 });
 const debug = inject('debug', false);
 
 const componentStyle = computed(() => {
   if (props.rotation === Orientation.Up || props.rotation === Orientation.Down) {
     return {
-      height: cardDimensions.height + 'px',
-      minHeight: cardDimensions.height + 'px',
-      maxHeight: cardDimensions.height + 'px'
+      height: props.cardDimensions.height + 'px',
+      minHeight: props.cardDimensions.height + 'px',
+      maxHeight: props.cardDimensions.height + 'px'
     };
   }
   return {
-    width: cardDimensions.height + 'px',
-    minWidth: cardDimensions.height + 'px',
-    maxWidth: cardDimensions.height + 'px'
+    width: props.cardDimensions.height + 'px',
+    minWidth: props.cardDimensions.height + 'px',
+    maxWidth: props.cardDimensions.height + 'px'
   };
 });
 
@@ -90,15 +89,15 @@ const update = (): void => {
 
 // Computed properties for runtime-calculated defaults using injected dimensions
 const effectiveMaximumCardOffset = computed(() => {
-  return props.maximumCardOffset ?? cardDimensions.width / 4;
+  return props.maximumCardOffset ?? props.cardDimensions.width / 4;
 });
 
 const effectiveDummySuitOffset = computed(() => {
-  return props.dummySuitOffset ?? cardDimensions.width * 0.05;
+  return props.dummySuitOffset ?? props.cardDimensions.width * 0.05;
 });
 
 const effectiveDummyCardOffset = computed(() => {
-  return props.dummyCardOffset ?? cardDimensions.width / 4.5;
+  return props.dummyCardOffset ?? props.cardDimensions.width / 4.5;
 });
 
 const root = useTemplateRef<HTMLDivElement>('root');
@@ -134,7 +133,7 @@ const make1DVector = (size: number, perpendicular = false): Vector => {
 };
 
 const getCardOffsetVector = (): Vector => {
-  const remainingSpace = getPrimaryDimensionSize() - cardDimensions.width;
+  const remainingSpace = getPrimaryDimensionSize() - props.cardDimensions.width;
   let cardOffset = 0;
   if (props.hand && props.hand.cards.length > 1) {
     cardOffset = Math.min(remainingSpace / props.hand.cards.length, effectiveMaximumCardOffset.value);
@@ -164,7 +163,7 @@ const updateNonDummy = (): void => {
 
   const offsetVector = getCardOffsetVector();
 
-  const primarySize = cardDimensions.width + offsetVector[primaryDimension.value] * (props.hand.cards.length - 1);
+  const primarySize = props.cardDimensions.width + offsetVector[primaryDimension.value] * (props.hand.cards.length - 1);
 
 
   const center = start.moveBy(make1DVector(getPrimaryDimensionSize() / 2));
@@ -182,7 +181,7 @@ const updateNonDummy = (): void => {
   }
 
   cards.forEach((card, index) => {
-    const view = cardViews.value.get(card);
+    const view = props.cardViews.get(card);
     if (!view) return;
     view.reverse = props.reverse;
     view.position = currentPosition;
@@ -199,12 +198,12 @@ const updateDummy = (): void => {
 
   const suits = getHandSuits();
   const suitCount = suits.length;
-  const primarySize = (cardDimensions.width + effectiveDummySuitOffset.value) * suitCount - effectiveDummySuitOffset.value;
+  const primarySize = (props.cardDimensions.width + effectiveDummySuitOffset.value) * suitCount - effectiveDummySuitOffset.value;
 
   const center = start.moveBy(make1DVector(getPrimaryDimensionSize() / 2));
   let currentPosition = center.moveBy(make1DVector(-primarySize / 2));
 
-  const suitOffset = make1DVector(effectiveDummySuitOffset.value + cardDimensions.width);
+  const suitOffset = make1DVector(effectiveDummySuitOffset.value + props.cardDimensions.width);
   let c = effectiveDummyCardOffset.value;
   if (props.rotation == Orientation.Right || props.rotation == Orientation.Down) c *= -1;
 
@@ -215,7 +214,7 @@ const updateDummy = (): void => {
     let currentSuitPos = currentPosition.copy();
     let index = 0;
     for (const card of cardsBySuit[suit]) {
-      const view = cardViews.value.get(card);
+      const view = props.cardViews.get(card);
       if (!view) return;
       view.position = currentSuitPos;
       view.reverse = false;
@@ -255,13 +254,13 @@ onUnmounted(() => {
 // Setup card rotations when hand changes
 const setupCardRotations = (hand: Hand) => {
   hand.cards.forEach((card) => {
-    const view = cardViews.value.get(card);
+    const view = props.cardViews.get(card);
     if (!view) return;
     view.rotation = props.rotation;
   });
 
   hand.cardAdded.sub((e: any) => {
-    const view = cardViews.value.get(e.card);
+    const view = props.cardViews.get(e.card);
     if (!view) return;
     view.rotation = props.rotation;
   });
@@ -287,7 +286,7 @@ watch(() => [
   update();
 }, { deep: false });
 
-watch(() => cardViews, () => {
+watch(() => props.cardViews, () => {
   update();
 }, { deep: false });
 

@@ -1,25 +1,29 @@
 <template>
   <div ref="gameView" @click="update" :class="{ debug: debug }">
-    <CardProvider :game="game">
+    <CardProvider :game="game" v-slot="{ cardViews, cardDimensions }">
       <div class="main-view" ref="mainView">
         <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
-          :rotation="Orientation.Left" :dummy="dummy === Position.West"></OneDimensionalHandView>
+          :rotation="Orientation.Left" :dummy="dummy === Position.West"
+          :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
-            :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"></OneDimensionalHandView>
+            :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
+            :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
 
           <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
             <CenterNSEWFrame ref="centerFrame" :vulnerability="game?.vulnerability" :game="game" class="center-frame">
-              <TrickView :game="game" class="trick-view"></TrickView>
+              <TrickView :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
-            :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"></OneDimensionalHandView>
+            :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"
+            :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
         </div>
 
         <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
-          :rotation="Orientation.Right" :dummy="dummy === Position.East"></OneDimensionalHandView>
-        <DebugView v-if="debug" :game="game"></DebugView>
+          :rotation="Orientation.Right" :dummy="dummy === Position.East"
+          :cardViews="cardViews" :cardDimensions="cardDimensions"></OneDimensionalHandView>
+        <DebugView v-if="debug" :game="game" :cardViews="cardViews"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
     </CardProvider>

@@ -21,10 +21,10 @@ import { getOffset } from '../utils/offset';
 import { PresentationGame } from '../../bridge/model/PresentationGame';
 
 
-const cardViews = inject('cardViews', ref(new Map<Card, CardViewData>()));
 const trick = shallowRef<Trick | undefined>(undefined);
 const props = defineProps<{
   game?: PresentationGame;
+  cardViews: Map<Card, CardViewData>;
 }>();
 const debug = inject('debug', false);
 
@@ -62,7 +62,7 @@ const positionTrick = (trick: Trick) => {
   if (!trick) return;
 
   trick.cards.forEach(({ card }, index) => {
-    const view = cardViews.value.get(card);
+    const view = props.cardViews.get(card);
     if (!view) return;
 
     // view.reverse = false;
@@ -75,7 +75,7 @@ const positionTrick = (trick: Trick) => {
     const cardInTrick = trick.getCardByPosition(pos);
     if (!cardInTrick) return;
 
-    const view = cardViews.value.get(cardInTrick.card);
+    const view = props.cardViews.get(cardInTrick.card);
     if (!view) return;
 
     const originEl = originElements.value.get(pos);
@@ -95,7 +95,7 @@ const detachTrick = (trick: Trick) => {
   if (!trick) return;
 
   trick.cards.forEach((c) => {
-    const v = cardViews.value.get(c.card);
+    const v = props.cardViews.get(c.card);
     if (v) v.hidden = true;
   });
 };
