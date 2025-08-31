@@ -14,7 +14,8 @@
 
           <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
             <CenterNSEWFrame  :vulnerability="game?.vulnerability" :game="game" class="center-frame">
-              <TrickView ref="trickView" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
+              <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
+              <div class="end-text" v-show="showEndText">End of game {{ waitBeforeShowingEndText.waiting }}</div>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
@@ -56,6 +57,7 @@ import BiddingBox from "./BiddingBox.vue";
 import BiddingCenterPanel from "./BiddingCenterPanel.vue";
 import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
+import { useWaitForClick } from "../utils/usewaitForClick";
 
 /**
  * GAME 
@@ -124,7 +126,6 @@ onUnmounted(() => {
  * MANUAL UI UPDATE
  */
 const trickView = useTemplateRef<typeof TrickView>("trickView");
-const centerFrame = useTemplateRef<typeof CenterNSEWFrame>("centerFrame");
 const handViewWest =
   useTemplateRef<typeof OneDimensionalHandView>("handViewWest");
 const handViewNorth =
@@ -144,43 +145,49 @@ function update() {
 
 window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
 
-watch(props.game, (game) => {
+watch(() => props.game, (game) => {
   game.cardPlayed.sub(() => {
     update();
   });
   game.undoMade.sub(() => {
     update();
   });
-}, { deep: false});
+}, { deep: false, immediate: true});
 
 /** 
  * AUCTION VISIBILITY
  * After the bidding ends, wait for the user to click the screen to continue to the card play
  */
 const auctionVisible = computed(() => {
-  return props.game?.state === "bidding" || waitForClick.value;
+  return props.game?.state === "bidding" || waitBeforeHidingAuction.waiting.value;
 });
 
-const waitForClick = ref(false);
-watch(props.game, (game) => {
+const waitBeforeHidingAuction = useWaitForClick();
+watch( () => props.game, (game) => {
   game.biddingEnded.sub(() => {
-    console.log("bidding ended");
-    waitForClick.value = true;
+    waitBeforeHidingAuction.set();
   });
   game.cardPlayed.sub(() => {
-    waitForClick.value = false;
+    waitBeforeHidingAuction.reset();
   });
-}, { deep: false});
+}, { deep: false, immediate: true});
 
-function handleClick() {
-  waitForClick.value = false;
-}
-onMounted(() => {
-  window.addEventListener("click", handleClick);
-});
-onUnmounted(() => {
-  window.removeEventListener("click", handleClick);
-});
+/**
+ * END TEXT VISIBILITY
+ */
+
+const waitBeforeShowingEndText = useWaitForClick();
+
+const showEndText = computed(() => 
+  props.game?.state === "finished" && !waitBeforeShowingEndText.waiting.value
+);
+
+watch(() => props.game, (game) => {
+  game.stateChanged.sub(() => {
+    waitBeforeShowingEndText.set();
+  });
+}, { deep: false, immediate: true});
+
 
 /**
  * DUMMY LOGIC
