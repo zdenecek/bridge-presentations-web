@@ -55,7 +55,7 @@ const getOrientation = (position: Position): Orientation => {
     case Position.East:
       return Orientation.Right;
     case Position.South:
-      return Orientation.Down;
+      return Orientation.Up;
     case Position.West:
       return Orientation.Left;
     default:

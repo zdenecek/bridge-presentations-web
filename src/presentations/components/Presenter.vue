@@ -1,10 +1,14 @@
 <template>
-    <presenter-view :game="game" :handsVisible="handsVisible" />
+    <div id="presenter">
+        <game-provider :game="game" v-slot="{ game }">
+            <presenter-view :game="game" :handsVisible="handsVisible" />
+        </game-provider>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue';
-import { Position  } from "@/bridge/model/Position";
+import { Position } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import GameFactory from "@/bridge/factory/GameFactory";
@@ -14,6 +18,8 @@ import { registerKeyboardShortcut } from '@/presenter/utils/shortcuts';
 import { PassBid } from "@/bridge/model/Bid";
 import { Player } from "@/bridge/model/Player";
 import { PositionHelper } from "@/bridge/model/Position";
+import GameProvider from '@/presenter/components/GameProvider.vue';
+
 
 const props = defineProps<{
     visible: boolean;
@@ -28,10 +34,10 @@ const handsVisible = ref<Map<Position, boolean>>(new Map(
 ));
 
 const startGame = (options: ConfiguratorOptions) => {
-    const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew, 
-    options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
+    const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew,
+        options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
     const gm = GameFactory.makeObservableGame(players, gameOpts, options.vulnerability);
-    
+
     game.value = gm;
     PlayerFactory.putHands(players, options.cards);
     nextTick(() => game.value.start(options.firstPlayer as Position, options.trumps));
@@ -70,7 +76,7 @@ defineExpose({
 </script>
 
 <style lang="scss">
-.presenter {
+#presenter {
     width: 100%;
     height: 100%;
 }
