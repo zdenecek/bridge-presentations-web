@@ -104,25 +104,21 @@ const getOrientation = (position: Position): Orientation => {
     &-north {
       grid-row: 1;
       grid-column: 2;
-      grid-column-end: 4;
     }
 
     &-east {
-      grid-row-start: 2;
-      grid-row-end: 4;
+      grid-row: 2 ;
       grid-column: 3;
     }
 
     &-south {
       grid-row: 3;
-      grid-column: 1;
-      grid-column-end: 3;
+      grid-column: 2;
     }
 
     &-west {
       grid-column: 1;
-      grid-row-start: 1;
-      grid-row-end: 3;
+      grid-row: 2;
    
     }
   }

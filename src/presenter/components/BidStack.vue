@@ -61,11 +61,6 @@ const mainAxisSize = computed(() => isHorizontal(props.orientation) ? width.valu
  */
 const bidMainAxisSize = computed(() => isHorizontal(props.orientation) ? bidRefs.value?.[0].height : bidRefs.value?.[0].width);
 
-/**
- * Available space for positioning bids after accounting for bid size.
- * This ensures the last bid fits within the container bounds.
- */
-const usableSize = computed(() => mainAxisSize.value - (bidMainAxisSize.value || 0));
 
 /**
  * CSS property to use for positioning bids based on orientation.
@@ -114,12 +109,12 @@ const animationDirection = computed(() => {
  */
 const bidPosition = computed(() => {
   if (props.bids.length === 0) return [];
-  if (props.bids.length === 1) return [0];
+  const space = Math.min(40, Math.max(20, mainAxisSize.value / props.bids.length));
 
-
-  const minSpace = bidMainAxisSize.value ? (bidMainAxisSize.value / 2) : 35;
-  const space = Math.min(minSpace, usableSize.value / (props.bids.length - 1));
-  return [...Array(props.bids.length).keys()].map((_, i) => i * space);
+  const bidsLen =  bidMainAxisSize.value  + space * (props.bids.length - 1);
+  const start = (mainAxisSize.value - bidsLen) / 2;
+  if (props.bids.length === 1) return [start];
+  return [...Array(props.bids.length).keys()].map((_, i) => start + i * space);
 });
 
 </script>
