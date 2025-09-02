@@ -3,8 +3,8 @@
         <game-view :game="game" :handsVisible="handsVisible" class="game-view"
             :endMessage="options.uiOptions.endMessage" />
         <div class="side-panel">
-            <status-panel :game="game" class="appear"/>
-            <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" class="appear"/>
+            <status-panel :game="game"  :class="{'appear': game.bidding}" />
+            <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" class="appear" />
             <control-panel :game="game" class="control-panel" v-show="showControlPanel" />
         </div>
     </div>
