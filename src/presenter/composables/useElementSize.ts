@@ -1,6 +1,6 @@
-import { Ref, ref, watch } from "vue";
+import { Ref, ref, TemplateRef, watch } from "vue";
 
-export function useElementSize(element: HTMLElement): {
+export function useElementSize(element: TemplateRef<HTMLElement>): {
   width: Ref<number>;
   height: Ref<number>;
 } {

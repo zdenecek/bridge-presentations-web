@@ -23,7 +23,7 @@ import { computed, useTemplateRef } from 'vue';
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
 import { Orientation, isHorizontal } from '../model/Orientation';
-import { useElementSize } from '@vueuse/core';
+import { useElementSize } from '../composables/useElementSize';
 
 const props = withDefaults(defineProps<{
   bid: Bid;

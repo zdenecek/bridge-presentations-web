@@ -33,8 +33,8 @@
 import { computed, useTemplateRef } from "vue";
 import { Bid } from "../../bridge/model/Bid";
 import BidView from './BidView.vue';
-import { useElementSize } from "@vueuse/core";
 import { Orientation, isHorizontal } from "../model/Orientation";
+import { useElementSize } from "../composables/useElementSize";
 
 const props = withDefaults(defineProps<{
   bids: Bid[];
