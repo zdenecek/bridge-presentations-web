@@ -15,7 +15,7 @@
           <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
             <CenterNSEWFrame  :vulnerability="game?.vulnerability" :game="game" class="center-frame">
               <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
-              <div class="end-text" v-show="showEndText">End of game {{ waitBeforeShowingEndText.waiting }}</div>
+              <div class="end-text" v-show="showEndText" v-html="endText"></div>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
@@ -62,6 +62,7 @@ import { useWaitForClick } from "../composables/usewaitForClick";
 const props = defineProps<{
   game: PresentationGame;
   handsVisible: Map<Position, boolean>;
+  endMessage?: string;
 }>();
 
 /** 
@@ -119,6 +120,7 @@ onUnmounted(() => {
 
 /**
  * MANUAL UI UPDATE
+ * This could be handled better with a more declarative approach not sure.
  */
 const trickView = useTemplateRef<typeof TrickView>("trickView");
 const handViewWest =
@@ -175,7 +177,16 @@ const waitBeforeShowingEndText = useWaitForClick();
 
 const showEndText = computed(() => 
   props.game?.state === "finished" && !waitBeforeShowingEndText.waiting.value
-);
+); 
+
+const endText = computed(() => {
+  let s = "";
+  if (props.game?.finalContract) s += `${props.game.finalContract.toString()} <br>`;
+  if (props.game?.result?.tricksMade) s += `${props.game.result.resultString} <br>`;
+  if (props.game?.result) s += `${props.game.result.scoreNS} <br>`;
+  if (props.endMessage) s += props.endMessage + " <br>";
+  return s;
+});
 
 watch(() => props.game, (game) => {
   game.stateChanged.sub(() => {
@@ -271,7 +282,8 @@ const debug = inject("debug", false);
 }
 
 
-.center-text {
+.end-text {
+  color: variables.$primary;
   position: absolute;
 
   font-size: 5vh;

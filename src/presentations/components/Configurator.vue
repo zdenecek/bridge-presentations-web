@@ -157,7 +157,7 @@
                 <h2>Graphics</h2>
                 <div class="fields">
                     <label for="message">End text</label>
-                    <input type="text" id="message" v-model="endText" />
+                    <input type="text" id="message" v-model="options.uiOptions.endMessage" />
                 </div>
             </div>
         </div>
@@ -171,13 +171,12 @@
 import { defineComponent } from "vue";
 import { Suit } from "@/bridge/model/Suit";
 import { CardsInputValidator } from "../class/CardsInputValidator";
-import { Position, PositionHelper } from "@/bridge/model/Position";
+import { Position } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
-import { Contract, NonPassedContract } from "@/bridge/model/Contract";
-import { DummyOptions } from "@/bridge/model/PresentationGame";
-import { ConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
-import Arrow from "@/presentations/components/Arrow.vue";
+import { NonPassedContract } from "@/bridge/model/Contract";
+import { ConfiguratorOptions,  getDefaultConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
+import Arrow from "@/presentations/components/partial/Arrow.vue";
 
 export default defineComponent({
     components: {
@@ -198,15 +197,12 @@ export default defineComponent({
     },
     mounted() {
     
-        this.setOptions(  { "cards": { "north": "AKQJ AKQ AKQ AKQ", "south": "AKQJ AKQ AKQ AKQ", "east": "AKQJ AKQ AKQ AKQ", "west": "AKQJ AKQ AKQ AKQ" }, "fake": { "ns": 0, "ew": 0 }, "firstPlayer": "west", 
-        "bidding": false, "trumps": 5, 
-        "dummy": "auto", "staticDummyPosition": "north", "vulnerability": "none", "activePositions": ["north", "east", "south", "west"] } as ConfiguratorOptions )
     
     },
     methods: {
         submit() {
             if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
-            this.onSubmit(this.options, { endMessage: this.endText.length > 0 ? this.endText : undefined });
+            this.onSubmit(this.options, { endMessage: (this.options.uiOptions.endMessage?.length ?? 0) > 0 ? this.options.uiOptions.endMessage : undefined });
         },
         clear() {
             this.options.cards = {
@@ -257,25 +253,8 @@ export default defineComponent({
             specifyContract: true,
             fakeTricks: false,
             fakeAuction: false,
-            endText: "Well done!",
 
-            options: {
-                cards: {
-                    north: "",
-                    south: "",
-                    east: "",
-                    west: "",
-                },
-                fake: { ns: 0, ew: 0 },
-                firstPlayer: "west" as Position,
-                bidding: true,
-                contract: undefined as Contract | undefined,
-                trumps: Suit.Notrump as Suit | undefined,
-                dummy: "auto" as DummyOptions | undefined,
-                staticDummyPosition: "north" as Position | undefined,
-                vulnerability: Vulnerability.None,
-                activePositions: PositionHelper.all(),
-            },
+            options: getDefaultConfiguratorOptions(),
 
             positions: {
                 [Position.North]: "North",

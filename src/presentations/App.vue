@@ -1,11 +1,11 @@
 <template>
-  <configurator v-show="state === 'configurator'" :onSubmit="startGame"></configurator>
-  <presenter ref="presenter" v-show="state === 'presenter'" :visible="state === 'presenter'"></presenter>
+  <configurator v-show="state === 'configurator'" @submit="startGame" @update:options="updateOptions"></configurator>
+  <presenter ref="presenter" v-show="state === 'presenter'" :options="options"></presenter>
 </template>
 
 <script lang="ts" setup>
 import Configurator from '@/presentations/components/Configurator.vue';
-import { ConfiguratorOptions } from './class/ConfiguratorOptions';
+import { ConfiguratorOptions, getDefaultConfiguratorOptions } from './class/ConfiguratorOptions';
 import { ref } from 'vue';
 import Presenter from '@/presentations/components/Presenter.vue';
 import { useKeyboardShortcut } from '@/presenter/composables/useKeyboardShortcut';
@@ -17,10 +17,16 @@ function changeState(newState?: 'configurator' | 'presenter') {
   state.value = newState ? newState : (state.value === 'configurator' ? 'presenter' : 'configurator');
 }
 useKeyboardShortcut("q", "ctrl", () => changeState());
+const options = ref<ConfiguratorOptions>(getDefaultConfiguratorOptions());
 
-function startGame(options: ConfiguratorOptions) {
+function startGame(opts: ConfiguratorOptions) {
   changeState('presenter');
-  presenter.value?.startGame(options);
+  options.value = opts;
+  presenter.value?.startGame();
+}
+
+const updateOptions = (opts: ConfiguratorOptions) => {
+  options.value = opts;
 }
 </script>
 

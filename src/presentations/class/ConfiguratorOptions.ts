@@ -3,6 +3,9 @@ import { Position, PositionHelper } from "@/bridge/model/Position";
 import { Suit } from "@/bridge/model/Suit";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { DummyOptions } from "@/bridge/model/PresentationGame";
+export interface UIOptions {
+  endMessage?: string;
+}
 
 export interface ConfiguratorOptions {
   cards: {
@@ -20,6 +23,30 @@ export interface ConfiguratorOptions {
   staticDummyPosition: Position | undefined;
   vulnerability: Vulnerability;
   activePositions: Array<Position>;
+  uiOptions: UIOptions;
+}
+
+export function getDefaultConfiguratorOptions(): ConfiguratorOptions {
+  return {
+    cards: {
+        north: "",
+        south: "",
+        east: "",
+        west: "",
+    },
+    fake: { ns: 0, ew: 0 },
+    firstPlayer: "west" as Position,
+    bidding: true,
+    contract: undefined as Contract | undefined,
+    trumps: Suit.Notrump as Suit | undefined,
+    dummy: "auto" as DummyOptions | undefined,
+    staticDummyPosition: "north" as Position | undefined,
+    vulnerability: Vulnerability.None,
+    activePositions: PositionHelper.all(),
+    uiOptions: {
+      endMessage: "Well done!",
+    },
+  };
 }
 
 export function normalizeConfiguratorOptions(
@@ -41,6 +68,9 @@ export function normalizeConfiguratorOptions(
     staticDummyPosition: undefined,
     vulnerability: Vulnerability.None,
     activePositions: PositionHelper.all(),
+    uiOptions: {
+      endMessage: undefined,
+    },
   };
 
   Object.assign(result, obj);
