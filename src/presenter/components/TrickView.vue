@@ -16,7 +16,7 @@ import { CardViewData } from "./CardViewData";
 import { Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";
 import { Position, PositionHelper } from "../../bridge/model/Position";
-import { Point } from "../classes/Point";
+import { Point } from "../model/Point";
 import { getOffset } from '../utils/offset';
 import { PresentationGame } from '../../bridge/model/PresentationGame';
 

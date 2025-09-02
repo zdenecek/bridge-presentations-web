@@ -18,7 +18,7 @@ import { Position, PositionHelper } from "../../bridge/model/Position";
 import { PresentationGame } from "../../bridge/model/PresentationGame";
 import { Bid } from "../../bridge/model/Bid";
 import BidStack from './BidStack.vue';
-import { Orientation } from '../classes/Orientation';
+import { Orientation } from '../model/Orientation';
 
 const props = defineProps<{
   auctionVisible?: boolean;

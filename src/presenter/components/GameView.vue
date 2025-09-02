@@ -39,7 +39,7 @@
 import { PresentationGame } from "@/bridge/model/PresentationGame";
 import OneDimensionalHandView from "./OneDimensionalHandView.vue";
 import { Position, PositionHelper } from "@/bridge/model/Position";
-import { Orientation } from "@/presenter/classes/Orientation";
+import { Orientation } from "@/presenter/model/Orientation";
 import CenterNSEWFrame from "./CenterNSEWFrame.vue";
 import {
   onMounted,
