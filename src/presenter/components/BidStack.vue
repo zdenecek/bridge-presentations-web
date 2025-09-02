@@ -23,7 +23,7 @@
   <div class="bid-stack" ref="container">
     <BidView v-for="(bid, index) in bids" :key="index" :bid="bid" :style="{
       [positionOrigin]: bidPosition[index] + 'px',
-      ...(isHorizontal(orientation) ? { width: 'auto', height: '100%' } :  { width: '100%' })
+      ...(isHorizontal(orientation) ? { height: '100%' } :  { width: '100%' })
     }" :orientation="orientation" :class="['bid-animate', animationDirection]" ref="bidRefs" >
     </BidView>
   </div>

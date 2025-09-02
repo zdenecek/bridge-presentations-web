@@ -16,18 +16,21 @@ const presenter = ref<typeof Presenter>();
 function changeState(newState?: 'configurator' | 'presenter') {
   state.value = newState ? newState : (state.value === 'configurator' ? 'presenter' : 'configurator');
 }
-useKeyboardShortcut("q", "ctrl", () => changeState());
 const options = ref<ConfiguratorOptions>(getDefaultConfiguratorOptions());
 
 function startGame(opts: ConfiguratorOptions) {
+  console.log("startGame", opts);
   changeState('presenter');
-  options.value = opts;
-  presenter.value?.startGame();
+  updateOptions(opts);
+  presenter.value?.startGame(opts);
 }
 
 const updateOptions = (opts: ConfiguratorOptions) => {
   options.value = opts;
 }
+
+useKeyboardShortcut("q", "ctrl", () => changeState());
+useKeyboardShortcut("+", null, () => startGame(options.value));
 </script>
 
 <style lang="scss">

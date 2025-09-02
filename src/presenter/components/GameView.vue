@@ -15,7 +15,7 @@
           <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
             <CenterNSEWFrame  :vulnerability="game?.vulnerability" :game="game" class="center-frame">
               <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
-                <div class="end-text" v-show="showEndText" v-html="endText"></div>
+                <div class="end-text appear" v-show="showEndText" v-html="endText"></div>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
@@ -296,17 +296,8 @@ const debug = inject("debug", false);
 
   text-align: center;
   vertical-align: middle;
-  animation: appear 2s linear forwards;
 }
 
-@keyframes appear {
-  0% { 
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
 
 
 </style>

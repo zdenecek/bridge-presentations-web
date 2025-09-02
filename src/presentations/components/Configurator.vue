@@ -15,7 +15,7 @@
                         <label :for="pos">{{ label }}</label>
                         <input :id="pos" type="text" v-model="options.cards[pos]" />
                         <div class="error-list"
-                             v-if="showCardInputErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
+                            v-if="showCardInputErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
                             <div v-for="err in cardErrors.get(pos as Position)" :key="err">
                                 {{ err }}
                             </div>
@@ -51,10 +51,8 @@
                             <option value="static">Static</option>
                             <option value="none">None</option>
                         </select>
-                        <select
-                                id="trumps2"
-                                v-model="options.staticDummyPosition"
-                                v-show="!options.bidding && options.dummy === 'static' && !specifyContract">
+                        <select id="trumps2" v-model="options.staticDummyPosition"
+                            v-show="!options.bidding && options.dummy === 'static' && !specifyContract">
                             <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                         </select>
                     </div>
@@ -62,7 +60,7 @@
                         <div class="error" v-show="'firstPlayer' in errors"> {{ errors.firstPlayer }}</div>
                         <label for="first">{{
                             options.bidding ? "Dealer" : "First to play"
-                        }}</label>
+                            }}</label>
                         <select id="first" v-model="options.firstPlayer">
                             <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
                         </select>
@@ -79,13 +77,13 @@
                     </div>
                     <label for="fake-auction" v-show="options.bidding">Fake auction</label>
                     <input type="checkbox" class="checkbox" id="fake-auction" v-model="fakeAuction"
-                           v-show="options.bidding" disabled title="Not supported" />
+                        v-show="options.bidding" disabled title="Not supported" />
                     <label>Active positions</label>
                     <div class="flex">
                         <div>
                             <div v-for="(label, position) in positions" :key="'inp' + position">
                                 <input type="checkbox" :value="position" :name="position"
-                                       v-model="options.activePositions" />
+                                    v-model="options.activePositions" />
                                 <label :for="position">{{ label }}</label>
                             </div>
                         </div>
@@ -143,7 +141,7 @@
                     <div>Undo</div>
                     <div class="keys">
                         <div><span class="key">0</span>-<span class="key">9</span></div><span class="key">/</span><span
-                              class="key">*</span><span class="key">-</span>
+                            class="key">*</span><span class="key">-</span>
                     </div>
                     <div>Play card</div>
                     <div class="key">C</div>
@@ -167,143 +165,141 @@
     </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
+import { computed, useTemplateRef, watch } from "vue";
 import { Suit } from "@/bridge/model/Suit";
 import { CardsInputValidator } from "../class/CardsInputValidator";
 import { Position } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
 import { NonPassedContract } from "@/bridge/model/Contract";
-import { ConfiguratorOptions,  getDefaultConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
+import { ConfiguratorOptions, getDefaultConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import Arrow from "@/presentations/components/partial/Arrow.vue";
 
-export default defineComponent({
-    components: {
-        Arrow
-    },
-    name: "Presenter",
-    props: {
-        onSubmit: {
-            type: Function,
-            required: true,
-        },
-    },
-    created() {
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "+") this.submit();
-        });
+import { ref, reactive } from "vue";
 
-    },
-    mounted() {
-    
-    
-    },
-    methods: {
-        submit() {
-            if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
-            this.onSubmit(this.options, { endMessage: (this.options.uiOptions.endMessage?.length ?? 0) > 0 ? this.options.uiOptions.endMessage : undefined });
-        },
-        clear() {
-            this.options.cards = {
-                north: "",
-                east: "",
-                west: "",
-                south: "",
-            };
-        },
-        save() {
-            const name = prompt("Enter file name");
-            if (name) downloadObjectAsJson(this.options, name + ".deal");
-        },
-        load(event: Event) {
-            (this.$refs.loadform as HTMLElement).blur();
-            loadJson(event.target as FileEventTarget).then(this.setOptions);
-        },
-        setOptions(a?: ConfiguratorOptions) {
-                if (!a) return;
-                this.options = a
-                this.fakeTricks = a.fake?.ns > 0 || a.fake?.ew > 0;
-                this.specifyContract = a.contract !== undefined;
-                this.fakeAuction = a.bidding;
-                if (this.options.contract && this.options.contract !== "passed")
-                    this.options.contract = new NonPassedContract(this.options.contract.suit, this.options.contract.level, this.options.contract.declarer, this.options.contract.dbl);
-            },
-        loadClicked() {
-            (this.$refs.loadform as HTMLElement).click();
-        },
-        parseContract(value: string) {
-            const c = NonPassedContract.fromString(value);
-            if (c) this.options.contract = c;
-        },
-        setActiveNS() {
-            this.options.activePositions = [Position.North, Position.South]
-        },
-        setActiveEW() {
-            this.options.activePositions = [Position.East, Position.West]
-        },
-        setActiveAll() {
-            this.options.activePositions = [Position.North, Position.South, Position.East, Position.West]
-        },
-    },
 
-    data() {
-        return {
-            contractInput: "",
-            specifyContract: true,
-            fakeTricks: false,
-            fakeAuction: false,
+const options = reactive(getDefaultConfiguratorOptions());
+const contractInput = ref("");
+const specifyContract = ref(true);
+const fakeTricks = ref(false);
+const fakeAuction = ref(false);
 
-            options: getDefaultConfiguratorOptions(),
+const positions = {
+    [Position.North]: "North",
+    [Position.East]: "East",
+    [Position.South]: "South",
+    [Position.West]: "West",
+};
 
-            positions: {
-                [Position.North]: "North",
-                [Position.East]: "East",
-                [Position.South]: "South",
-                [Position.West]: "West",
-            },
+const vulnerabilities = {
+    [Vulnerability.Both]: "Both",
+    [Vulnerability.None]: "None",
+    [Vulnerability.NS]: "NS",
+    [Vulnerability.EW]: "EW",
+};
 
-            vulnerabilities: {
-                [Vulnerability.Both]: "Both",
-                [Vulnerability.None]: "None",
-                [Vulnerability.NS]: "NS",
-                [Vulnerability.EW]: "EW",
-            },
-            suits: {
-                [Suit.Spades]: "♠",
-                [Suit.Hearts]: "♥",
-                [Suit.Diamonds]: "♦",
-                [Suit.Clubs]: "♣",
-                [Suit.Notrump]: "NT",
-            },
-        };
-    },
-    watch: {
-        contractInput(value: string) {
-            this.parseContract(value);
-        },
-        "options.bidding"(value: boolean) {
-            if (value) this.specifyContract = false;
-        },
-        specifyContract(value: boolean) {
-            if (!value) this.options.contract = undefined;
-            else this.parseContract(this.contractInput);
-        }
-    },
-    computed: {
-        contract() {
-            return this.options.contract && this.options.contract !== "passed" ? NonPassedContract.toString(this.options.contract) : "";
-        },
-        cardErrors() {
-            return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as unknown as Iterable<readonly [Position, string]>));
-        },
-        showCardInputErrors() {
-            return Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
-        },
-        errors() {
-            return validateConfiguratorOptions(this.options);
-        }
-    },
+const suits = {
+    [Suit.Spades]: "♠",
+    [Suit.Hearts]: "♥",
+    [Suit.Diamonds]: "♦",
+    [Suit.Clubs]: "♣",
+    [Suit.Notrump]: "NT",
+};
+
+const emit = defineEmits<{
+    (e: 'submit', options: ConfiguratorOptions): void;
+    (e: 'update:options', options: ConfiguratorOptions): void;
+}>();
+
+function submit() {
+    if (!options.bidding && specifyContract.value && !options.contract) return;
+    // onSubmit is not defined in this script setup, but assuming it's a prop or global
+    emit("submit", options);
+}
+
+function clear() {
+    options.cards = {
+        north: "",
+        east: "",
+        west: "",
+        south: "",
+    };
+}
+
+function save() {
+    const name = prompt("Enter file name");
+    if (name) downloadObjectAsJson(options, name + ".deal");
+}
+const loadform = useTemplateRef<HTMLInputElement>("loadform");
+function load(event: Event) {
+    (loadform.value as HTMLElement).blur();
+    loadJson(event.target as FileEventTarget).then(setOptions);
+}
+function loadClicked() {
+    (loadform.value as HTMLElement).click();
+}
+
+function setOptions(a?: ConfiguratorOptions) {
+    if (!a) return;
+    Object.assign(options, a);
+    fakeTricks.value = a.fake?.ns > 0 || a.fake?.ew > 0;
+    specifyContract.value = a.contract !== undefined;
+    fakeAuction.value = a.bidding;
+    if (options.contract && options.contract !== "passed")
+        options.contract = new NonPassedContract(options.contract.suit, options.contract.level, options.contract.declarer, options.contract.dbl);
+}
+
+
+function parseContract(value: string) {
+    const c = NonPassedContract.fromString(value);
+    if (c) options.contract = c;
+}
+watch(specifyContract, (value: boolean) => {
+    if (!value) options.contract = undefined;
+    else parseContract(contractInput.value);
+});
+watch(contractInput, (value: string) => {
+    parseContract(value);
+});
+
+
+function setActiveNS() {
+    options.activePositions = [Position.North, Position.South];
+}
+
+function setActiveEW() {
+    options.activePositions = [Position.East, Position.West];
+}
+
+function setActiveAll() {
+    options.activePositions = [Position.North, Position.South, Position.East, Position.West];
+}
+
+watch(() => options.bidding, (value: boolean) => {
+    if (value) specifyContract.value = false;
+});
+
+const contract = computed(() => {
+    return options.contract && options.contract !== "passed"
+        ? NonPassedContract.toString(options.contract)
+        : "";
+});
+
+const cardErrors = computed(() => {
+    return CardsInputValidator.validate(
+        new Map<Position, string>(
+            Object.entries(options.cards) as unknown as Iterable<readonly [Position, string]>
+        )
+    );
+});
+
+const showCardInputErrors = computed(() => {
+    return Object.values(options.cards).map(s => s.length).every(a => a > 10);
+});
+
+const errors = computed(() => {
+    return validateConfiguratorOptions(options);
 });
 </script>
 

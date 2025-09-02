@@ -3,8 +3,8 @@
         <game-view :game="game" :handsVisible="handsVisible" class="game-view"
             :endMessage="options.uiOptions.endMessage" />
         <div class="side-panel">
-            <status-panel :game="game" />
-            <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" />
+            <status-panel :game="game" class="appear"/>
+            <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" class="appear"/>
             <control-panel :game="game" class="control-panel" v-show="showControlPanel" />
         </div>
     </div>
@@ -89,7 +89,7 @@ const showControlPanel = computed(() => {
 
 </script>
 
-<style scoped lang="scss">
+<style  lang="scss">
 .presenter-view {
     width: 100%;
     height: 100%;
@@ -121,4 +121,18 @@ const showControlPanel = computed(() => {
         right: 0;
     }
 }
+
+.appear {
+    animation: appear 2s linear forwards;
+}
+
+@keyframes appear {
+  0% { 
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 </style>
