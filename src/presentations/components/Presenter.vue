@@ -1,6 +1,5 @@
 <template>
     <div class="presenter-view">
-        <div style="color: white;">{{ game.state }}</div>
         <game-view :game="game" :handsVisible="handsVisible" class="game-view"
             :endMessage="options.uiOptions.endMessage" />
         <div class="side-panel">
