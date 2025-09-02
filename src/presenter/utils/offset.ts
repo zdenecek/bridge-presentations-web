@@ -5,7 +5,7 @@ export function getOffset(element: HTMLElement): { top: number; left: number } {
 
   let rect = element.getBoundingClientRect();
   let win = element.ownerDocument.defaultView;
-  if (!win) throw new Error('Window not found');
+  if (!win) throw new Error("Window not found");
   return {
     top: rect.top + win.pageYOffset,
     left: rect.left + win.pageXOffset,

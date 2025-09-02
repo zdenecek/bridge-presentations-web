@@ -175,7 +175,7 @@ import { Position, PositionHelper } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
 import { Contract, NonPassedContract } from "@/bridge/model/Contract";
-import { DummyOptions } from "@/presenter/views/GameView";
+import { DummyOptions } from "@/bridge/model/PresentationGame";
 import { ConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
 import Arrow from "@/presentations/components/Arrow.vue";
 

@@ -1,10 +1,11 @@
 <template>
     <div class="presenter-view">
+        <div style="color: white;">{{ game.state }}</div>
         <game-view :game="game" :handsVisible="handsVisible" class="game-view" />
         <div class="side-panel">
             <status-panel :game="game" />
             <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" />
-            <control-panel :game="game" class="control-panel" />
+            <control-panel :game="game" class="control-panel" v-show="showControlPanel" />
         </div>
     </div>
 </template>
@@ -23,10 +24,14 @@ const props = defineProps<{
     handsVisible: Map<Position, boolean>;
 }>();
 
-const showBiddingHistory = computed(() =>
-    (props.game.state === "cardplay" || props.game.state === "finished") &&
-    (props.game).bidding
-);
+const showBiddingHistory = computed(() => {
+    return  (props.game.state === "cardplay" || props.game.state === "finished") &&
+    (props.game).bidding;
+});
+
+const showControlPanel = computed(() => {
+    return props.game.state === "cardplay";
+});
 
 </script>
 

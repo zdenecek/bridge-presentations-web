@@ -147,9 +147,6 @@ const updateButtonStates = (player: PresentationPlayer) => {
 watch(() => props.game, (newGame) => {
   if (!newGame) return;
 
-  // Hide control panel initially
-  // (This would be handled by the parent component)
-
   // Set up player event listeners
   Object.values(newGame.players).forEach((player) => {
     player.playRequested.sub((e) => {
@@ -162,11 +159,6 @@ watch(() => props.game, (newGame) => {
     });
   });
 
-  // Watch for state changes
-  newGame.stateChanged.sub(({ game }) => {
-    // Hide control panel when not in cardplay state
-    // (This would be handled by the parent component)
-  });
 }, { immediate: true });
 
 // Watch for player changes

@@ -15,7 +15,7 @@ export function useWaitForClick() {
 
   return {
     waiting: waitForClick,
-    reset: () => waitForClick.value = false,
-    set: () => waitForClick.value = true,
+    reset: () => (waitForClick.value = false),
+    set: () => (waitForClick.value = true),
   };
 }

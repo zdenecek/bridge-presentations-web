@@ -1,4 +1,3 @@
-import { DummyOptions } from "@/presenter/views/GameView";
 import { Auction } from "./Auction";
 import { Bid } from "./Bid";
 import { Contract } from "./Contract";
@@ -10,6 +9,8 @@ import { Suit } from "./Suit";
 import { Trick } from "./Trick";
 import { UndoableGame } from "./UndoableGame";
 import { Vulnerability } from "./Vulnerability";
+
+export type DummyOptions = "auto" | "static" | "none";
 
 export class PresentationGameOptions {
   bidding: boolean;

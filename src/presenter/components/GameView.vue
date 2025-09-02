@@ -46,9 +46,9 @@ import {
   ref,
   useTemplateRef,
   watch,
-  provide,
   onUnmounted,
   computed,
+  inject,
 } from "vue";
 import TrickView from "./TrickView.vue";
 import CardProvider from "./CardProvider.vue";
@@ -207,12 +207,7 @@ const dummy = computed(() => {
   }
 });
 
-/**
- * DEBUG
- */
-
-const debug = ref(false);
-provide("debug", debug);
+const debug = inject("debug", false);
 </script>
 
 <style lang="scss">
@@ -274,4 +269,22 @@ provide("debug", debug);
     background-color: lightpink;
   }
 }
+
+
+.center-text {
+  position: absolute;
+
+  font-size: 5vh;
+
+  top: 50%;
+  right: 0;
+  left: 0;
+
+  transform: translateY(-50%);
+
+  text-align: center;
+  vertical-align: middle;
+}
+
+
 </style>

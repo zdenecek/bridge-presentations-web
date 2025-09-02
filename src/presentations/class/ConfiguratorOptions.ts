@@ -2,7 +2,7 @@ import { Contract } from "@/bridge/model/Contract";
 import { Position, PositionHelper } from "@/bridge/model/Position";
 import { Suit } from "@/bridge/model/Suit";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
-import { DummyOptions } from "@/presenter/views/GameView";
+import { DummyOptions } from "@/bridge/model/PresentationGame";
 
 export interface ConfiguratorOptions {
   cards: {

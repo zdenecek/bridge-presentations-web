@@ -57,7 +57,7 @@ useKeyboardShortcut('z', null, () =>
 );
 
 // Pass bid shortcut
-useKeyboardShortcut(' ', null, (e) => {
+useKeyboardShortcut(' ', null, () => {
     if (game.value.state === "bidding" && game.value.currentlyRequestedPlayer) {
         game.value.tryAddBid(new PassBid(), game.value.currentlyRequestedPlayer as Player);
     }

@@ -19,7 +19,7 @@
             </div>
             <div class="debug-item">
                 <div class="debug-item-label">Game state:</div>
-                <div class="debug-item-value">{{ game?.state }}</div>
+                <div class="debug-item-value">{{ game.state }}</div>
                 
             </div>
             <div class="debug-item">
@@ -35,10 +35,10 @@
 import { CardViewData } from './CardViewData';
 import { Card } from '@/bridge/model/Card';
 import { PresentationGame } from '@/bridge/model/PresentationGame';
-import { inject, ref, computed } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<{
-  game?: PresentationGame;
+  game: PresentationGame;
   cardViews: Map<Card, CardViewData>;
 }>();
 

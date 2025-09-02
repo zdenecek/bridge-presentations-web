@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, useTemplateRef, watch } from 'vue';
+import { computed, useTemplateRef, watch } from 'vue';
 import { Card, CardValue, CardValueHelper } from "../../bridge/model/Card";
 import { SuitHelper } from "../../bridge/model/Suit";
 import { Orientation } from "../classes/Orientation";
