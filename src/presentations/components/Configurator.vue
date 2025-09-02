@@ -18,7 +18,11 @@
                 <div class="section">
                     <div class="section-header">
                         <h2>Cards</h2>
-                        <button class="btn btn-secondary btn-small" @click="clear">Clear Cards</button>
+                        <div class="header-buttons">
+                            <button class="btn btn-secondary btn-small" @click="genDealPartial">Generate Rest</button>
+                            <button class="btn btn-secondary btn-small" @click="genDeal">Generate Deal</button>
+                            <button class="btn btn-secondary btn-small" @click="clear">Clear Cards</button>
+                        </div>
                     </div>
                     <div class="cards-grid">
                         <template v-for="(label, pos) in positions" :key="pos">
@@ -262,15 +266,16 @@
 <script lang="ts" setup>
 import { computed, useTemplateRef, watch } from "vue";
 import { Suit } from "@/bridge/model/Suit";
-import { CardsInputValidator } from "../class/CardsInputValidator";
+import { CardsInputValidator } from "../class/deal-validator";
 import { Position } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
-import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
+import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/json-utils";
 import { NonPassedContract } from "@/bridge/model/Contract";
-import { ConfiguratorOptions, getDefaultConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
+import { ConfiguratorOptions, getDefaultConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/options";
 import Arrow from "@/presentations/components/partial/Arrow.vue";
 
 import { ref, reactive } from "vue";
+import { DealLike, generateDeal, generateDealWithCards } from "../class/deal-generator";
 
 
 const options = reactive(getDefaultConfiguratorOptions());
@@ -395,6 +400,24 @@ const showCardInputErrors = computed(() => {
 const errors = computed(() => {
     return validateConfiguratorOptions(options);
 });
+
+function genDeal() {
+    const deal = generateDeal();
+    options.cards = deal;
+}
+
+let lastUsedCards: DealLike | undefined = undefined;
+
+function genDealPartial() {
+    let partialCards = {...options.cards};
+    const isFull = Object.values(partialCards).every(c => c.replaceAll(/[\s\-]/g, "").length === 13);
+    if(isFull && lastUsedCards !== undefined) 
+        partialCards = lastUsedCards;
+    else if(isFull) return;    
+    const deal = generateDealWithCards(partialCards);
+    lastUsedCards = partialCards;
+    options.cards = deal;
+}
 </script>
 
 <style lang="scss">
@@ -487,6 +510,11 @@ const errors = computed(() => {
             font-size: 1.2rem;
             font-weight: 500;
             color: #fff;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
         }
     }
 

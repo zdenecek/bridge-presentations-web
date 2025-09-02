@@ -5,7 +5,7 @@
 
 <script lang="ts" setup>
 import Configurator from '@/presentations/components/Configurator.vue';
-import { ConfiguratorOptions, getDefaultConfiguratorOptions } from './class/ConfiguratorOptions';
+import { ConfiguratorOptions, getDefaultConfiguratorOptions } from './class/options';
 import { ref } from 'vue';
 import Presenter from '@/presentations/components/Presenter.vue';
 import { useKeyboardShortcut } from '@/presenter/composables/useKeyboardShortcut';
@@ -19,7 +19,6 @@ function changeState(newState?: 'configurator' | 'presenter') {
 const options = ref<ConfiguratorOptions>(getDefaultConfiguratorOptions());
 
 function startGame(opts: ConfiguratorOptions) {
-  console.log("startGame", opts);
   changeState('presenter');
   updateOptions(opts);
   presenter.value?.startGame(opts);

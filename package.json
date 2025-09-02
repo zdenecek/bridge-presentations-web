@@ -10,6 +10,7 @@
     "lint": " npx prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "dependencies": {
+    "@bridge-tools/generator": "^0.2.2",
     "@vueuse/core": "^13.3.0",
     "pinia": "^3.0.3",
     "vue": "^3.3.4"

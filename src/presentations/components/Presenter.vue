@@ -14,7 +14,7 @@
 import { ref, computed } from 'vue';
 import { Position } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
-import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
+import { ConfiguratorOptions } from "@/presentations/class/options";
 import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
 import { useKeyboardShortcut } from '@/presenter/composables/useKeyboardShortcut';

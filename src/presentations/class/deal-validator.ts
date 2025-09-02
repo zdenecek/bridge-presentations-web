@@ -42,6 +42,10 @@ export class CardsInputValidator {
       errors.set(pos, ar);
     });
 
+    // Remove entries with empty error arrays
+    for (const [pos, errs] of errors.entries()) {
+      if (!errs.length) errors.delete(pos);
+    }
     return errors;
   }
 }

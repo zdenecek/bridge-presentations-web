@@ -1,7 +1,7 @@
 import {
   ConfiguratorOptions,
   normalizeConfiguratorOptions,
-} from "./ConfiguratorOptions";
+} from "./options";
 
 export function downloadObjectAsJson(
   exportObj: unknown,
