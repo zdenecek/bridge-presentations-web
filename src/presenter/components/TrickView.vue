@@ -4,16 +4,16 @@
     <div v-for="position in PositionHelper.all()" :key="position"
       :class="`trick-view-origin trick-view-origin-${position}`" :ref="el => setOriginRef(position, el)">
       <div>
-        <span class="absolute" v-show="debug">{{ trick?.getCardByPosition(position)?.card.toString() }}</span>
+        <span class="absolute" v-show="debug">{{ cardsByPosition?.[position]?.card.toString() }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch, ref, nextTick, inject, shallowRef, triggerRef } from 'vue';
+import { watch, ref, nextTick, inject, shallowRef, triggerRef, computed } from 'vue';
 import { CardViewData } from "./CardViewData";
-import { Trick } from "../../bridge/model/Trick";
+import { CardInTrick, Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";
 import { Position, PositionHelper } from "../../bridge/model/Position";
 import { Point } from "../model/Point";
@@ -57,6 +57,18 @@ const setOriginRef = (position: Position, el: any) => {
   }
 };
 
+const cardsByPosition = computed(() => {
+  if (!trick.value) return {} as Record<Position, CardInTrick>;
+  return getCardsByPosition(trick.value);
+});
+
+function getCardsByPosition(trick: Trick): Record<Position, CardInTrick> {
+  return trick.cards.reduce((acc, card) => {
+    acc[card.player] = card;
+    return acc;
+  }, {} as Record<Position, CardInTrick>);
+}
+
 // Position cards in the trick
 const positionTrick = (trick: Trick) => {
   if (!trick) return;
@@ -70,9 +82,11 @@ const positionTrick = (trick: Trick) => {
     view.z = index + 100;
   });
 
+
+  const cardsByPosition = getCardsByPosition(trick);
   // Position cards at their respective positions
   PositionHelper.all().forEach((pos) => {
-    const cardInTrick = trick.getCardByPosition(pos);
+    const cardInTrick = cardsByPosition[pos];
     if (!cardInTrick) return;
 
     const view = props.cardViews.get(cardInTrick.card);

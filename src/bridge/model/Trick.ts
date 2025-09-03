@@ -1,5 +1,5 @@
 import { Card } from "./Card";
-import { Position, PartialPositionList, PositionHelper } from "./Position";
+import { Position, PositionHelper } from "./Position";
 import { Suit } from "./Suit";
 
 export interface CardInTrick {
@@ -9,7 +9,6 @@ export interface CardInTrick {
 }
 
 export class Trick {
-  public currentToPlay?: Position;
   public cards: Array<CardInTrick> = [];
   public firstToPlay: Position;
   public trumps: Suit;
@@ -20,44 +19,19 @@ export class Trick {
   ) {
     this.firstToPlay = firstToPlay;
     this.trumps = trumps;
-    this.currentToPlay = firstToPlay;
   }
 
-  protected nextToPlay(): Position | undefined {
-    if (this.currentToPlay === undefined)
-      throw Error("Error, cannot play card in finished trick");
-    return this.isFinished
-      ? undefined
-      : PositionHelper.nextPosition(this.currentToPlay);
+  public get currentToPlay(): Position | undefined {
+    if (this.cards.length === 0) return this.firstToPlay;
+    if (this.isFinished) return undefined;
+    return PositionHelper.nextPosition(this.cards[this.cards.length - 1].player);
   }
 
-  addCard(card: Card): void {
-    if (this.currentToPlay === undefined)
-      throw Error("Cannot add a card to finished trick");
-
-    const c = { card, player: this.currentToPlay, trick: this };
-
-    // Use array methods that create new arrays for better reactivity
-    this.cards = [...this.cards, c];
-
-    this.currentToPlay = this.nextToPlay();
-  }
-
-  getCards(): PartialPositionList<CardInTrick> {
-    // Create a position map from the cards array
-    const result: PartialPositionList<CardInTrick> = {};
-    this.cards.forEach((card) => {
-      result[card.player] = card;
-    });
-    return result;
-  }
-
-  // Use a computed property for reactive data
-  get isFinished(): boolean {
+  public get isFinished(): boolean {
     return this.cards.length == 4;
   }
 
-  get winner(): CardInTrick | undefined {
+  public get winner(): CardInTrick | undefined {
     if (!this.isFinished) return undefined;
 
     // Calculate winner on-the-fly without memoization
@@ -71,16 +45,25 @@ export class Trick {
     });
   }
 
-  suit(suit: Suit): Array<CardInTrick> {
-    return this.cards.filter((c) => c.card.suit == suit);
+  /**
+   * The suit of the trick, if it has at least one card.
+   */
+  public get suit(): Suit | undefined {
+    if (this.cards.length === 0) return undefined;
+    return this.cards[0].card.suit;
+  }
+
+  public addCard(card: Card): void {
+    if (this.isFinished)
+      throw Error("Cannot add a card to finished trick");
+
+    const c = { card, player: this.currentToPlay!, trick: this };
+
+    // Use array methods that create new arrays for better reactivity
+    this.cards = [...this.cards, c];
   }
 
   toString(): string {
     return `(${this.firstToPlay} leads; ${this.cards.map((c) => c.card.toString()).join(", ")})`;
-  }
-
-  // Helper method specifically for Vue templates
-  getCardByPosition(position: Position): CardInTrick | undefined {
-    return this.cards.find((card) => card.player === position);
   }
 }

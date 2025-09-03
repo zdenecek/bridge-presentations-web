@@ -176,7 +176,8 @@ watch(() => props.game, (newGame) => {
     player.playRequested.sub((e) => {
       if (e.player instanceof PresentationPlayer) {
         currentPlayer.value = e.player;
-        if (e.trick.cards.length > 0) {
+
+        if (e.trick.suit && e.player.hand.cardsWithSuit(e.trick.suit).length > 0) {
           currentSuitName.value = SuitHelper.toString(e.trick.cards[0].card.suit);
         } else {
           currentSuitName.value = undefined;
