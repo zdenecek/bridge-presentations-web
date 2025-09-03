@@ -143,12 +143,16 @@ function update() {
 window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
 
 watch(() => props.game, (game) => {
+  game.stateChanged.sub(() => {
+    update();
+  });
   game.cardPlayed.sub(() => {
     update();
   });
   game.undoMade.sub(() => {
     update();
   });
+  update();
 }, { deep: false, immediate: true});
 
 /** 

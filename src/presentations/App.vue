@@ -19,6 +19,7 @@ function changeState(newState?: 'configurator' | 'presenter') {
 const options = ref<ConfiguratorOptions>(getDefaultConfiguratorOptions());
 
 function startGame(opts: ConfiguratorOptions) {
+  console.log('startGame', opts);
   changeState('presenter');
   updateOptions(opts);
   presenter.value?.startGame(opts);

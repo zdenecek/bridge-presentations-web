@@ -59,7 +59,7 @@ const mainAxisSize = computed(() => isHorizontal(props.orientation) ? width.valu
  * For horizontal rotations: uses bid height
  * For vertical rotations: uses bid width
  */
-const bidMainAxisSize = computed(() => isHorizontal(props.orientation) ? bidRefs.value?.[0].height : bidRefs.value?.[0].width);
+const bidMainAxisSize = computed(() => isHorizontal(props.orientation) ? (bidRefs.value?.[0]?.height ?? 100) : (bidRefs.value?.[0]?.width ?? 100));
 
 
 /**

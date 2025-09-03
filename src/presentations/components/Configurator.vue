@@ -313,7 +313,6 @@ const emit = defineEmits<{
 
 function submit() {
     if (!options.bidding && specifyContract.value && !options.contract) return;
-    // onSubmit is not defined in this script setup, but assuming it's a prop or global
     emit("submit", options);
 }
 

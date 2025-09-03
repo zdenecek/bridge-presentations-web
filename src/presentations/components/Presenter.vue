@@ -31,13 +31,12 @@ import ControlPanel from '@/presenter/components/ControlPanel.vue';
 const players = PlayerFactory.makeObservablePlayers();
 const game = useGameRef(new PresentationGame(players, PresentationGameOptions.Default));
 
-const props = defineProps<{
+defineProps<{
     options: ConfiguratorOptions;
 }>();
 
 defineExpose({
-    startGame() {
-        const options = props.options;
+    startGame(options: ConfiguratorOptions) {
         const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew,
             options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
         const gm = GameFactory.makeObservableGame(players, gameOpts, options.vulnerability);

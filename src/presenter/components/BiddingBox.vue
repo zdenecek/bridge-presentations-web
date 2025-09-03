@@ -62,97 +62,214 @@ const handleBidClick = (bid: Bid) => {
 </script>
 
 <style scoped lang="scss">
+@use '../assets/style/_variables.scss' as variables;
+
 .bidding-box {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   position: absolute;
   right: 0;
   bottom: 0;
-  padding: 20px;
-  background-color: var(--background);
-  border: 2px solid var(--primary);
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 20, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  box-shadow: 
+    0 6px 24px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    border-radius: 12px;
+    pointer-events: none;
+  }
 
   &-level {
     display: flex;
-    gap: 0.5rem;
+    gap: 4px;
     justify-content: center;
+    position: relative;
+    z-index: 1;
   }
 
   &-other {
     display: flex;
-    gap: 0.5rem;
+    gap: 4px;
     justify-content: center;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--primary);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
   }
 
   &-bid {
-    padding: 2px 4px;
-    outline: solid 1px;
-    border-radius: 4px;
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 3rem;
-    height: 2.5rem;
+    min-width: 2.8rem;
+    height: 2.2rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
 
     &:hover {
-      background-color: var(--primary);
-      color: var(--background);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &:active {
+      transform: translateY(-1px) scale(1.02);
     }
 
     .level {
-      color: black;
-      font-weight: bold;
-      margin-right: 0.25rem;
+      color: variables.$primary;
+      font-weight: 700;
+      margin-right: 0.2rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .suit {
+      font-size: 1rem;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
     }
 
     &.suit-clubs {
-      color: #3575af;
-      background-color: #e3f0fa;
+      color: #60a5fa;
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(96, 165, 250, 0.05) 100%);
+      border-color: rgba(96, 165, 250, 0.4);
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(96, 165, 250, 0.2);
+        border-color: rgba(96, 165, 250, 0.6);
+      }
     }
 
     &.suit-diamonds {
-      color: #d26d2a;
-      background-color: #f8e8d8;
+      color: #fb923c;
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.15) 0%, rgba(251, 146, 60, 0.05) 100%);
+      border-color: rgba(251, 146, 60, 0.4);
+      box-shadow: 0 0 20px rgba(251, 146, 60, 0.1);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(251, 146, 60, 0.2);
+        border-color: rgba(251, 146, 60, 0.6);
+      }
     }
 
     &.suit-hearts {
-      color: #e90202;
-      background-color: #fbeaea;
+      color: #f87171;
+      background: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(248, 113, 113, 0.05) 100%);
+      border-color: rgba(248, 113, 113, 0.4);
+      box-shadow: 0 0 20px rgba(248, 113, 113, 0.1);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(248, 113, 113, 0.2);
+        border-color: rgba(248, 113, 113, 0.6);
+      }
     }
 
     &.suit-spades {
-      color: black;
-      background-color: gainsboro;
+      color: variables.$primary;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
     }
 
     &.suit-notrump {
-      color: black;
-      background-color: lightgray;
+      color: #9ca3af;
+      background: linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(156, 163, 175, 0.05) 100%);
+      border-color: rgba(156, 163, 175, 0.4);
+      box-shadow: 0 0 20px rgba(156, 163, 175, 0.1);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(156, 163, 175, 0.2);
+        border-color: rgba(156, 163, 175, 0.6);
+      }
     }
 
     &.pass {
-      grid-column: span 3;
-      background-color: green;
-      color: white;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+      color: #22c55e;
+      border-color: rgba(34, 197, 94, 0.5);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(34, 197, 94, 0.25);
+        border-color: rgba(34, 197, 94, 0.7);
+      }
     }
 
     &.double {
-      background-color: red;
-      color: white;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.25);
+        border-color: rgba(239, 68, 68, 0.7);
+      }
     }
 
     &.redouble {
-      background-color: blue;
-      color: white;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+      color: #3b82f6;
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+        border-color: rgba(59, 130, 246, 0.7);
+      }
     }
   }
 }
