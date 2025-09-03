@@ -140,8 +140,6 @@ function update() {
   trickView.value?.update?.();
 }
 
-window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
-
 watch(() => props.game, (game) => {
   game.stateChanged.sub(() => {
     update();
@@ -150,6 +148,9 @@ watch(() => props.game, (game) => {
     update();
   });
   game.undoMade.sub(() => {
+    update();
+  });
+  game.bidMade.sub(() => {
     update();
   });
   update();
