@@ -10,6 +10,9 @@ export class PresentationAuction extends UndoableAuction {
   }
 
   protected get auctionFinished(): boolean {
-    return this._standingPassCount >= this.playerCount - 1 && this.bids.length >= this.playerCount;
+    return (
+      this._standingPassCount >= this.playerCount - 1 &&
+      this.bids.length >= this.playerCount
+    );
   }
 }

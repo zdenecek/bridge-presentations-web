@@ -45,7 +45,10 @@ export class UndoableGame extends Game {
     setTimeout(() => this._undoMade.dispatch({ game: this }));
     setTimeout(() => {
       this.currentlyRequestedPlayer = this.players[lastBid.position];
-      this.players[lastBid.position].requestBid(this, (player: Player, bid: Bid) => this.addBid(bid, player));
+      this.players[lastBid.position].requestBid(
+        this,
+        (player: Player, bid: Bid) => this.addBid(bid, player),
+      );
     });
   }
 
@@ -57,7 +60,7 @@ export class UndoableGame extends Game {
     this.currentlyRequestedPlayer?.cancelRequestToPlay();
 
     if (lastTrick.cards.length === 0) {
-      this.tricks.pop();
+      this.tricks = this.tricks.slice(0, -1);
     }
 
     if (this.tricks.length === 0) {
@@ -65,17 +68,26 @@ export class UndoableGame extends Game {
       this.undoBidding();
     } else {
       lastTrick = this.tricks[this.tricks.length - 1];
-      const lastCard = this.popCard(lastTrick) ?? errorMessage("popCard returned undefined");
-      const card = this.players[lastCard.player].hand._cards.find((c) => c.card === lastCard.card) ?? errorMessage("card not found");
+      const lastCard =
+        this.popCard(lastTrick) ?? errorMessage("popCard returned undefined");
+      const card =
+        this.players[lastCard.player].hand._cards.find(
+          (c) => c.card === lastCard.card,
+        ) ?? errorMessage("card not found");
       card.played = false;
       lastTrick.currentToPlay = lastCard.player;
 
       setTimeout(() => this._undoMade.dispatch({ game: this }));
-      if (lastTrick.cards.length === 3) setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
+      if (lastTrick.cards.length === 3)
+        setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
 
       setTimeout(() => {
         this.currentlyRequestedPlayer = this.players[lastCard.player];
-        this.currentlyRequestedPlayer.requestPlay(this, lastTrick, (player: Player, card: Card) => this.addCard(lastTrick, card, player));
+        this.currentlyRequestedPlayer.requestPlay(
+          this,
+          lastTrick,
+          (player: Player, card: Card) => this.addCard(lastTrick, card, player),
+        );
       });
     }
   }
@@ -87,9 +99,14 @@ export class UndoableGame extends Game {
     setTimeout(() => this._trickCountChanged.dispatch({ game: this }));
     const lastTrick = this.tricks[this.tricks.length - 1];
     setTimeout(() => {
-      if (lastTrick.currentToPlay == undefined) throw new Error("No current player");
+      if (lastTrick.currentToPlay == undefined)
+        throw new Error("No current player");
       this.currentlyRequestedPlayer = this.players[lastTrick.currentToPlay];
-      this.currentlyRequestedPlayer.requestPlay(this, lastTrick, (player: Player, card: Card) => this.addCard(lastTrick, card, player));
+      this.currentlyRequestedPlayer.requestPlay(
+        this,
+        lastTrick,
+        (player: Player, card: Card) => this.addCard(lastTrick, card, player),
+      );
     });
   }
 
@@ -110,11 +127,9 @@ export class UndoableGame extends Game {
   }
 
   protected popCard(trick: Trick): CardInTrick | undefined {
-    const lastCard = trick.cards.pop();
-    if (lastCard) {
-      delete trick.cardsByPosition[lastCard.player];
-      trick.currentToPlay = lastCard.player;
-    }
+    const lastCard = trick.cards[trick.cards.length - 1];
+    if (lastCard) trick.currentToPlay = lastCard.player;
+    trick.cards = trick.cards.slice(0, -1);
     return lastCard;
   }
 }

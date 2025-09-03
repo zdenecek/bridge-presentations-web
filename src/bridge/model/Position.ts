@@ -32,7 +32,10 @@ class PositionHelper {
     return PositionHelper.nextPosition(pos, count - 1);
   }
 
-  static nextPosisitionFrom(positions: Array<Position>, position: Position): Position {
+  static nextPosisitionFrom(
+    positions: Array<Position>,
+    position: Position,
+  ): Position {
     const currentIndex = positions.indexOf(position);
     if (currentIndex < 0) throw new Error("Position not found in array");
     const nextIndex = (currentIndex + 1) % positions.length;
@@ -40,7 +43,9 @@ class PositionHelper {
   }
 
   static side(position: Position): Side {
-    return position === Position.North || position === Position.South ? Side.NS : Side.EW;
+    return position === Position.North || position === Position.South
+      ? Side.NS
+      : Side.EW;
   }
 
   static toString(position: Position): string {
@@ -70,4 +75,10 @@ class PositionHelper {
 type PositionList<T> = { [key in Position]: T };
 type PartialPositionList<T> = { [key in Position]?: T };
 
-export { Position, PositionHelper, type PositionList, type PartialPositionList, Side };
+export {
+  Position,
+  PositionHelper,
+  type PositionList,
+  type PartialPositionList,
+  Side,
+};

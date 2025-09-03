@@ -5,7 +5,10 @@ import { Card, CardValue } from "../model/Card";
 import { Suit } from "../model/Suit";
 import { PresentationPlayer } from "../model/PresentationPlayer";
 import { Vulnerability } from "../model/Vulnerability";
-import { PresentationGame, PresentationGameOptions } from "../model/PresentationGame";
+import {
+  PresentationGame,
+  PresentationGameOptions,
+} from "../model/PresentationGame";
 
 export default class GameFactory {
   static makeTestGame(): PresentationGame {
@@ -14,20 +17,43 @@ export default class GameFactory {
       players[position] = new PresentationPlayer(position);
     });
 
-    players[Position.North].hand = new Hand([new Card(Suit.Clubs, CardValue.Jack), new Card(Suit.Spades, CardValue.Jack)]);
-    players[Position.East].hand = new Hand([new Card(Suit.Diamonds, CardValue.Jack), new Card(Suit.Spades, CardValue.Queen)]);
-    players[Position.West].hand = new Hand([new Card(Suit.Hearts, CardValue.Jack), new Card(Suit.Spades, CardValue.King)]);
-    players[Position.South].hand = new Hand([new Card(Suit.Spades, CardValue.Jack), new Card(Suit.Spades, CardValue.Ace)]);
-    return GameFactory.makeObservableGame(players, PresentationGameOptions.Default);
+    players[Position.North].hand = new Hand([
+      new Card(Suit.Clubs, CardValue.Jack),
+      new Card(Suit.Spades, CardValue.Jack),
+    ]);
+    players[Position.East].hand = new Hand([
+      new Card(Suit.Diamonds, CardValue.Jack),
+      new Card(Suit.Spades, CardValue.Queen),
+    ]);
+    players[Position.West].hand = new Hand([
+      new Card(Suit.Hearts, CardValue.Jack),
+      new Card(Suit.Spades, CardValue.King),
+    ]);
+    players[Position.South].hand = new Hand([
+      new Card(Suit.Spades, CardValue.Jack),
+      new Card(Suit.Spades, CardValue.Ace),
+    ]);
+    return GameFactory.makeObservableGame(
+      players,
+      PresentationGameOptions.Default,
+    );
   }
 
-  static makeGame(players: PositionList<Player>, vulnerability: Vulnerability, options: PresentationGameOptions): PresentationGame {
+  static makeGame(
+    players: PositionList<Player>,
+    vulnerability: Vulnerability,
+    options: PresentationGameOptions,
+  ): PresentationGame {
     const game = new PresentationGame(players, options, vulnerability);
 
     return game;
   }
 
-  static makeObservableGame(players: PositionList<Player>, options: PresentationGameOptions, vul = Vulnerability.None): PresentationGame {
+  static makeObservableGame(
+    players: PositionList<Player>,
+    options: PresentationGameOptions,
+    vul = Vulnerability.None,
+  ): PresentationGame {
     const game = this.makeGame(players, vul, options);
     game.cardPlayed.sub((e) => {
       console.debug(`card played: ${e.card}`);

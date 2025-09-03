@@ -10,8 +10,17 @@ export class Result {
   public readonly contract: Contract;
   public readonly vul: boolean;
 
-  public static make(contract: Contract, vulnerability: Vulnerability, tricksMade?: number): Result {
-    if (contract !== "passed") return new Result(contract, VulnerabilityHelper.IsVulnerable(contract.declarer, vulnerability), tricksMade);
+  public static make(
+    contract: Contract,
+    vulnerability: Vulnerability,
+    tricksMade?: number,
+  ): Result {
+    if (contract !== "passed")
+      return new Result(
+        contract,
+        VulnerabilityHelper.IsVulnerable(contract.declarer, vulnerability),
+        tricksMade,
+      );
     else return new Result("passed");
   }
 
@@ -28,12 +37,16 @@ export class Result {
 
   public get scoreNS(): number {
     if (this.contract === "passed") return 0;
-    return (PositionHelper.side(this.contract.declarer) === Side.NS ? 1 : -1) * this.score;
+    return (
+      (PositionHelper.side(this.contract.declarer) === Side.NS ? 1 : -1) *
+      this.score
+    );
   }
 
   public get tricksMadeRelative(): number {
     if (this.contract === "passed") return 0;
-    if (!this.tricksMade) errorMessage("Invalid Result state: tricksMade is undefined");
+    if (!this.tricksMade)
+      errorMessage("Invalid Result state: tricksMade is undefined");
     return this.tricksMade - this.contract.level - 6;
   }
 

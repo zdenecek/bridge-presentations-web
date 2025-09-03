@@ -19,16 +19,29 @@ export default class PlayerFactory {
     const players = PlayerFactory.makePlayers();
 
     Object.values(players).forEach((player) => {
-      player.bidRequested.sub(({ player }) => console.debug(`A bid has been requested from player ${player}`));
-      player.bidRequestCancelled.sub(({ player }) => console.debug(`A bid request has been cancelled from ${player}`));
-      player.playRequested.sub(({ player }) => console.debug(`A play has been requested from ${player}`));
-      player.playRequestCancelled.sub(({ player }) => console.debug(`A play request has been cancelled from player ${player}`));
+      player.bidRequested.sub(({ player }) =>
+        console.debug(`A bid has been requested from player ${player}`),
+      );
+      player.bidRequestCancelled.sub(({ player }) =>
+        console.debug(`A bid request has been cancelled from ${player}`),
+      );
+      player.playRequested.sub(({ player }) =>
+        console.debug(`A play has been requested from ${player}`),
+      );
+      player.playRequestCancelled.sub(({ player }) =>
+        console.debug(
+          `A play request has been cancelled from player ${player}`,
+        ),
+      );
     });
 
     return players;
   }
 
-  static putHands(players: PositionList<Player>, cards: PositionList<string>): void {
+  static putHands(
+    players: PositionList<Player>,
+    cards: PositionList<string>,
+  ): void {
     PositionHelper.all().forEach((position) => {
       const _cards = Parser.parseHandString(cards[position]);
       players[position].hand = new Hand(_cards);

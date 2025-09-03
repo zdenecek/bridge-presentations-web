@@ -1,63 +1,39 @@
 <template>
-  <configurator v-show="state === 'configurator'" :onSubmit="play"></configurator>
-  <presenter ref="presenter" v-show="state === 'presenter'"></presenter>
+  <configurator v-show="state === 'configurator'" @submit="startGame" @update:options="updateOptions"></configurator>
+  <presenter ref="presenter" v-show="state === 'presenter'" :options="options"></presenter>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import Presenter from '@/presentations/components/Presenter.vue';
+<script lang="ts" setup>
 import Configurator from '@/presentations/components/Configurator.vue';
-import { ConfiguratorOptions } from './class/ConfiguratorOptions';
-import { Application } from './class/Application';
+import { ConfiguratorOptions, getDefaultConfiguratorOptions } from './class/options';
+import { ref } from 'vue';
+import Presenter from '@/presentations/components/Presenter.vue';
+import { useKeyboardShortcut } from '@/presenter/composables/useKeyboardShortcut';
 
-export default defineComponent({
-  name: 'App',
-  created() {
-    window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === "q" && e.ctrlKey) {
-        e.preventDefault();
-        this.changeState();
-      }
-    });
-  },
-  data() {
-    return {
-      state: 'configurator' as 'configurator' | 'presenter',
+const state = ref<'configurator' | 'presenter'>('configurator');
+const presenter = ref<typeof Presenter>();
 
-    };
-  },
-  methods: {
-    changeState(state?: 'configurator' | 'presenter') {
+function changeState(newState?: 'configurator' | 'presenter') {
+  state.value = newState ? newState : (state.value === 'configurator' ? 'presenter' : 'configurator');
+}
+const options = ref<ConfiguratorOptions>(getDefaultConfiguratorOptions());
 
-      this.state = state ? state : (this.state == 'configurator' ? 'presenter' : 'configurator');
-      if (this.state == 'presenter') {
-        this.$nextTick(() => (this.$refs.presenter as typeof Presenter)?.updatePositions());
-      }
+function startGame(opts: ConfiguratorOptions) {
+  console.log('startGame', opts);
+  changeState('presenter');
+  updateOptions(opts);
+  presenter.value?.startGame(opts);
+}
 
-      Application.state = this.state;
-    },
-    play(options: ConfiguratorOptions, otherOptions: { endMessage?: string }) {
-      this.changeState('presenter');
-      (this.$refs.presenter as typeof Presenter).startGame(options, otherOptions);
-    },
+const updateOptions = (opts: ConfiguratorOptions) => {
+  options.value = opts;
+}
 
-  },
-
-  components: {
-    Presenter,
-    Configurator,
-  }
-});
+useKeyboardShortcut("q", "ctrl", () => changeState());
+useKeyboardShortcut("+", null, () => startGame(options.value));
 </script>
 
 <style lang="scss">
-.body {
-  background-image: url(0.png);
-  background-size: cover;
-  filter: opacity(20%);
-}
-
-
 * {
   box-sizing: border-box;
 }

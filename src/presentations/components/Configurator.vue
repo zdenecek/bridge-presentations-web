@@ -1,503 +1,858 @@
 <template>
-    <div id="configurator">
-        <div id="configurator-tabs"></div>
-        <div id="configurator-content">
-            <div class="tab" ref="tabCards">
-                <h2>Cards and play</h2>
-                <div class="vertical">
-                    <button tabindex="-1" @click="clear">Clear cards</button>
-                    <button tabindex="-1" @click="save">Save</button>
-                    <input type='file' accept=".deal" @change='e => load(e)' ref="loadform" hidden />
-                    <button tabindex="-1" @click="loadClicked">Load</button>
-                </div>
-                <div class="fields">
-                    <template v-for="(label, pos) in positions" :key="pos">
-                        <label :for="pos">{{ label }}</label>
-                        <input :id="pos" type="text" v-model="options.cards[pos]" />
-                        <div class="error-list"
-                             v-if="showCardInputErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
-                            <div v-for="err in cardErrors.get(pos as Position)" :key="err">
-                                {{ err }}
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <div class="fields">
-                    <label for="first">Vulnerability</label>
-                    <select id="first" v-model="options.vulnerability">
-                        <option :value="vul" v-for="(label, vul) in vulnerabilities" :key="vul">{{ label }}</option>
-                    </select>
-                    <label for="include-auction">Auction</label>
-                    <input type="checkbox" class="checkbox" id="include-auction" v-model="options.bidding" />
-                    <template v-if="!options.bidding">
-                        <label for="specify-contract">Contract</label>
-                        <div class="contract-field">
-                            <input type="checkbox" class="checkbox" id="specify-contract" v-model="specifyContract" />
-                            <input type="text" v-model="contractInput" v-show="specifyContract" placeholder="4SxE" />
-                            <span v-show="specifyContract"> {{ contract }}</span>
-                        </div>
-                    </template>
-
-
-                    <label for="trumps" v-show="!options.bidding && !specifyContract">{{ "Trumps" }}</label>
-                    <select id="trumps" v-model="options.trumps" v-show="!options.bidding && !specifyContract">
-                        <option :value="suit" v-for="(label, suit) in suits" :key="suit">{{ label }}</option>
-                    </select>
-                    <label for="dummy-choice" v-show="!options.bidding">{{ "Dummy" }}</label>
-                    <div class="dummy-choice" v-show="!options.bidding">
-                        <select id="trumps" v-model="options.dummy" v-show="!options.bidding">
-                            <option value="auto" selected>Show after lead</option>
-                            <option value="static">Static</option>
-                            <option value="none">None</option>
-                        </select>
-                        <select
-                                id="trumps2"
-                                v-model="options.staticDummyPosition"
-                                v-show="!options.bidding && options.dummy === 'static' && !specifyContract">
-                            <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
-                        </select>
-                    </div>
-                    <template v-if="options.bidding || (options.dummy !== 'auto' || !specifyContract)">
-                        <div class="error" v-show="'firstPlayer' in errors"> {{ errors.firstPlayer }}</div>
-                        <label for="first">{{
-                            options.bidding ? "Dealer" : "First to play"
-                        }}</label>
-                        <select id="first" v-model="options.firstPlayer">
-                            <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
-                        </select>
-                    </template>
-                    <label for="fake-tricks">Fake trick count</label>
-                    <div class="fake-tricks-field">
-                        <input type="checkbox" class="checkbox" id="fake-tricks" v-model="fakeTricks" />
-                        <div v-show="fakeTricks">
-                            <label for="fake-ns">NS:</label>
-                            <input type="text" id="fake-ns" v-model.number="options.fake.ns" v-show="fakeTricks" />
-                            <label for="fake-ew">EW:</label>
-                            <input type="text" id="fake-ew" v-model.number="options.fake.ew" v-show="fakeTricks" />
-                        </div>
-                    </div>
-                    <label for="fake-auction" v-show="options.bidding">Fake auction</label>
-                    <input type="checkbox" class="checkbox" id="fake-auction" v-model="fakeAuction"
-                           v-show="options.bidding" disabled title="Not supported" />
-                    <label>Active positions</label>
-                    <div class="flex">
-                        <div>
-                            <div v-for="(label, position) in positions" :key="'inp' + position">
-                                <input type="checkbox" :value="position" :name="position"
-                                       v-model="options.activePositions" />
-                                <label :for="position">{{ label }}</label>
-                            </div>
-                        </div>
-                        <div class="active-positions-buttons">
-                            <button @click="setActiveNS">NS</button>
-                            <button @click="setActiveEW">EW</button>
-                            <button @click="setActiveAll">All</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab">
-                <h2>Controls</h2>
-
-                <div id="controls-tab">
-                    <div class="key">+</div>
-                    <div>Start game</div>
-                    <div class="keys"><span class="key">Ctrl</span>+<span class="key">Q</span></div>
-                    <div>Toggle this menu</div>
-                    <div class="keys">
-                        <span class="key">
-                            <arrow direction="up" />
-                        </span>
-                        <span class="key">
-                            <arrow direction="left" />
-                        </span>
-                        <span class="key">
-                            <arrow direction="down" />
-                        </span>
-                        <span class="key">
-                            <arrow direction="right" />
-                        </span>
-                    </div>
-                    <div>Toggle visibility for a hand</div>
-                    <div class="keys">
-                        <span class="key">Ctrl</span>
-                        +
-                        <div class="key-grid">
-                            <span class="key">
-                                <arrow direction="up" />
-                            </span>
-                            <span class="key">
-                                <arrow direction="left" />
-                            </span>
-                            <span class="key">
-                                <arrow direction="down" />
-                            </span>
-                            <span class="key">
-                                <arrow direction="right" />
-                            </span>
-                        </div>
-                    </div>
-                    <div>Show one hand, hide others, does not affect dummy</div>
-                    <div class="key">Z</div>
-                    <div>Undo</div>
-                    <div class="keys">
-                        <div><span class="key">0</span>-<span class="key">9</span></div><span class="key">/</span><span
-                              class="key">*</span><span class="key">-</span>
-                    </div>
-                    <div>Play card</div>
-                    <div class="key">C</div>
-                    <div>Claim (first focus then submit, <br>enter claimed tricks for NS)</div>
-                    <div class="key">Spacebar</div>
-                    <div>Pass (in auction)</div>
-
-                </div>
-            </div>
-            <div class="tab">
-                <h2>Graphics</h2>
-                <div class="fields">
-                    <label for="message">End text</label>
-                    <input type="text" id="message" v-model="endText" />
-                </div>
+    <div class="configurator">
+        <div class="configurator-header">
+            <h1>Bridge Presentation Configurator</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" @click="save">Save Deal</button>
+                <input type='file' accept=".deal" @change='e => load(e)' ref="loadform" hidden />
+                <button class="btn btn-secondary" @click="loadClicked">Load Deal</button>
+                <button class="btn btn-primary btn-large" @click="submit">Start Game</button>
             </div>
         </div>
-        <div id="configurator-buttons">
-            <button @click="submit">Play</button>
+
+        <div class="configurator-content">
+            <div class="content-grid">
+                <!-- Left Column -->
+                <div class="column">
+                <!-- Cards Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Cards</h2>
+                        <div class="header-buttons">
+                            <button class="btn btn-secondary btn-small" @click="genDealPartial">Generate Rest</button>
+                            <button class="btn btn-secondary btn-small" @click="genDeal">Generate Deal</button>
+                            <button class="btn btn-secondary btn-small" @click="clear">Clear Cards</button>
+                        </div>
+                    </div>
+                    <div class="cards-grid">
+                        <template v-for="(label, pos) in positions" :key="pos">
+                            <div class="card-input-group">
+                                <label :for="pos" class="card-label">{{ label }}</label>
+                                <input 
+                                    :id="pos" 
+                                    type="text" 
+                                    v-model="options.cards[pos]" 
+                                    class="card-input"
+                                    :class="{ 'error': showCardInputErrors && cardErrors.has(pos as Position) }"
+                                />
+                                <div class="error-list" v-if="showCardInputErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
+                                    <div v-for="err in cardErrors.get(pos as Position)" :key="err" class="error-item">
+                                        {{ err }}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+  <!-- Advanced Settings Section -->
+  <div class="section">
+                    <h2>Advanced Settings</h2>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="fake-tricks" v-model="fakeTricks" class="checkbox" />
+                                <span class="checkmark"></span>
+                                Fake Trick Count
+                            </label>
+                            <div v-if="fakeTricks" class="fake-tricks-inputs">
+                                <div class="fake-input-group">
+                                    <label for="fake-ns">NS:</label>
+                                    <input type="number" id="fake-ns" v-model.number="options.fake.ns" class="input small" />
+                                </div>
+                                <div class="fake-input-group">
+                                    <label for="fake-ew">EW:</label>
+                                    <input type="number" id="fake-ew" v-model.number="options.fake.ew" class="input small" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-group" v-if="options.bidding">
+                            <label class="checkbox-label disabled">
+                                <input type="checkbox" id="fake-auction" v-model="fakeAuction" class="checkbox" disabled />
+                                <span class="checkmark"></span>
+                                Fake Auction (Not supported)
+                            </label>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Active Positions</label>
+                            <div class="active-positions">
+                                <div class="position-checkboxes">
+                                    <label v-for="(label, position) in positions" :key="position" class="checkbox-label">
+                                        <input 
+                                            type="checkbox" 
+                                            :value="position" 
+                                            v-model="options.activePositions" 
+                                            class="checkbox"
+                                        />
+                                        <span class="checkmark"></span>
+                                        {{ label }}
+                                    </label>
+                                </div>
+                                <div class="position-buttons">
+                                    <button @click="setActiveNS" class="btn btn-small">NS</button>
+                                    <button @click="setActiveEW" class="btn btn-small">EW</button>
+                                    <button @click="setActiveAll" class="btn btn-small">All</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="end-message">End Message</label>
+                            <input 
+                                type="text" 
+                                id="end-message" 
+                                v-model="options.uiOptions.endMessage" 
+                                placeholder="Custom message to show at game end"
+                                class="input"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column -->
+            <div class="column">
+              
+
+                <!-- Game Settings Section -->
+                <div class="section">
+                    <h2>Game Settings</h2>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="vulnerability">Vulnerability</label>
+                            <select id="vulnerability" v-model="options.vulnerability" class="select">
+                                <option :value="vul" v-for="(label, vul) in vulnerabilities" :key="vul">{{ label }}</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="include-auction" v-model="options.bidding" class="checkbox" />
+                                <span class="checkmark"></span>
+                                Include Auction
+                            </label>
+                        </div>
+
+                        <template v-if="!options.bidding">
+                            <div class="setting-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="specify-contract" v-model="specifyContract" class="checkbox" />
+                                    <span class="checkmark"></span>
+                                    Specify Contract
+                                </label>
+                            </div>
+
+                            <div class="setting-group" v-if="specifyContract">
+                                <label for="contract-input">Contract</label>
+                                <div class="contract-input-group">
+                                    <input 
+                                        type="text" 
+                                        id="contract-input"
+                                        v-model="contractInput" 
+                                        placeholder="4SxE" 
+                                        class="input"
+                                    />
+                                    <span class="contract-display">{{ contract }}</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-group" v-if="!specifyContract">
+                                <label for="trumps">Trumps</label>
+                                <select id="trumps" v-model="options.trumps" class="select">
+                                    <option :value="suit" v-for="(label, suit) in suits" :key="suit">{{ label }}</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-group">
+                                <label for="dummy">Dummy</label>
+                                <select id="dummy" v-model="options.dummy" class="select">
+                                    <option value="auto">Show after lead</option>
+                                    <option value="static">Static</option>
+                                    <option value="none">None</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-group" v-if="options.dummy === 'static' && !specifyContract">
+                                <label for="static-dummy">Static Dummy Position</label>
+                                <select id="static-dummy" v-model="options.staticDummyPosition" class="select">
+                                    <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
+                                </select>
+                            </div>
+                        </template>
+
+                        <template v-if="options.bidding || (options.dummy !== 'auto' || !specifyContract)">
+                            <div class="setting-group" v-if="'firstPlayer' in errors">
+                                <div class="error-message">{{ errors.firstPlayer }}</div>
+                            </div>
+                            <div class="setting-group">
+                                <label for="first-player">{{ options.bidding ? "Dealer" : "First to play" }}</label>
+                                <select id="first-player" v-model="options.firstPlayer" class="select">
+                                    <option :value="pos" v-for="(label, pos) in positions" :key="pos">{{ label }}</option>
+                                </select>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <!-- Controls Reference Section -->
+                <div class="section">
+                    <h2>Keyboard Controls</h2>
+                    <div class="controls-grid">
+                        <div class="control-item">
+                            <div class="key">+</div>
+                            <span>Start game</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="keys"><span class="key">Ctrl</span>+<span class="key">Q</span></div>
+                            <span>Toggle this menu</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="keys">
+                                <span class="key"><arrow direction="up" /></span>
+                                <span class="key"><arrow direction="left" /></span>
+                                <span class="key"><arrow direction="down" /></span>
+                                <span class="key"><arrow direction="right" /></span>
+                            </div>
+                            <span>Toggle hand visibility</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="keys">
+                                <span class="key">Ctrl</span>+
+                                <div class="key-grid">
+                                    <span class="key"><arrow direction="up" /></span>
+                                    <span class="key"><arrow direction="left" /></span>
+                                    <span class="key"><arrow direction="down" /></span>
+                                    <span class="key"><arrow direction="right" /></span>
+                                </div>
+                            </div>
+                            <span>Show one hand, hide others</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="key">Z</div>
+                            <span>Undo</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="keys">
+                                <span class="key">0</span>-<span class="key">9</span>
+                                <span class="key">/</span>
+                                <span class="key">*</span>
+                                <span class="key">-</span>
+                            </div>
+                            <span>Play card</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="key">C</div>
+                            <span>Claim</span>
+                        </div>
+                        <div class="control-item">
+                            <div class="key">Spacebar</div>
+                            <span>Pass (in auction)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="configurator-footer">
+            <div class="footer-content">
+                <span class="author">Created by <a href="https://bridge.zdenektomis.eu/en" target="_blank" rel="noopener">Zdenek Tomis</a></span>
+            </div>
         </div>
     </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
+import { computed, useTemplateRef, watch } from "vue";
 import { Suit } from "@/bridge/model/Suit";
-import { CardsInputValidator } from "../class/CardsInputValidator";
-import { Position, PositionHelper } from "@/bridge/model/Position";
+import { CardsInputValidator } from "../class/deal-validator";
+import { Position } from "@/bridge/model/Position";
 import { Vulnerability } from "@/bridge/model/Vulnerability";
-import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/utils";
-import { Contract, NonPassedContract } from "@/bridge/model/Contract";
-import { DummyOptions } from "@/presenter/views/GameView";
-import { validateConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
-import Arrow from "@/presentations/components/Arrow.vue";
+import { downloadObjectAsJson, loadJson, FileEventTarget } from "@/presentations/class/json-utils";
+import { NonPassedContract } from "@/bridge/model/Contract";
+import { ConfiguratorOptions, getDefaultConfiguratorOptions, validateConfiguratorOptions } from "@/presentations/class/options";
+import Arrow from "@/presentations/components/partial/Arrow.vue";
 
-export default defineComponent({
-    components: {
-        Arrow
-    },
-    name: "Presenter",
-    props: {
-        onSubmit: {
-            type: Function,
-            required: true,
-        },
-    },
-    created() {
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "+") this.submit();
-        });
-    },
-    methods: {
-        submit() {
-            if (!this.options.bidding && this.specifyContract && !this.options.contract) return;
-            this.onSubmit(this.options, { endMessage: this.endText.length > 0 ? this.endText : undefined });
-        },
-        clear() {
-            this.options.cards = {
-                north: "",
-                east: "",
-                west: "",
-                south: "",
-            };
-        },
-        save() {
-            const name = prompt("Enter file name");
-            if (name) downloadObjectAsJson(this.options, name + ".deal");
-        },
-        load(event: Event) {
-            (this.$refs.loadform as HTMLElement).blur();
-            loadJson(event.target as FileEventTarget).then(a => {
-                if (!a) return;
-                this.options = a
-                this.fakeTricks = a.fake?.ns > 0 || a.fake?.ew > 0;
-                this.specifyContract = a.contract !== undefined;
-                this.fakeAuction = a.bidding;
-                if (this.options.contract && this.options.contract !== "passed")
-                    this.options.contract = new NonPassedContract(this.options.contract.suit, this.options.contract.level, this.options.contract.declarer, this.options.contract.dbl);
-            });
-        },
-        loadClicked() {
-            (this.$refs.loadform as HTMLElement).click();
-        },
-        parseContract(value: string) {
-            const c = NonPassedContract.fromString(value);
-            if (c) this.options.contract = c;
-        },
-        setActiveNS() {
-            this.options.activePositions = [Position.North, Position.South]
-        },
-        setActiveEW() {
-            this.options.activePositions = [Position.East, Position.West]
-        },
-        setActiveAll() {
-            this.options.activePositions = [Position.North, Position.South, Position.East, Position.West]
-        },
-    },
+import { ref, reactive } from "vue";
+import { DealLike, generateDeal, generateDealWithCards } from "../class/deal-generator";
 
-    data() {
-        return {
-            contractInput: "",
-            specifyContract: true,
-            fakeTricks: false,
-            fakeAuction: false,
-            endText: "Well done!",
 
-            options: {
-                cards: {
-                    north: "",
-                    south: "",
-                    east: "",
-                    west: "",
-                },
-                fake: { ns: 0, ew: 0 },
-                firstPlayer: "west" as Position,
-                bidding: true,
-                contract: undefined as Contract | undefined,
-                trumps: Suit.Notrump as Suit | undefined,
-                dummy: "auto" as DummyOptions | undefined,
-                staticDummyPosition: "north" as Position | undefined,
-                vulnerability: Vulnerability.None,
-                activePositions: PositionHelper.all(),
-            },
+const options = reactive(getDefaultConfiguratorOptions());
+const contractInput = ref("");
+const specifyContract = ref(true);
+const fakeTricks = ref(false);
+const fakeAuction = ref(false);
 
-            positions: {
-                [Position.North]: "North",
-                [Position.East]: "East",
-                [Position.South]: "South",
-                [Position.West]: "West",
-            },
+const positions = {
+    [Position.North]: "North",
+    [Position.East]: "East",
+    [Position.South]: "South",
+    [Position.West]: "West",
+};
 
-            vulnerabilities: {
-                [Vulnerability.Both]: "Both",
-                [Vulnerability.None]: "None",
-                [Vulnerability.NS]: "NS",
-                [Vulnerability.EW]: "EW",
-            },
-            suits: {
-                [Suit.Spades]: "♠",
-                [Suit.Hearts]: "♥",
-                [Suit.Diamonds]: "♦",
-                [Suit.Clubs]: "♣",
-                [Suit.Notrump]: "NT",
-            },
-        };
-    },
-    watch: {
-        contractInput(value: string) {
-            this.parseContract(value);
-        },
-        "options.bidding"(value: boolean) {
-            if (value) this.specifyContract = false;
-        },
-        specifyContract(value: boolean) {
-            if (!value) this.options.contract = undefined;
-            else this.parseContract(this.contractInput);
-        }
-    },
-    computed: {
-        contract() {
-            return this.options.contract && this.options.contract !== "passed" ? NonPassedContract.toString(this.options.contract) : "";
-        },
-        cardErrors() {
-            return CardsInputValidator.validate(new Map<Position, string>(Object.entries(this.options.cards) as unknown as Iterable<readonly [Position, string]>));
-        },
-        showCardInputErrors() {
-            return Object.values(this.options.cards).map(s => s.length).every(a => a > 10);
-        },
-        errors() {
-            return validateConfiguratorOptions(this.options);
-        }
-    },
-});
-</script>
+const vulnerabilities = {
+    [Vulnerability.Both]: "Both",
+    [Vulnerability.None]: "None",
+    [Vulnerability.NS]: "NS",
+    [Vulnerability.EW]: "EW",
+};
 
-<style lang="scss">
-.flex {
-    display: flex;
-    gap: 1em;
-    align-items: center;
+const suits = {
+    [Suit.Spades]: "♠",
+    [Suit.Hearts]: "♥",
+    [Suit.Diamonds]: "♦",
+    [Suit.Clubs]: "♣",
+    [Suit.Notrump]: "NT",
+};
+
+const emit = defineEmits<{
+    (e: 'submit', options: ConfiguratorOptions): void;
+    (e: 'update:options', options: ConfiguratorOptions): void;
+}>();
+
+function submit() {
+    if (!options.bidding && specifyContract.value && !options.contract) return;
+    emit("submit", options);
+}
+
+function clear() {
+    options.cards = {
+        north: "",
+        east: "",
+        west: "",
+        south: "",
+    };
+}
+
+function save() {
+    const name = prompt("Enter file name");
+    if (name) downloadObjectAsJson(options, name + ".deal");
+}
+const loadform = useTemplateRef<HTMLInputElement>("loadform");
+function load(event: Event) {
+    (loadform.value as HTMLElement).blur();
+    loadJson(event.target as FileEventTarget).then(setOptions);
+}
+function loadClicked() {
+    (loadform.value as HTMLElement).click();
+}
+
+function setOptions(a?: ConfiguratorOptions) {
+    if (!a) return;
+    Object.assign(options, a);
+    fakeTricks.value = a.fake?.ns > 0 || a.fake?.ew > 0;
+    specifyContract.value = a.contract !== undefined;
+    fakeAuction.value = a.bidding;
+    if (options.contract && options.contract !== "passed")
+        options.contract = new NonPassedContract(options.contract.suit, options.contract.level, options.contract.declarer, options.contract.dbl);
 }
 
 
+function parseContract(value: string) {
+    const c = NonPassedContract.fromString(value);
+    if (c) options.contract = c;
+}
+watch(specifyContract, (value: boolean) => {
+    if (!value) options.contract = undefined;
+    else parseContract(contractInput.value);
+});
+watch(contractInput, (value: string) => {
+    parseContract(value);
+});
 
-#configurator {
+
+function setActiveNS() {
+    options.activePositions = [Position.North, Position.South];
+}
+
+function setActiveEW() {
+    options.activePositions = [Position.East, Position.West];
+}
+
+function setActiveAll() {
+    options.activePositions = [Position.North, Position.South, Position.East, Position.West];
+}
+
+watch(() => options.bidding, (value: boolean) => {
+    if (value) specifyContract.value = false;
+});
+
+const contract = computed(() => {
+    return options.contract && options.contract !== "passed"
+        ? NonPassedContract.toString(options.contract)
+        : "";
+});
+
+const cardErrors = computed(() => {
+    return CardsInputValidator.validate(
+        new Map<Position, string>(
+            Object.entries(options.cards) as unknown as Iterable<readonly [Position, string]>
+        )
+    );
+});
+
+const showCardInputErrors = computed(() => {
+    return Object.values(options.cards).map(s => s.length).every(a => a > 10);
+});
+
+const errors = computed(() => {
+    return validateConfiguratorOptions(options);
+});
+
+function genDeal() {
+    const deal = generateDeal();
+    options.cards = deal;
+}
+
+let lastUsedCards: DealLike | undefined = undefined;
+
+function genDealPartial() {
+    let partialCards = {...options.cards};
+    const isFull = Object.values(partialCards).every(c => c.replaceAll(/[\s\-]/g, "").length === 13);
+    if(isFull && lastUsedCards !== undefined) 
+        partialCards = lastUsedCards;
+    else if(isFull) return;    
+    const deal = generateDealWithCards(partialCards);
+    lastUsedCards = partialCards;
+    options.cards = deal;
+}
+</script>
+
+<style lang="scss">
+@use '../../presenter/assets/style/_variables.scss' as variables;
+
+.configurator {
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100vh;
+    background-color: variables.$background;
+    color: variables.$primary;
     display: flex;
-    padding: 10px;
     flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.configurator-header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 10px 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+
+    h1 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        background: linear-gradient(45deg, #fff, #ccc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+}
+
+.configurator-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+
+    .content-grid {
+        max-width: 1400px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+
+        @media (max-width: 1200px) {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+    }
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    @media (max-width: 1200px) {
+        gap: 15px;
+    }
+}
+
+.section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 8px;
+
+        h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+    }
+
+    & > h2 {
+        margin: 0 0 15px 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #fff;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 8px;
+    }
+}
+
+.cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .card-label {
+        font-weight: 500;
+        color: #ccc;
+        font-size: 0.85rem;
+    }
+
+    .card-input {
+        padding: 10px 14px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        color: variables.$primary;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+
+        &:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        }
+
+        &.error {
+            border-color: #ff4757;
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2);
+        }
+    }
+}
+
+.settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+        font-weight: 500;
+        color: #ccc;
+        font-size: 0.85rem;
+    }
+
+    .error-message {
+        color: #ff4757;
+        font-size: 0.8rem;
+        margin-top: 3px;
+    }
+}
+
+.input, .select {
+    padding: 10px 14px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: variables.$primary;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+        outline: none;
+        border-color: #4a9eff;
+        box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+    }
+
+    &.small {
+        width: 70px;
+        padding: 6px 10px;
+    }
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
     gap: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #ccc;
+    font-size: 0.85rem;
+
+    &.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .checkbox {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        appearance: none;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:checked {
+            background: #4a9eff;
+            border-color: #4a9eff;
+
+            &::after {
+                content: '✓';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+            }
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        }
+    }
+}
+
+.contract-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .contract-display {
+        color: #4a9eff;
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+}
+
+.fake-tricks-inputs {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+
+    .fake-input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        label {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+    }
+}
+
+.active-positions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    .position-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .position-buttons {
+        display: flex;
+        gap: 8px;
+    }
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    span {
+        color: #ccc;
+        font-size: 0.85rem;
+    }
+}
+
+.key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: variables.$primary;
+    font-size: 0.8rem;
+    font-weight: 500;
+    user-select: none;
+}
+
+.keys {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .key-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 5px;
+    gap: 4px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+
+    &.btn-primary {
+        background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+        color: white;
+        box-shadow: 0 3px 10px rgba(74, 158, 255, 0.3);
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(74, 158, 255, 0.4);
+        }
+    }
+
+    &.btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: variables.$primary;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    &.btn-small {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+
+    &.btn-large {
+        padding: 10px 24px;
+        font-size: 0.95rem;
+    }
+}
+
+.configurator-footer {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .footer-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .author {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+    }
 }
 
 .error-list {
+    margin-top: 8px;
+    max-height: 100px;
+    overflow-y: auto;
 
-    max-height: 80px;
-    overflow-y: scroll;
+    .error-item {
+        color: #ff4757;
+        font-size: 0.8rem;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(255, 71, 87, 0.2);
 
-    grid-column: 1 / 3;
-
-    div {
-        padding: 0 10px;
-        text-align: right;
-    }
-
-    font-size: 0.8em;
-    color: red;
-}
-
-#configurator-tabs {
-    display: flex;
-}
-
-#configurator-content {
-    flex-grow: 1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    overflow: auto;
-
-    .tab {
-        display: flex;
-        flex-direction: column;
-        background-color: lightcyan;
-        border-radius: 10px;
-        padding: 20px 10px;
-        gap: 20px;
-        overflow-y: auto;
-    }
-
-    .fields {
-        display: grid;
-        grid-template-columns: 2fr 3fr;
-        gap: 10px;
-
-        .error {
-            grid-column: 1 / span 2;
-            color: red;
-            font-size: 0.8em;
-            text-align: right;
-        }
-
-        .checkbox {
-            justify-self: start;
-        }
-
-        label {
-            text-align: right;
-        }
-
-        .span {
-            grid-column: span 2;
-        }
-    }
-
-    .vertical {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-
-    .dummy-choice {
-        display: flex;
-        gap: 10px;
-
-        select {
-            flex-grow: 1;
-        }
-    }
-
-    .contract-field {
-        display: flex;
-        gap: 4px;
-        align-items: center;
-
-        input[type=text] {
-            width: 50px;
-        }
-    }
-
-    .fake-tricks-field {
-        display: flex;
-        gap: 4px;
-        align-items: center;
-
-        div {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        input[type=text] {
-            width: 30px;
-        }
-    }
-
-    .active-positions-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        button {
-            min-width: 40px;
-        }
-    }
-
-    #controls-tab {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 10px;
-        align-items: baseline;
-
-
-        div {
-            text-align: left;
-            margin: auto 0;
-        }
-
-        .key {
-            border: solid gray 1px;
-            background-color: lightgray;
-            padding: 2px 6px;
-            border-radius: 5px;
-            display: inline;
-            user-select: none;
-            justify-self: center;
-        }
-
-        .keys {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            justify-content: center;
+        &:last-child {
+            border-bottom: none;
         }
     }
 }
 
-#configurator-buttons {
-    display: flex;
-    justify-content: flex-end;
+// Scrollbar styling
+.configurator-content::-webkit-scrollbar {
+    width: 8px;
+}
 
-    button {
-        padding: 5px 30px;
-        font-size: 1.2rem;
+.configurator-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.configurator-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.5);
     }
-
-
 }
 </style>

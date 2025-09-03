@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 import { fileURLToPath, URL } from "url";
-import vue from '@vitejs/plugin-vue'
+import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,10 +8,20 @@ export default defineConfig({
     minify: false,
   },
   plugins: [vue()],
-  base: '', // makes import relative to the root
+  base: "", // makes import relative to the root
   resolve: {
     alias: [
-      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+      {
+        find: "@",
+        replacement: fileURLToPath(new URL("./src", import.meta.url)),
+      },
     ],
-  }
-})
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+      },
+    },
+  },
+});

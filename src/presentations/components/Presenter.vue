@@ -1,91 +1,137 @@
 <template>
-    <div class="presenter" ref="presenter"></div>
+    <div class="presenter-view">
+        <game-view :game="game" :handsVisible="handsVisible" class="game-view"
+            :endMessage="options.uiOptions.endMessage" />
+        <div class="side-panel">
+            <status-panel :game="game"  :class="{'appear': game.bidding}" />
+            <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" class="appear" />
+            <control-panel :game="game" class="control-panel" v-show="showControlPanel" />
+        </div>
+    </div>
 </template>
 
-<script lang="ts">
-import { Position, PositionHelper } from "@/bridge/model/Position";
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { Position } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
-import { defineComponent } from "vue";
-import $ from "jquery";
-import { ConfiguratorOptions } from "@/presentations/class/ConfiguratorOptions";
+import { ConfiguratorOptions } from "@/presentations/class/options";
 import GameFactory from "@/bridge/factory/GameFactory";
-import GameViewFactory from "@/presenter/views/GameViewFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
-import { Application } from "../class/Application";
+import { useKeyboardShortcut } from '@/presenter/composables/useKeyboardShortcut';
 import { PassBid } from "@/bridge/model/Bid";
+import { Player } from "@/bridge/model/Player";
+import { PositionHelper } from "@/bridge/model/Position";
+import { useGameRef } from '@/presenter/composables/useGameRef';
 
+import GameView from '@/presenter/components/GameView.vue';
+import BiddingHistoryView from '@/presenter/components/BiddingHistoryView.vue';
+import StatusPanel from '@/presenter/components/StatusPanel.vue';
+import ControlPanel from '@/presenter/components/ControlPanel.vue';
 
-export default defineComponent({
-    name: "Presenter",
+const players = PlayerFactory.makeObservablePlayers();
+const game = useGameRef(new PresentationGame(players, PresentationGameOptions.Default));
 
-    data() {
-        return {};
-    },
-    methods: {
-        updatePositions() {
-            this.gameView.update();
-        },
+defineProps<{
+    options: ConfiguratorOptions;
+}>();
 
-        startGame(options: ConfiguratorOptions, { endMessage }: { endMessage?: string }) {
-            const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew, options.contract, options.trumps, options.activePositions)
+defineExpose({
+    startGame(options: ConfiguratorOptions) {
+        const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew,
+            options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
+        const gm = GameFactory.makeObservableGame(players, gameOpts, options.vulnerability);
 
-            this.gameView.endMessage = endMessage;
-
-            this.game = GameFactory.makeObservableGame(this.players, gameOpts, options.vulnerability);
-            PlayerFactory.putHands(this.players, options.cards);
-            this.gameView.attachGame(this.game, options.dummy, options.staticDummyPosition);
-
-            this.$nextTick(() => this.game.start(options.firstPlayer as Position, options.trumps));
-        },
-    },
-    mounted() {
-        $(window)
-            .on("resize click", () => this.gameView.update())
-            .on("keydown", (e) => {
-                if (Application.state !== 'presenter') return;
-
-                var arrowHelper = (ctrl: boolean, pos: Position) => {
-                    if (!ctrl) {
-                        this.gameView.toggleVisible(pos);
-                        return;
-                    }
-
-                    PositionHelper.all().forEach((p) => {
-                        if (p !== this.gameView.dummy) this.gameView.toggleVisible(p, p === pos);
-                    });
-                }
-
-                if (e.key === "ArrowLeft") arrowHelper(e.ctrlKey, Position.West);
-                if (e.key === "ArrowRight") arrowHelper(e.ctrlKey, Position.East);
-                if (e.key === "ArrowDown") arrowHelper(e.ctrlKey, Position.South);
-                if (e.key === "ArrowUp") arrowHelper(e.ctrlKey, Position.North);
-                if (e.key === "Z" || e.key === "z") this.game.undo();
-                if (e.key === " " && this.game.state === "bidding" && this.game.currentlyRequestedPlayer) this.game.tryAddBid(new PassBid(), this.game.currentlyRequestedPlayer);
-
-            });
-
-        this.gameView.attach(this.$refs.presenter as HTMLElement);
-    },
-    setup() {
-        const players = PlayerFactory.makeObservablePlayers();
-        const gameView = GameViewFactory.make();
-        const game = new PresentationGame(players, PresentationGameOptions.Default);
-
-        return {
-            players,
-            game,
-            gameView,
-        };
-    },
+        game.value = gm;
+        PlayerFactory.putHands(players, options.cards);
+        setTimeout(() => game.value.start(options.firstPlayer as Position, options.trumps));
+    }
 });
+
+
+// Hide or show hands for presentation purposes
+const handsVisible = ref<Map<Position, boolean>>(new Map(
+    PositionHelper.all().map((position) => [position, true])
+));
+[
+    { key: 'ArrowLeft', pos: Position.West },
+    { key: 'ArrowRight', pos: Position.East },
+    { key: 'ArrowDown', pos: Position.South },
+    { key: 'ArrowUp', pos: Position.North }
+].forEach(({ key, pos }) => {
+    useKeyboardShortcut(key, null, () =>
+        handsVisible.value.set(pos, !handsVisible.value.get(pos))
+    );
+});
+
+
+useKeyboardShortcut('z', null, () =>
+    game.value.undo()
+);
+
+// Pass bid shortcut
+useKeyboardShortcut(' ', null, () => {
+    if (game.value.state === "bidding" && game.value.currentlyRequestedPlayer) {
+        game.value.tryAddBid(new PassBid(), game.value.currentlyRequestedPlayer as Player);
+    }
+});
+
+
+
+const showBiddingHistory = computed(() => {
+    return (game.value.state === "cardplay" || game.value.state === "finished") &&
+        game.value.bidding;
+});
+
+const showControlPanel = computed(() => {
+    return game.value.state === "cardplay";
+});
+
 </script>
 
-<style lang="scss">
-@import "@/presenter/assets/style/presenter.scss";
-// @import '@/presenter/assets/style/debug.scss';
-
-.presenter {
+<style  lang="scss">
+.presenter-view {
     width: 100%;
     height: 100%;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 100vh 2fr;
+    background-color: black;
+
+    ::selection {
+        color: none;
+        background: none;
+    }
+
+    .game-view {
+        grid-column: 2;
+    }
+
+    .side-panel {
+        grid-column: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+    }
+
+    .control-panel {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
 }
+
+.appear {
+    animation: appear 2s linear forwards;
+}
+
+@keyframes appear {
+  0% { 
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 </style>

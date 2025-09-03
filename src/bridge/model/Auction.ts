@@ -97,16 +97,20 @@ export class Auction {
       return (
         this.standingBidPosition !== undefined &&
         this._standingContractState === "undoubled" &&
-        PositionHelper.side(position) !== PositionHelper.side(this.standingBidPosition)
+        PositionHelper.side(position) !==
+          PositionHelper.side(this.standingBidPosition)
       );
     } else if (bid instanceof RedoubleBid) {
       return (
         this.standingBidPosition !== undefined &&
         this._standingContractState === "doubled" &&
-        PositionHelper.side(position) === PositionHelper.side(this.standingBidPosition)
+        PositionHelper.side(position) ===
+          PositionHelper.side(this.standingBidPosition)
       );
     } else if (bid instanceof ContractBid) {
-      return this._standingBid === undefined || bid.isGreaterThan(this._standingBid);
+      return (
+        this._standingBid === undefined || bid.isGreaterThan(this._standingBid)
+      );
     }
 
     return false;
@@ -116,15 +120,22 @@ export class Auction {
     if (this.standingBid === undefined) this._finalContract = "passed";
     else {
       const lastBid = this.standingBid;
-      const side = PositionHelper.side(this.standingBidPosition ?? errorMessage("standingBidPosition is undefined"));
+      const side = PositionHelper.side(
+        this.standingBidPosition ??
+          errorMessage("standingBidPosition is undefined"),
+      );
       const declarer = this.bids.filter(
-        (b) => b.bid instanceof ContractBid && b.bid.suit === lastBid.suit && PositionHelper.side(b.position) === side
+        (b) =>
+          b.bid instanceof ContractBid &&
+          b.bid.suit === lastBid.suit &&
+          PositionHelper.side(b.position) === side,
       )[0].position;
       this._finalContract = new NonPassedContract(
         lastBid.suit,
         lastBid.level,
         declarer,
-        this._standingContractState ?? errorMessage("standingContractState is undefined")
+        this._standingContractState ??
+          errorMessage("standingContractState is undefined"),
       );
     }
 
