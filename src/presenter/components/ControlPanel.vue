@@ -45,7 +45,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { Game } from '@/bridge/model/Game';
 import { PresentationPlayer } from '@/bridge/model/PresentationPlayer';
-import { SuitHelper } from '@/bridge/model/Suit';
+import { Suit, SuitHelper } from '@/bridge/model/Suit';
 ;
 
 interface Props {
@@ -77,13 +77,15 @@ const cardsBySuit = computed(() => {
   if (!currentPlayer.value) return {};
   
   const cards = currentPlayer.value.hand.cardsWithPlayInfo;
-  const suitGroups: Record<string, Array<{card: any, played: boolean, originalIndex: number}>> = {};
+  const suitGroups: Record<string, Array<{card: any, played: boolean, originalIndex: number}>> = {
+    [SuitHelper.toString(Suit.Spades)]: [],
+    [SuitHelper.toString(Suit.Hearts)]: [],
+    [SuitHelper.toString(Suit.Diamonds)]: [],
+    [SuitHelper.toString(Suit.Clubs)]: [],
+  };
   
   cards.forEach((cardInfo, index) => {
     const suitName = SuitHelper.toString(cardInfo.card.suit);
-    if (!suitGroups[suitName]) {
-      suitGroups[suitName] = [];
-    }
     suitGroups[suitName].push({
       card: cardInfo.card,
       played: cardInfo.played,
@@ -176,7 +178,8 @@ watch(() => props.game, (newGame) => {
     player.playRequested.sub((e) => {
       if (e.player instanceof PresentationPlayer) {
         currentPlayer.value = e.player;
-        if (e.trick.cards.length > 0) {
+
+        if (e.trick.suit && e.player.hand.cardsWithSuit(e.trick.suit).length > 0) {
           currentSuitName.value = SuitHelper.toString(e.trick.cards[0].card.suit);
         } else {
           currentSuitName.value = undefined;

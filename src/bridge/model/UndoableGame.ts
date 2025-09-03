@@ -75,7 +75,6 @@ export class UndoableGame extends Game {
           (c) => c.card === lastCard.card,
         ) ?? errorMessage("card not found");
       card.played = false;
-      lastTrick.currentToPlay = lastCard.player;
 
       setTimeout(() => this._undoMade.dispatch({ game: this }));
       if (lastTrick.cards.length === 3)
@@ -128,7 +127,6 @@ export class UndoableGame extends Game {
 
   protected popCard(trick: Trick): CardInTrick | undefined {
     const lastCard = trick.cards[trick.cards.length - 1];
-    if (lastCard) trick.currentToPlay = lastCard.player;
     trick.cards = trick.cards.slice(0, -1);
     return lastCard;
   }

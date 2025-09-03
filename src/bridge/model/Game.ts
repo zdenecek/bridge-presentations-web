@@ -285,11 +285,10 @@ export class Game {
   protected addCard(trick: Trick, card: Card, player: Player): boolean {
     // check correct playeer, correct trick, correct card
     if (this.state !== "cardplay") return false;
-    if (trick.cards.length > 0) {
-      const suit = trick.cards[0].card.suit;
-      if (suit !== card.suit && player.hand.cardsWithSuit(suit).length > 0)
+    
+    if (trick.suit && trick.suit !== card.suit && player.hand.cardsWithSuit(trick.suit).length > 0)
         return false;
-    }
+    
 
     trick.addCard(card);
     setTimeout(() =>

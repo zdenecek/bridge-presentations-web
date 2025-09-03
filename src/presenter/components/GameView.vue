@@ -140,8 +140,6 @@ function update() {
   trickView.value?.update?.();
 }
 
-window.addEventListener("keydown", () => {setTimeout(() => {update()}, 10)});
-
 watch(() => props.game, (game) => {
   game.stateChanged.sub(() => {
     update();
@@ -150,6 +148,9 @@ watch(() => props.game, (game) => {
     update();
   });
   game.undoMade.sub(() => {
+    update();
+  });
+  game.bidMade.sub(() => {
     update();
   });
   update();
@@ -207,6 +208,7 @@ const dummy = computed(() => {
   if (props.game?.options.dummy === "auto") {
     if (auctionVisible.value) return undefined;
     if (props.game.auction?.finalContract == "passed") return undefined;
+    if (props.game.tricks.length === 0 || props.game.tricks[0].cards.length === 0) return undefined;
     const declarer = props.game.auction?.finalContract?.declarer;
     if (declarer) return PositionHelper.nextPosition(declarer, 2);
   }
