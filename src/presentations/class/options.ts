@@ -29,10 +29,10 @@ export interface ConfiguratorOptions {
 export function getDefaultConfiguratorOptions(): ConfiguratorOptions {
   return {
     cards: {
-        north: "",
-        south: "",
-        east: "",
-        west: "",
+      north: "",
+      south: "",
+      east: "",
+      west: "",
     },
     fake: { ns: 0, ew: 0 },
     firstPlayer: "west" as Position,

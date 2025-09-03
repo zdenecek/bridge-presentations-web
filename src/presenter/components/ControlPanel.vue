@@ -45,7 +45,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { Game } from '@/bridge/model/Game';
 import { PresentationPlayer } from '@/bridge/model/PresentationPlayer';
-import { SuitHelper, Suit } from '@/bridge/model/Suit';
+import { SuitHelper } from '@/bridge/model/Suit';
 ;
 
 interface Props {

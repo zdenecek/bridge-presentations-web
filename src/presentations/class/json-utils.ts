@@ -1,7 +1,4 @@
-import {
-  ConfiguratorOptions,
-  normalizeConfiguratorOptions,
-} from "./options";
+import { ConfiguratorOptions, normalizeConfiguratorOptions } from "./options";
 
 export function downloadObjectAsJson(
   exportObj: unknown,
