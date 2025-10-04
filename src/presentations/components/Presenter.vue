@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { Position } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { ConfiguratorOptions } from "@/presentations/class/options";
@@ -43,7 +43,7 @@ defineExpose({
 
         game.value = gm;
         PlayerFactory.putHands(players, options.cards);
-        setTimeout(() => game.value.start(options.firstPlayer as Position, options.trumps));
+        nextTick(() => game.value.start(options.firstPlayer as Position, options.trumps));
     }
 });
 

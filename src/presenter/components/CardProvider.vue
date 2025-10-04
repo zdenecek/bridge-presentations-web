@@ -69,7 +69,7 @@ const updateCardDimensions = () => {
   // Apply the exact SCSS variable calculations
   // $card-height: calc((95vh - 2 * $padding - $margin - $top-space ) / 4.5);
   // $card-width: calc($card-height * 53 / 80);
-  const cardHeight = 'calc((95vh - 2 * 20px - 10px - 10px) / 4.5)';
+  const cardHeight = 'calc((95vh - 2 * 10px - 10px - 6px) / 4.5)';
   const cardWidth = `calc((${cardHeight}) * 53 / 80)`;
 
   measureEl.style.height = cardHeight;

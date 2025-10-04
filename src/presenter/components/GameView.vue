@@ -3,38 +3,38 @@
     <CardProvider :game="game" v-slot="{ cardViews, cardDimensions }">
       <div class="main-view" ref="mainView">
         <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
-          :rotation="Orientation.Left" :dummy="dummy === Position.West"
-          :cardViews="cardViews" :cardDimensions="cardDimensions"
-          :reverse="!handsVisible.get(Position.West)"></OneDimensionalHandView>
+          :rotation="Orientation.Left" :dummy="dummy === Position.West" :cardViews="cardViews"
+          :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.West)"></OneDimensionalHandView>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
-            :cardViews="cardViews" :cardDimensions="cardDimensions"
-            :reverse="!handsVisible.get(Position.North)"></OneDimensionalHandView>
+            :cardViews="cardViews" :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.North)">
+          </OneDimensionalHandView>
+          <div class="filler"></div>
+
           <div class="center-frame-container">
             <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
-            <CenterNSEWFrame  :vulnerability="game?.vulnerability" :game="game" class="center-frame">
+              <CenterNSEWFrame :vulnerability="game?.vulnerability" :game="game" class="center-frame">
                 <div class="end-text appear" v-show="showEndText" v-html="endText"></div>
-            </CenterNSEWFrame>
-          </BiddingCenterPanel>
-          <BiddingCenterPanel class="bidding-center-panel-fake" :auction-visible="false"> 
-            <!-- Fake bidding center panel - so that trick view has always expanded position -->
-            <CenterNSEWFrame  class="center-frame" :showFrame="false">
-              <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
-            </CenterNSEWFrame>
-          </BiddingCenterPanel>
+              </CenterNSEWFrame>
+            </BiddingCenterPanel>
+            <BiddingCenterPanel class="bidding-center-panel-fake" :auction-visible="false">
+              <!-- Fake bidding center panel - so that trick view has always expanded position -->
+              <CenterNSEWFrame class="center-frame" :showFrame="false">
+                <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews">
+                </TrickView>
+              </CenterNSEWFrame>
+            </BiddingCenterPanel>
           </div>
-         
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
             :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"
-            :cardViews="cardViews" :cardDimensions="cardDimensions"
-            :reverse="!handsVisible.get(Position.South)"></OneDimensionalHandView>
+            :cardViews="cardViews" :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.South)">
+          </OneDimensionalHandView>
         </div>
 
         <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
-          :rotation="Orientation.Right" :dummy="dummy === Position.East"
-          :cardViews="cardViews" :cardDimensions="cardDimensions"
-          :reverse="!handsVisible.get(Position.East)"></OneDimensionalHandView>
+          :rotation="Orientation.Right" :dummy="dummy === Position.East" :cardViews="cardViews"
+          :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.East)"></OneDimensionalHandView>
         <DebugView v-if="debug" :game="game" :cardViews="cardViews"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
@@ -89,11 +89,11 @@ watch(
           (player as PresentationPlayer).bid(bid);
       });
 
-      player.bidRequestCancelled.sub(() => 
+      player.bidRequestCancelled.sub(() =>
         biddingBoxCallback.value = undefined
       );
 
-      player.bidMade.sub(() => 
+      player.bidMade.sub(() =>
         biddingBoxCallback.value = undefined
       );
     });
@@ -161,7 +161,7 @@ watch(() => props.game, (game) => {
     update();
   });
   update();
-}, { deep: false, immediate: true});
+}, { deep: false, immediate: true });
 
 /** 
  * AUCTION VISIBILITY
@@ -172,14 +172,14 @@ const auctionVisible = computed(() => {
 });
 
 const waitBeforeHidingAuction = useWaitForClick();
-watch( () => props.game, (game) => {
+watch(() => props.game, (game) => {
   game.biddingEnded.sub(() => {
     waitBeforeHidingAuction.set();
   });
   game.cardPlayed.sub(() => {
     waitBeforeHidingAuction.reset();
   });
-}, { deep: false, immediate: true});
+}, { deep: false, immediate: true });
 
 /**
  * END TEXT VISIBILITY
@@ -187,9 +187,9 @@ watch( () => props.game, (game) => {
 
 const waitBeforeShowingEndText = useWaitForClick();
 
-const showEndText = computed(() => 
+const showEndText = computed(() =>
   props.game?.state === "finished" && !waitBeforeShowingEndText.waiting.value
-); 
+);
 
 const endText = computed(() => {
   let s = "";
@@ -204,7 +204,7 @@ watch(() => props.game, (game) => {
   game.stateChanged.sub(() => {
     waitBeforeShowingEndText.set();
   });
-}, { deep: false, immediate: true});
+}, { deep: false, immediate: true });
 
 
 /**
@@ -275,6 +275,7 @@ const debug = inject("debug", false);
     .frame {
       // outline: none;
     }
+
     .center-frame-label {
       display: none;
     }
@@ -329,5 +330,13 @@ const debug = inject("debug", false);
 }
 
 
+.filler {
+  flex: 1;
+}
 
+.debug {
+  .filler {
+    background-color: red;
+  }
+}
 </style>

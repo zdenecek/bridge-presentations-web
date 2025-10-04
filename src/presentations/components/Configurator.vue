@@ -282,7 +282,7 @@ import { DealLike, generateDeal, generateDealWithCards } from "../class/deal-gen
 
 const options = reactive(getDefaultConfiguratorOptions());
 const contractInput = ref("");
-const specifyContract = ref(true);
+const specifyContract = ref(false);
 const fakeTricks = ref(false);
 const fakeAuction = ref(false);
 
