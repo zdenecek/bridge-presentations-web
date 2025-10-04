@@ -266,7 +266,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useTemplateRef, watch } from "vue";
+import { computed, useTemplateRef, watch, onMounted } from "vue";
 import { Suit } from "@/bridge/model/Suit";
 import { CardsInputValidator } from "../class/deal-validator";
 import { Position } from "@/bridge/model/Position";
@@ -279,6 +279,8 @@ import Arrow from "@/presentations/components/partial/Arrow.vue";
 import { ref, reactive } from "vue";
 import { DealLike, generateDeal, generateDealWithCards } from "../class/deal-generator";
 
+
+const STORAGE_KEY = 'bridge-presentation-config';
 
 const options = reactive(getDefaultConfiguratorOptions());
 const contractInput = ref("");
@@ -346,8 +348,18 @@ function setOptions(a?: ConfiguratorOptions) {
     fakeTricks.value = a.fake?.ns > 0 || a.fake?.ew > 0;
     specifyContract.value = a.contract !== undefined;
     fakeAuction.value = a.bidding;
+
+    if (options.bidding) {
+        specifyContract.value = false;
+    }
+    else if (options.contract) {
+        specifyContract.value = true;
+    }
     if (options.contract && options.contract !== "passed")
         options.contract = new NonPassedContract(options.contract.suit, options.contract.level, options.contract.declarer, options.contract.dbl);
+    
+    // Save to local storage after loading from file
+    saveToLocalStorage();
 }
 
 
@@ -440,6 +452,67 @@ function debugKeydown(event: KeyboardEvent, pos: string) {
         altKey: event.altKey
     });
 }
+
+// Local storage functions
+function saveToLocalStorage() {
+    try {
+        const configToSave = {
+            ...options,
+            contractInput: contractInput.value,
+            specifyContract: specifyContract.value,
+            fakeTricks: fakeTricks.value,
+            fakeAuction: fakeAuction.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(configToSave));
+    } catch (error) {
+        console.warn('Failed to save configuration to local storage:', error);
+    }
+}
+
+function loadFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsedConfig = JSON.parse(saved);
+            
+            // Use existing setOptions function to restore configuration
+            setOptions(parsedConfig);
+            
+            // Restore UI state that's not part of ConfiguratorOptions
+            if (parsedConfig.contractInput !== undefined) {
+                contractInput.value = parsedConfig.contractInput;
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to load configuration from local storage:', error);
+    }
+}
+
+// Load configuration on component mount
+onMounted(() => {
+    loadFromLocalStorage();
+});
+
+// Watch for changes and save to local storage
+watch(options, () => {
+    saveToLocalStorage();
+}, { deep: true });
+
+watch(contractInput, () => {
+    saveToLocalStorage();
+});
+
+watch(specifyContract, () => {
+    saveToLocalStorage();
+});
+
+watch(fakeTricks, () => {
+    saveToLocalStorage();
+});
+
+watch(fakeAuction, () => {
+    saveToLocalStorage();
+});
 </script>
 
 <style lang="scss">

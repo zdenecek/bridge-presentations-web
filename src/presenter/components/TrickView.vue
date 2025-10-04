@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, nextTick, inject, shallowRef, triggerRef, computed, useTemplateRef, onMounted, onUnmounted } from 'vue';
+import { watch, ref, nextTick, inject, shallowRef, triggerRef, computed, useTemplateRef } from 'vue';
 import { CardViewData } from "./CardViewData";
 import { CardInTrick, Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";

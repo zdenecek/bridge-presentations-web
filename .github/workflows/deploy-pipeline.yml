@@ -31,9 +31,17 @@ jobs:
       - name: Extract version from tag and save message
         env:
           TAG_NAME: ${{ github.ref_name }}
-          TAG_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           VERSION=${TAG_NAME#v} # Remove the leading 'v' from the tag
+          # Get the tag message (annotation) if it exists, otherwise use commit message
+          if git tag -l "$TAG_NAME" | grep -q .; then
+            TAG_MESSAGE=$(git tag -l --format='%(contents:subject)' "$TAG_NAME")
+            if [ -z "$TAG_MESSAGE" ]; then
+              TAG_MESSAGE=$(git tag -l --format='%(contents)' "$TAG_NAME")
+            fi
+          else
+            TAG_MESSAGE="${{ github.event.head_commit.message }}"
+          fi
           echo "${TAG_MESSAGE}" > "./dist/message"
 
       - name: Upload via FTP
