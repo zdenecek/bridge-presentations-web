@@ -11,13 +11,20 @@
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
             :cardViews="cardViews" :cardDimensions="cardDimensions"
             :reverse="!handsVisible.get(Position.North)"></OneDimensionalHandView>
-
-          <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
+          <div class="center-frame-container">
+            <BiddingCenterPanel class="bidding-center-panel" :auction-visible="auctionVisible" :game="game">
             <CenterNSEWFrame  :vulnerability="game?.vulnerability" :game="game" class="center-frame">
-              <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
                 <div class="end-text appear" v-show="showEndText" v-html="endText"></div>
             </CenterNSEWFrame>
           </BiddingCenterPanel>
+          <BiddingCenterPanel class="bidding-center-panel-fake" :auction-visible="false"> 
+            <!-- Fake bidding center panel - so that trick view has always expanded position -->
+            <CenterNSEWFrame  class="center-frame" :showFrame="false">
+              <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"></TrickView>
+            </CenterNSEWFrame>
+          </BiddingCenterPanel>
+          </div>
+         
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
             :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"
             :cardViews="cardViews" :cardDimensions="cardDimensions"
@@ -250,10 +257,27 @@ const debug = inject("debug", false);
     overflow: hidden;
   }
 
+  .center-frame-container {
+    position: relative;
+  }
+
   .bidding-center-panel {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+  }
+
+  .bidding-center-panel-fake {
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    .frame {
+      // outline: none;
+    }
+    .center-frame-label {
+      display: none;
+    }
   }
 
   .trick-view {

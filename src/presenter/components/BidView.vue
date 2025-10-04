@@ -1,20 +1,12 @@
 <!--
   BidView.vue
 
-  This component displays a single bridge bid as an image, with support for orientation and dynamic sizing.
-  - The bid is rendered as an image (e.g., "1S", "Pass", "X", "XX") using preloaded PNG assets.
-  - The `orientation` prop controls the orientation of the bid (up, right, down, left), and the image is rotated accordingly using CSS classes.
-  - Sizing is controlled from the parent component.
-  - The component exposes its DOM element and measured width/height for use by parent components (e.g., for stacking or layout).
+ A naive image view for a bid.
 -->
 
 <template>
-  <div :class="['bid', bidClass, rotationClass]" ref="element" :style="isHorizontal(orientation) ? {} : {
-    height: width * ratio + 'px'
-  }">
-    <img :src="imagePath" :alt="bid.toString()" :style="isHorizontal(orientation) ? {} : {
-      height: width + 'px'
-    }" />
+  <div :class="['bid', bidClass]" :style="elementStyle" ref="element">
+    <img :src="imagePath" :style="imageStyle" :alt="bid.toString()" />
   </div>
 </template>
 
@@ -22,45 +14,84 @@
 import { computed, useTemplateRef } from 'vue';
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { SuitHelper } from "../../bridge/model/Suit";
-import { Orientation, isHorizontal } from '../model/Orientation';
-import { useElementSize } from '../composables/useElementSize';
+import { getImagePath, getImageRatio } from '../utils/images';
+import { isHorizontal, Orientation } from '../model/Orientation';
 
-const props = withDefaults(defineProps<{
+const props =withDefaults(defineProps<{
   bid: Bid;
+  width?: number;
+  height?: number;
   orientation?: Orientation;
 }>(), {
   orientation: Orientation.Up
 });
 
 const element = useTemplateRef<HTMLDivElement>('element');
-const { width, height } = useElementSize(element);
+const elementStyle = computed(() => {
+  if (props.width !== undefined && props.height !== undefined)
 
-// Static image imports
-const _images = import.meta.glob(
-  ['@/presenter/assets/bidding-c/*.png'],
-  { eager: true }
-);
+    return {
+      width: props.width ? props.width + 'px' : undefined,
+      height: props.height ? props.height + 'px' : undefined
+    };
 
-// ratio for the images in use.
-const BIDDING_RATIO = 764 / 882;
-const BIDDING_RATIO_PASS = 501 / 425;
-const BIDDING_RATIO_DOUBLE = 733 / 622;
-const ratio = computed(() => props.bid instanceof PassBid ? BIDDING_RATIO_PASS : (props.bid instanceof DoubleBid || props.bid instanceof RedoubleBid) ? BIDDING_RATIO_DOUBLE : BIDDING_RATIO);
+  const ratio = getImageRatio(props.bid);
+  const realRation = isHorizontal(props.orientation) ? ratio : 1 / ratio;
 
-const getImagePath = (bid: Bid): string => {
-  if (bid instanceof ContractBid) {
-    return (_images["/src/presenter/assets/bidding-c/" + `${bid.level}${SuitHelper.toLetter(bid.suit)}` + ".png"] as any).default;
-  } else if (bid instanceof PassBid) {
-    return (_images["/src/presenter/assets/bidding-c/pass.png"] as any).default;
-  } else if (bid instanceof DoubleBid) {
-    return (_images["/src/presenter/assets/bidding-c/x.png"] as any).default;
-  } else if (bid instanceof RedoubleBid) {
-    return (_images["/src/presenter/assets/bidding-c/xx.png"] as any).default;
+  if (props.height !== undefined) {
+    const width = props.height * realRation;
+    return {
+      width: width + 'px',
+      height: props.height + 'px'
+    };
   }
-  throw new Error("Unknown bid type");
-};
+  if (props.width !== undefined) {
+    const height = props.width / realRation;
+    return {
+      width: props.width + 'px',
+      height: height + 'px'
+    };
+  }
+  return {};
+});
 
-const getClass = (bid: Bid): string => {
+const imageStyle = computed(() => {
+  if (props.width === undefined && props.height === undefined) return {
+    maxHeight: "100%",
+    maxWidth: "100%"
+  }
+  if(isHorizontal(props.orientation)) {
+    return props.orientation === Orientation.Up ? elementStyle.value : {
+      ...elementStyle.value,
+      transform: "rotate(180deg)",
+      transformOrigin: "50% 50%"
+    }
+  } else {
+    const dimensions = {
+      width: elementStyle.value.height,
+      height: elementStyle.value.width
+    }
+    const rotation = props.orientation === Orientation.Right ? {
+      transform: "rotate(90deg) translateY(-100%)",
+      transformOrigin: "top left"
+    } : {
+      transform: "rotate(270deg) translateX(-100%)",
+      transformOrigin: "top left"
+    }
+    return {
+      ...dimensions,
+      ...rotation
+    }
+  }
+});
+
+
+const imagePath = computed(() => getImagePath(props.bid));
+
+
+
+const bidClass = computed(() => {
+  const bid = props.bid;
   if (bid instanceof ContractBid) {
     return SuitHelper.toString(bid.suit).toLowerCase();
   } else if (bid instanceof PassBid) {
@@ -71,30 +102,10 @@ const getClass = (bid: Bid): string => {
     return "redouble";
   }
   return "unknown";
-};
-
-const imagePath = computed(() => getImagePath(props.bid));
-const bidClass = computed(() => getClass(props.bid));
-
-const rotationClass = computed(() => {
-  switch (props.orientation) {
-    case Orientation.Right:
-      return 'rotate-90';
-    case Orientation.Down:
-      return 'rotate-180';
-    case Orientation.Left:
-      return 'rotate-270';
-    case Orientation.Up:
-    default:
-      return 'rotate-0';
-  }
 });
-
 
 defineExpose({
   element,
-  width,
-  height
 });
 </script>
 
@@ -103,25 +114,9 @@ defineExpose({
   display: inline-block;
   transition: ease 1s;
 
-  &.rotate-180 img,
-  &.rotate-0 img {
-    max-height: 100%;
-    max-width: 100%;
-    // for the vertical case the heigh is set manually
+  img {
+    top: 50%;
+    left: 50%;
   }
-}
-
-.rotate-90 img {
-  transform: rotate(90deg) translateY(-100%);
-  transform-origin: top left;
-}
-
-.rotate-180 img {
-  transform: rotate(180deg);
-}
-
-.rotate-270 img {
-  transform: rotate(270deg) translateX(-100%);
-  transform-origin: top left;
 }
 </style>

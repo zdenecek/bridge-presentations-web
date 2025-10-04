@@ -1,5 +1,5 @@
 <template>
-  <div class="bidding-center-panel" :class="{ 'bidding-center-panel-auction': auctionVisible }">
+  <div class="bidding-center-panel" :class="{ 'bidding-center-panel-auction':   auctionVisible, 'animate': animate }">
     <div class="absolute" v-if="debug">
       <button @click="auctionVisible = !auctionVisible">Toggle auction</button>
     </div>
@@ -8,7 +8,8 @@
     </div>
     <BidStack v-for="position in positions" :key="position" :class="'bid-stack-'+ position "
       :orientation="getOrientation(position)"
-       :bids="getBidsForPosition(position)" />
+       :bids="getBidsForPosition(position)"
+       v-show="auctionVisible" />
   </div>
 </template>
 
@@ -25,10 +26,23 @@ const props = defineProps<{
   game?: PresentationGame;
 }>();
 
-const auctionVisible = ref(props.auctionVisible);
-watch(() => props.auctionVisible, (newAuctionVisible) => {
-  auctionVisible.value = newAuctionVisible;
-});
+const animate = ref(false);
+watch(() => props.auctionVisible, (function() { // cl
+  let animationTimeout: NodeJS.Timeout | null = null;
+  return (newAuctionVisible: boolean) => {
+    if (animationTimeout) {
+      clearTimeout(animationTimeout);
+    }
+    if (!newAuctionVisible) {
+      animate.value = true;
+      animationTimeout = setTimeout(() => {
+        animate.value = false;
+      }, 1000);
+    } else {
+      animate.value = false;
+    }
+  }
+})());
 
 const debug = inject('debug', false);
 const positions = computed(() => PositionHelper.all());
@@ -75,10 +89,11 @@ const getOrientation = (position: Position): Orientation => {
 
   padding: 10px;
   display: grid;
-
-  transition: all 1s;
-
   align-self: center;
+
+  &.animate {
+    transition: all 1s;
+  }
 
   &.bidding-center-panel-auction {
     gap: 3px;

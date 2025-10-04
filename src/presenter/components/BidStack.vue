@@ -21,20 +21,23 @@
 
 <template>
   <div class="bid-stack" ref="container">
-    <BidView v-for="(bid, index) in bids" :key="index" :bid="bid" :style="{
-      [positionOrigin]: bidPosition[index] + 'px',
-      ...(isHorizontal(orientation) ? { height: '100%' } :  { width: '100%' })
-    }" :orientation="orientation" :class="['bid-animate', animationDirection]" ref="bidRefs" >
+    <BidView v-for="(bid, index) in bids" :key="index" :bid="bid"
+      v-bind="baseBidDimensions" 
+      :style="getBidStyle(index)"
+      :orientation="orientation" 
+      :class="['bid-animate', animationDirection]" 
+      ref="bidRefs">
     </BidView>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue";
+import { computed, inject, useTemplateRef } from "vue";
 import { Bid } from "../../bridge/model/Bid";
 import BidView from './BidView.vue';
 import { Orientation, isHorizontal } from "../model/Orientation";
 import { useElementSize } from "../composables/useElementSize";
+import { getImageRatio } from "../utils/images";
 
 const props = withDefaults(defineProps<{
   bids: Bid[];
@@ -43,24 +46,33 @@ const props = withDefaults(defineProps<{
   orientation: Orientation.Up
 });
 
+const debug = inject('debug', false);
+
 const container = useTemplateRef<HTMLDivElement>('container');
 const bidRefs = useTemplateRef<typeof BidView[]>('bidRefs');
 
 const { width, height } = useElementSize(container);
+
+/**
+ * The size of the secondary axis (perpendicular to stacking direction).
+ * For Up/Down (vertical stacking): uses container height
+ * For Left/Right (horizontal stacking): uses container width
+ */
+const secondaryAxisSize = computed(() => {
+  const result = isHorizontal(props.orientation) ? height.value : width.value;
+  return result > 0 ? result : 100;
+});
+
 /**
  * The size of the main axis for positioning bids based on orientation.
- * For horizontal rotations (Left/Right): uses container height
- * For vertical rotations (Up/Down): uses container width
+ * For Up/Down (vertical stacking): uses container width
+ * For Left/Right (horizontal stacking): uses container height
  */
-const mainAxisSize = computed(() => isHorizontal(props.orientation) ? width.value : height.value);
-
-/**
- * The size of a bid along the main axis for spacing calculations.
- * For horizontal rotations: uses bid height
- * For vertical rotations: uses bid width
- */
-const bidMainAxisSize = computed(() => isHorizontal(props.orientation) ? (bidRefs.value?.[0]?.height ?? 100) : (bidRefs.value?.[0]?.width ?? 100));
-
+const mainAxisSize = computed(() => {
+  const result = isHorizontal(props.orientation) ? width.value : height.value;
+  // Fallback to reasonable defaults if container size is 0
+  return result > 0 ? result : 300;
+});
 
 /**
  * CSS property to use for positioning bids based on orientation.
@@ -96,26 +108,61 @@ const animationDirection = computed(() => {
   }
 });
 
+const baseBidDimensions = computed(() => {
+  return isHorizontal(props.orientation)
+    ? { height: secondaryAxisSize.value }
+    : { width: secondaryAxisSize.value };
+});
+
+const getLastBidPrimaryAxisSize = computed(() => {
+
+  const lastBid = props.bids[props.bids.length - 1];
+  return secondaryAxisSize.value * getImageRatio(lastBid);
+});
+  
+
 /**
- * Computes the horizontal positions (in pixels) for each bid in the stack.
+ * Computes the positions (in pixels) for each bid in the stack along the primary axis.
  * 
  * - If there are no bids, returns an empty array.
  * - If there is only one bid, it is positioned at 0px (the start).
  * - For multiple bids, calculates the spacing between them:
- *    - The available width for positioning is `usableWidth`.
- *    - The space between each bid is the smaller of 35px or the result of dividing `usableWidth` by (number of bids - 1).
+ *    - The usable space is the main axis size minus one full bid size (to ensure last bid fits)
+ *    - The space between each bid is the smaller of 35px or the result of dividing usable space by (number of bids - 1).
  *    - Each bid is positioned at `i * space`, where `i` is its index in the array.
- *    - This ensures that bids are evenly distributed, but never spaced more than 35px apart.
  */
 const bidPosition = computed(() => {
   if (props.bids.length === 0) return [];
-  const space = Math.min(40, Math.max(20, mainAxisSize.value / props.bids.length));
+  if (props.bids.length === 1) {
+    return [(mainAxisSize.value - getLastBidPrimaryAxisSize.value) / 2];
+  }
 
-  const bidsLen =  bidMainAxisSize.value  + space * (props.bids.length - 1);
-  const start = (mainAxisSize.value - bidsLen) / 2;
-  if (props.bids.length === 1) return [start];
-  return [...Array(props.bids.length).keys()].map((_, i) => start + i * space);
+
+  const lastBidPrimaryAxisSize = getLastBidPrimaryAxisSize.value;
+  const usableSpace = mainAxisSize.value - lastBidPrimaryAxisSize;
+
+  const spacePerBid = Math.min(35, usableSpace / (props.bids.length - 1));
+
+  const usedSpace = (props.bids.length - 1) * spacePerBid + lastBidPrimaryAxisSize;
+
+  const shift = usedSpace >= mainAxisSize.value ? 0 : (mainAxisSize.value - usedSpace) / 2;
+
+  return Array.from({ length: props.bids.length }, (_, i) => i * spacePerBid + shift);  
 });
+
+/**
+ * Computes the complete style object for each bid
+ */
+const getBidStyle = (index: number) => {
+  const position = bidPosition.value[index];
+  const posOrigin = positionOrigin.value;
+  
+  const style = {
+    [posOrigin]: position + 'px'
+  };
+  
+  return style;
+};
 
 </script>
 
@@ -191,5 +238,13 @@ const bidPosition = computed(() => {
   100% {
     transform: translateX(0);
   }
+}
+
+.debug {
+  z-index: 9999;
+  color: red;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="trick-view">
+  <div class="trick-view" ref="element">
     <span class="absolute" v-show="debug">{{ trick }}</span>
     <div v-for="position in PositionHelper.all()" :key="position"
       :class="`trick-view-origin trick-view-origin-${position}`" :ref="el => setOriginRef(position, el)">
@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, nextTick, inject, shallowRef, triggerRef, computed } from 'vue';
+import { watch, ref, nextTick, inject, shallowRef, triggerRef, computed, useTemplateRef, onMounted, onUnmounted } from 'vue';
 import { CardViewData } from "./CardViewData";
 import { CardInTrick, Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";
@@ -19,14 +19,39 @@ import { Position, PositionHelper } from "../../bridge/model/Position";
 import { Point } from "../model/Point";
 import { getOffset } from '../utils/offset';
 import { PresentationGame } from '../../bridge/model/PresentationGame';
+import { debounce } from 'lodash';
 
 
 const trick = shallowRef<Trick | undefined>(undefined);
+const element = useTemplateRef<HTMLDivElement>('element');
+
 const props = defineProps<{
   game?: PresentationGame;
   cardViews: Map<Card, CardViewData>;
 }>();
 const debug = inject('debug', false);
+
+let resizeObserver: ResizeObserver | null = null;
+onMounted(() => {
+
+  const debouncedUpdate = debounce(() => {
+    console.log('ResizeObserver update');
+    update();
+  }, 50);
+
+  resizeObserver = new ResizeObserver(() => {
+    console.log('resizeObserver');
+    debouncedUpdate();
+  });
+
+  if (element.value) {
+    resizeObserver.observe(element.value);
+  }
+});
+
+onUnmounted(() => {
+  resizeObserver?.disconnect();
+});
 
 // Update method for external calls
 const update = () => {

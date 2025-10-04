@@ -1,6 +1,6 @@
 <template>
   <div class="center-panel" >
-    <div class="frame">
+    <div class="frame" :class="{ 'show-frame': showFrame }">
       <div 
         v-for="position in PositionHelper.all()" 
         :key="position"
@@ -14,8 +14,8 @@
       >
         {{ position }}
       </div>
-
       <slot></slot>
+
     </div>
   </div>
 </template>
@@ -26,10 +26,13 @@ import { Position, PositionHelper } from "../../bridge/model/Position";
 import { Vulnerability, VulnerabilityHelper } from "../../bridge/model/Vulnerability";
 import { PresentationGame } from "../../bridge/model/PresentationGame";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   vulnerability?: Vulnerability;
   game?: PresentationGame;
-}>();
+  showFrame?: boolean;
+}>(), {
+  showFrame: true
+});
 
 const focus = ref<Position | undefined>(undefined);
 
@@ -69,13 +72,12 @@ defineExpose({
 <style scoped lang="scss">
 @use '../assets/style/variables' as variables;
 
-.center-frame {
+.center-panel {
 
   padding: 16%;
   position: relative;
 
   .frame {
-    outline: variables.$primary solid 3px;
     position: absolute;
     top: 8%;
     left: 8%;
@@ -84,6 +86,9 @@ defineExpose({
     border-radius: 2px;
     padding: 10%;
   }
+ 
+  .frame.show-frame {
+    outline: variables.$primary solid 3px;
 
   .center-frame-label {
     cursor: default;
@@ -141,5 +146,6 @@ defineExpose({
     transform: translateX(-50%) translateY(-50%) rotate(270deg);
     transform-origin: 50% 50%;
   }
+}
 }
 </style> 
