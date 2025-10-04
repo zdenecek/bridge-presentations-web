@@ -1,8 +1,5 @@
 <template>
   <div class="bidding-center-panel" :class="{ 'bidding-center-panel-auction':   auctionVisible, 'animate': animate }">
-    <div class="absolute" v-if="debug">
-      <button @click="auctionVisible = !auctionVisible">Toggle auction</button>
-    </div>
     <div class="bidding-center-panel-container">
       <slot></slot>
     </div>
@@ -14,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, watch, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { Position, PositionHelper } from "../../bridge/model/Position";
 import { PresentationGame } from "../../bridge/model/PresentationGame";
 import { Bid } from "../../bridge/model/Bid";
@@ -44,7 +41,6 @@ watch(() => props.auctionVisible, (function() { // cl
   }
 })());
 
-const debug = inject('debug', false);
 const positions = computed(() => PositionHelper.all());
 
 const getBidsForPosition = (position: Position): Bid[] => {

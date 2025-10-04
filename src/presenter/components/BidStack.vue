@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, useTemplateRef } from "vue";
+import { computed, useTemplateRef } from "vue";
 import { Bid } from "../../bridge/model/Bid";
 import BidView from './BidView.vue';
 import { Orientation, isHorizontal } from "../model/Orientation";
@@ -45,8 +45,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   orientation: Orientation.Up
 });
-
-const debug = inject('debug', false);
 
 const container = useTemplateRef<HTMLDivElement>('container');
 const bidRefs = useTemplateRef<typeof BidView[]>('bidRefs');
