@@ -31,6 +31,7 @@
 import CardView from './CardView.vue';
 import { CardViewData } from './CardViewData';
 import { Card } from '@/bridge/model/Card';
+import { Position } from '@/bridge/model/Position';
 import { PresentationGame } from '@/bridge/model/PresentationGame';
 import { PresentationPlayer } from '@/bridge/model/PresentationPlayer';
 import { onMounted, onUnmounted, provide, reactive, ref, useTemplateRef, watch } from 'vue';
@@ -38,6 +39,7 @@ import { onMounted, onUnmounted, provide, reactive, ref, useTemplateRef, watch }
 
 const props = defineProps<{
   game: PresentationGame;
+  dummy: Position | undefined;
 }>();
 
 const cardViews = ref<Map<Card, CardViewData>>(new Map<Card, CardViewData>());
@@ -167,7 +169,7 @@ function makeCards(game?: PresentationGame): Map<Card, CardViewData> {
       playables.forEach((card) => {
         const cardView = getCardView(card);
         cardView.playable = true;
-        cardView.dummy = game.finalContract !== "passed" && game.finalContract?.declarer === player.position;
+        cardView.dummy = props.dummy === player.position;
         cardView.onclick = () => (player as PresentationPlayer).playCard(card);
       });
     });

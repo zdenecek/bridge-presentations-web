@@ -63,6 +63,9 @@ export class PresentationGame extends UndoableGame {
   ) {
     super(players, vulnerability);
     this.options = options;
+    // Sort activePositions by default NESW order
+    const neswOrder = [Position.North, Position.East, Position.South, Position.West];
+    this.options.activePositions.sort((a, b) => neswOrder.indexOf(a) - neswOrder.indexOf(b));
 
     if (options.contract) this.finalContract = options.contract;
     else if (options.trumps) this.trumps = options.trumps;
@@ -78,7 +81,7 @@ export class PresentationGame extends UndoableGame {
           setTimeout(() => this.end());
           return;
         }
-        firstToPlay = PositionHelper.nextPosition(this.finalContract.declarer);
+        firstToPlay = PositionHelper.nextPosisitionFrom(this.options.activePositions, this.finalContract.declarer);
       } else if (trumps) {
         this.trumps = trumps;
       }

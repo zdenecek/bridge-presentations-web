@@ -1,6 +1,6 @@
 <template>
   <div ref="gameView" @click="update" :class="{ debug: debug }">
-    <CardProvider :game="game" v-slot="{ cardViews, cardDimensions }">
+    <CardProvider :game="game" :dummy="dummy" v-slot="{ cardViews, cardDimensions }">
       <div class="main-view" ref="mainView">
         <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
           :rotation="Orientation.Left" :dummy="dummy === Position.West" :cardViews="cardViews"
