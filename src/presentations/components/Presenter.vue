@@ -94,7 +94,7 @@ const showControlPanel = computed(() => {
     height: 100%;
     padding: 0 20px;
     display: grid;
-    grid-template-columns: 1fr 100vh 2fr;
+    grid-template-columns: 1fr 100vh minmax(400px, 2fr);
     background-color: black;
 
     ::selection {

@@ -37,7 +37,7 @@
           :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.East)"></OneDimensionalHandView>
         <DebugView v-if="debug" :game="game" :cardViews="cardViews"></DebugView>
       </div>
-      <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback"></BiddingBox>
+      <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback" :isBidLegal="isBidLegal"></BiddingBox>
     </CardProvider>
   </div>
 </template>
@@ -77,6 +77,7 @@ const props = defineProps<{
  */
 
 const biddingBoxCallback = ref<((bid: Bid) => void) | undefined>(undefined);
+const isBidLegal = ref<((bid: Bid) => boolean) | undefined>(undefined);
 watch(
   () => props.game,
   (game) => {
@@ -87,6 +88,7 @@ watch(
       player.bidRequested.sub(() => {
         biddingBoxCallback.value = (bid) =>
           (player as PresentationPlayer).bid(bid);
+        isBidLegal.value = (bid: Bid) => game.auction?.isLegal(bid, player.position) ?? true;
       });
 
       player.bidRequestCancelled.sub(() =>

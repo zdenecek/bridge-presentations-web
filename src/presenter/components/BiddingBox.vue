@@ -12,7 +12,8 @@
         :class="[
           'bidding-box-bid',
           `level-${level}`,
-          `suit-${SuitHelper.toString(suit).toLowerCase()}`
+          `suit-${SuitHelper.toString(suit).toLowerCase()}`,
+          { 'disabled': !isBidLegal(new ContractBid(suit, level as ContractLevel)) }
         ]"
         @click="handleBidClick(new ContractBid(suit, level as ContractLevel))"
       >
@@ -26,17 +27,18 @@
       <div
         class="bidding-box-bid pass"
         @click="handleBidClick(new PassBid())"
+        :class="{ 'disabled': !isBidLegal(new PassBid()) }"
       >
         Pass
       </div>
       <div
-        class="bidding-box-bid double"
+        class="bidding-box-bid double" :class="{ 'disabled': !isBidLegal(new DoubleBid()) }"
         @click="handleBidClick(new DoubleBid())"
       >
         X
       </div>
       <div
-        class="bidding-box-bid redouble"
+        class="bidding-box-bid redouble" :class="{ 'disabled': !isBidLegal(new RedoubleBid()) }"
         @click="handleBidClick(new RedoubleBid())"
       >
         XX
@@ -49,6 +51,13 @@
 import { Bid, ContractBid, DoubleBid, PassBid, RedoubleBid } from "../../bridge/model/Bid";
 import { ContractLevel } from "../../bridge/model/Contract";
 import { SuitHelper } from "../../bridge/model/Suit";
+
+
+withDefaults(defineProps<{
+   isBidLegal?: (bid: Bid) => boolean;
+}>(), {
+  isBidLegal: () => true
+});
 
 
 const emit = defineEmits<{
@@ -81,6 +90,11 @@ const handleBidClick = (bid: Bid) => {
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   &::before {
     content: '';
@@ -151,7 +165,7 @@ const handleBidClick = (bid: Bid) => {
       transition: left 0.5s ease;
     }
 
-    &:hover {
+    &:hover:not(.disabled) {
       transform: translateY(-2px) scale(1.05);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
       
@@ -160,7 +174,7 @@ const handleBidClick = (bid: Bid) => {
       }
     }
 
-    &:active {
+    &:active:not(.disabled) {
       transform: translateY(-1px) scale(1.02);
     }
 

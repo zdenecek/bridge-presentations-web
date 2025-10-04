@@ -97,7 +97,7 @@ const effectiveDummySuitOffset = computed(() => {
 });
 
 const effectiveDummyCardOffset = computed(() => {
-  return props.dummyCardOffset ?? props.cardDimensions.width / 4.5;
+  return props.dummyCardOffset ?? props.cardDimensions.width / 4;
 });
 
 const root = useTemplateRef<HTMLDivElement>('root');

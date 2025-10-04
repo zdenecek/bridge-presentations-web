@@ -19,7 +19,6 @@ import { Position, PositionHelper } from "../../bridge/model/Position";
 import { Point } from "../model/Point";
 import { getOffset } from '../utils/offset';
 import { PresentationGame } from '../../bridge/model/PresentationGame';
-import { debounce } from 'lodash';
 
 
 const trick = shallowRef<Trick | undefined>(undefined);
@@ -30,28 +29,6 @@ const props = defineProps<{
   cardViews: Map<Card, CardViewData>;
 }>();
 const debug = inject('debug', false);
-
-let resizeObserver: ResizeObserver | null = null;
-onMounted(() => {
-
-  const debouncedUpdate = debounce(() => {
-    console.log('ResizeObserver update');
-    update();
-  }, 50);
-
-  resizeObserver = new ResizeObserver(() => {
-    console.log('resizeObserver');
-    debouncedUpdate();
-  });
-
-  if (element.value) {
-    resizeObserver.observe(element.value);
-  }
-});
-
-onUnmounted(() => {
-  resizeObserver?.disconnect();
-});
 
 // Update method for external calls
 const update = () => {
