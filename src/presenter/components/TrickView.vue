@@ -102,7 +102,7 @@ const positionTrick = (trick: Trick) => {
     const view = props.cardViews.get(card);
     if (!view) return;
 
-    // view.reverse = false;
+    view.reverse = false;
     view.hidden = false;
     view.z = index + 100;
   });

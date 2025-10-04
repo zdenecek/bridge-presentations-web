@@ -23,7 +23,7 @@ export function useKeyboardShortcut(
       return;
 
     // Prevent event propagation
-    event.preventDefault();
+    // event.preventDefault(); - not good for typing in configurator
     event.stopPropagation();
 
     // Call the handler

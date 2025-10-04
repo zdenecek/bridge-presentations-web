@@ -3,9 +3,9 @@
         <div class="configurator-header">
             <h1>Bridge Presentation Configurator</h1>
             <div class="header-actions">
-                <button class="btn btn-secondary" @click="save">Save Deal</button>
+                <button class="btn btn-secondary" @click="save">Save scene</button>
                 <input type='file' accept=".deal" @change='e => load(e)' ref="loadform" hidden />
-                <button class="btn btn-secondary" @click="loadClicked">Load Deal</button>
+                <button class="btn btn-secondary" @click="loadClicked">Load scene</button>
                 <button class="btn btn-primary btn-large" @click="submit">Start Game</button>
             </div>
         </div>
@@ -34,6 +34,8 @@
                                     v-model="options.cards[pos]" 
                                     class="card-input"
                                     :class="{ 'error': showCardInputErrors && cardErrors.has(pos as Position) }"
+                                    @input="debugInput($event, pos)"
+                                    @keydown="debugKeydown($event, pos)"
                                 />
                                 <div class="error-list" v-if="showCardInputErrors && cardErrors.has(pos as Position) && cardErrors.get(pos as Position)?.length">
                                     <div v-for="err in cardErrors.get(pos as Position)" :key="err" class="error-item">
@@ -416,6 +418,27 @@ function genDealPartial() {
     const deal = generateDealWithCards(partialCards);
     lastUsedCards = partialCards;
     options.cards = deal;
+}
+
+function debugInput(event: Event, pos: string) {
+    const target = event.target as HTMLInputElement;
+    console.log(`Input event for ${pos}:`, {
+        value: target.value,
+        key: (event as any).key,
+        inputType: (event as any).inputType
+    });
+}
+
+function debugKeydown(event: KeyboardEvent, pos: string) {
+    console.log(`Keydown event for ${pos}:`, {
+        key: event.key,
+        code: event.code,
+        charCode: event.charCode,
+        keyCode: event.keyCode,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey
+    });
 }
 </script>
 
