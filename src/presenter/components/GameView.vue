@@ -27,7 +27,7 @@
             </BiddingCenterPanel>
           </div>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
-            :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"
+            :position="Position.South" :rotation="dummy === Position.South ? Orientation.Down : Orientation.Up" :dummy="dummy === Position.South"
             :cardViews="cardViews" :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.South)">
           </OneDimensionalHandView>
         </div>
