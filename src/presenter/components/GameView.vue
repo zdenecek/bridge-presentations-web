@@ -1,6 +1,6 @@
 <template>
   <div ref="gameView" @click="update" :class="{ debug: debug }">
-    <CardProvider :game="game" :dummy="dummy" v-slot="{ cardViews, cardDimensions }">
+    <CardProvider :cards="cards" :game="game" :dummy="dummy" v-slot="{ cardViews, cardDimensions }">
       <div class="main-view" ref="mainView">
         <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
           :rotation="Orientation.Left" :dummy="dummy === Position.West" :cardViews="cardViews"
@@ -65,6 +65,7 @@ import BiddingCenterPanel from "./BiddingCenterPanel.vue";
 import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import { useWaitForClick } from "../composables/usewaitForClick";
+import { Card } from "@/bridge/model/Card";
 
 const props = defineProps<{
   game: PresentationGame;
@@ -209,29 +210,18 @@ watch(() => props.game, (game) => {
 }, { deep: false, immediate: true });
 
 
-/**
- * DUMMY LOGIC
- */
+const dummy = computed(() => auctionVisible.value ? undefined : props.game.dummy );
+const cards = ref<Set<Card>>(new Set());
 
-const dummy = computed(() => {
-  if (props.game?.options.dummy === "auto") {
-    if (auctionVisible.value) return undefined;
-    if (props.game.auction?.finalContract == "passed") return undefined;
-    if (props.game.tricks.length === 0 || props.game.tricks[0].cards.length === 0) return undefined;
-    const declarer = props.game.auction?.finalContract?.declarer;
-    if (declarer) return PositionHelper.nextPosition(declarer, 2);
-  }
-  else if (props.game?.options.dummy === "static" && props.game?.options.staticDummyPosition) {
-    return props.game?.options.staticDummyPosition;
-  }
-  else if (props.game?.options.dummy === "none") {
-    return undefined;
-  }
-  else {
-    console.warn("Unknown dummy option", props.game?.options.dummy);
-    return undefined;
-  }
-});
+watch(() => props.game, computeCards, { deep: false, immediate: true });
+
+function computeCards(game: PresentationGame) { // manually computed based only on game.
+  console.debug("calculating cards")
+  if (!game) return;
+  const trickCards = game.tricks.flatMap((trick) => trick.cards.map(c => c.card));
+  const cardsInHands = game.allPlayers.flatMap(player => player.hand?.cards).filter(c => c !== undefined);
+  cards.value = new Set(trickCards.concat(cardsInHands))
+}
 
 const debug = inject("debug", false);
 </script>

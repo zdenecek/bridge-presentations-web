@@ -1,7 +1,8 @@
 <template>
   <div ref="element">
     <div id="cards">
-      <CardView v-for="card in cardViews.values()" :data="card" :key="card.card.toString()" :dimensions="cardDimensions"></CardView>
+      <CardView v-for="card in cardViews.values()" :data="card" :key="card.card.toString()"
+        :dimensions="cardDimensions"></CardView>
     </div>
     <slot :cardViews="cardViews" :cardDimensions="cardDimensions"></slot>
   </div>
@@ -31,15 +32,14 @@
 import CardView from './CardView.vue';
 import { CardViewData } from './CardViewData';
 import { Card } from '@/bridge/model/Card';
-import { Position } from '@/bridge/model/Position';
 import { PresentationGame } from '@/bridge/model/PresentationGame';
 import { PresentationPlayer } from '@/bridge/model/PresentationPlayer';
 import { onMounted, onUnmounted, provide, reactive, ref, useTemplateRef, watch } from 'vue';
 
 
 const props = defineProps<{
-  game: PresentationGame;
-  dummy: Position | undefined;
+  cards: Set<Card>;
+  game?: PresentationGame;
 }>();
 
 const cardViews = ref<Map<Card, CardViewData>>(new Map<Card, CardViewData>());
@@ -94,7 +94,6 @@ onMounted(() => {
   // Initial dimension calculation
   updateCardDimensions();
 
-
   // Update on window resize
   window.addEventListener('resize', updateCardDimensions);
 
@@ -114,10 +113,51 @@ onUnmounted(() => {
 });
 
 // Only watch for game reference changes, not internal game state changes
-watch(() => props.game, (game) => {
+watch(() => props.cards, (cards) => {
 
-  cardViews.value = makeCards(game);
+  cardViews.value = makeCards(cards);
+  if (props.game) attachToGame(props.game);
+  
 }, { flush: 'pre' });
+
+const unsubscribe = ref([] as (( ) => void)[])
+
+function attachToGame(game: PresentationGame) {
+
+  unsubscribe.value?.forEach(unsub => unsub())
+  unsubscribe.value = []
+
+  game.allPlayers.forEach((player) => {
+
+    unsubscribe.value.push(player.cardPlayed.sub((e) => {
+      e.player.hand.cards.forEach((card) => {
+        const cardView = getCardView(card);
+        cardView.playable = false;
+        cardView.onclick = () => { };
+      });
+      const cardView = getCardView(e.card);
+      cardView.playable = false;
+      cardView.onclick = () => { };
+    }));
+
+    unsubscribe.value.push(player.playRequestCancelled.sub((e) => {
+      e.player.hand.cards.forEach((card) => getCardView(card).playable = false);
+    }));
+
+    unsubscribe.value.push(player.playRequested.sub((e) => {
+      let playables = e.player.hand.cards;
+      if (e.trick.cards.length > 0) playables = playables.filter((c) => c.suit == e.trick.cards[0]?.card.suit);
+      if (playables.length == 0) playables = e.player.hand.cards;
+
+      playables.forEach((card) => {
+        const cardView = getCardView(card);
+        cardView.playable = true;
+        cardView.dummy = game.dummy === player.position;
+        cardView.onclick = () => (player as PresentationPlayer).playCard(card);
+      });
+    }));
+  });
+}
 
 
 function getCardView(card: Card): CardViewData {
@@ -128,53 +168,11 @@ function getCardView(card: Card): CardViewData {
   return cardView;
 }
 
-function makeCards(game?: PresentationGame): Map<Card, CardViewData> {
+function makeCards(cards: Set<Card>): Map<Card, CardViewData> {
   const cardViews = new Map<Card, CardViewData>()
-  if (!game) return cardViews;
-
-  const trick_cards = game.tricks.flatMap((trick) => trick.cards);
-  trick_cards.forEach(({ card }) => {
-    cardViews.set(card, new CardViewData(card));
-  });
-
-  game.allPlayers.forEach((player) => {
-    player.hand?.cards.forEach((card) => {
+  cards.forEach((card) => {
       cardViews.set(card, new CardViewData(card));
     });
-  });
-
-
-  game.allPlayers.forEach((player) => {
-
-    player.cardPlayed.sub((e) => {
-      e.player.hand.cards.forEach((card) => {
-        const cardView = getCardView(card);
-        cardView.playable = false;
-        cardView.onclick = () => { };
-      });
-      const cardView = getCardView(e.card);
-      cardView.playable = false;
-      cardView.onclick = () => { };
-    });
-
-    player.playRequestCancelled.sub((e) => {
-      e.player.hand.cards.forEach((card) => getCardView(card).playable = false);
-    });
-
-    player.playRequested.sub((e) => {
-      let playables = e.player.hand.cards;
-      if (e.trick.cards.length > 0) playables = playables.filter((c) => c.suit == e.trick.cards[0]?.card.suit);
-      if (playables.length == 0) playables = e.player.hand.cards;
-
-      playables.forEach((card) => {
-        const cardView = getCardView(card);
-        cardView.playable = true;
-        cardView.dummy = props.dummy === player.position;
-        cardView.onclick = () => (player as PresentationPlayer).playCard(card);
-      });
-    });
-  });
-
   return cardViews;
 }
 

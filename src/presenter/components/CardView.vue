@@ -12,6 +12,7 @@
     :style="cardStyle"
     @click="handleClick"
   >
+    <div class="absolute debug">{{ data.rotation }}</div>
     <img class="front" :src="frontImageSrc" />
     <img class="back" :src="backImageSrc" />
   </div>

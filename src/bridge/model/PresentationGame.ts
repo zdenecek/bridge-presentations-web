@@ -110,6 +110,25 @@ export class PresentationGame extends UndoableGame {
     return this.addBid(bid, player);
   }
 
+  public get dummy(): Position | undefined {
+    if (this.options.dummy === "auto") {
+      if (this.auction?.finalContract == "passed") return undefined;
+      if (this.tricks.length === 0 || this.tricks[0].cards.length === 0) return undefined;
+      const declarer = this.auction?.finalContract?.declarer;
+      if (declarer) return this.nextToPlay(this.nextToPlay(declarer));
+    }
+    else if (this.options.dummy === "static" && this?.options.staticDummyPosition) {
+      return this.options.staticDummyPosition;
+    }
+    else if (this.options.dummy === "none") {
+      return undefined;
+    }
+    else {
+      console.warn("Unknown dummy option", this.options.dummy);
+      return undefined;
+    }
+  }
+
   protected nextToPlay(position: Position): Position {
     return PositionHelper.nextPosisitionFrom(
       this.options.activePositions,
