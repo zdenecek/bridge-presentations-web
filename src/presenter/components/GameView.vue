@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { PresentationGame } from "@/bridge/model/PresentationGame";
 import OneDimensionalHandView from "./OneDimensionalHandView.vue";
-import { Position, PositionHelper } from "@/bridge/model/Position";
+import { Position } from "@/bridge/model/Position";
 import { Orientation } from "@/presenter/model/Orientation";
 import CenterNSEWFrame from "./CenterNSEWFrame.vue";
 import {
@@ -69,9 +69,16 @@ import { Card } from "@/bridge/model/Card";
 
 const props = defineProps<{
   game: PresentationGame;
-  handsVisible: Map<Position, boolean>;
+  handsVisible?: Map<Position, boolean>;
   endMessage?: string;
 }>();
+
+const handsVisible = computed(() => props.handsVisible ?? new Map([
+  [Position.North, true],
+  [Position.East, true],
+  [Position.South, true],
+  [Position.West, true],
+]));
 
 /** 
  * BIDDING BOX

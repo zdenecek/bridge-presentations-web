@@ -55,6 +55,10 @@ const element = useTemplateRef<HTMLDivElement>('element');
 // Provide card dimensions to child components
 provide('cardDimensions', cardDimensions);
 provide('cardViews', cardViews);
+defineExpose({
+  cardViews,
+  cardDimensions,
+});
 
 const updateCardDimensions = () => {
   if (!element.value) return;
@@ -112,18 +116,14 @@ onUnmounted(() => {
   resizeObserver?.disconnect();
 });
 
-// Only watch for game reference changes, not internal game state changes
-watch(() => props.cards, (cards) => {
 
-  cardViews.value = makeCards(cards);
-  if (props.game) attachToGame(props.game);
-  
-}, { flush: 'pre' });
+const attachToGame = (() => {
+  const unsubscribe = ref([] as (( ) => void)[])
 
-const unsubscribe = ref([] as (( ) => void)[])
 
-function attachToGame(game: PresentationGame) {
 
+  function attach(game: PresentationGame) {
+  console.debug("attaching card provider to game");
   unsubscribe.value?.forEach(unsub => unsub())
   unsubscribe.value = []
 
@@ -157,7 +157,17 @@ function attachToGame(game: PresentationGame) {
       });
     }));
   });
-}
+  }
+  return attach;
+})()
+
+// Only watch for game reference changes, not internal game state changes
+watch(() => props.cards, (cards) => {
+  cardViews.value = makeCards(cards);
+  if (props.game) attachToGame(props.game);
+  
+}, { flush: 'pre',immediate: true });
+
 
 
 function getCardView(card: Card): CardViewData {

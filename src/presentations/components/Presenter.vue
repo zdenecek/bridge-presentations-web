@@ -3,7 +3,7 @@
         <game-view :game="game" :handsVisible="handsVisible" class="game-view"
             :endMessage="options.uiOptions.endMessage" />
         <div class="side-panel">
-            <status-panel :game="game"  :class="{'appear': game.bidding}" />
+            <status-panel :game="game" :class="{ 'appear': game.bidding }" />
             <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" class="appear" />
             <control-panel :game="game" class="control-panel" v-show="showControlPanel" />
         </div>
@@ -11,11 +11,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, inject } from 'vue';
 import { Position } from "@/bridge/model/Position";
 import PlayerFactory from "@/bridge/factory/PlayerFactory";
 import { ConfiguratorOptions } from "@/presentations/class/options";
-import GameFactory from "@/bridge/factory/GameFactory";
 import { PresentationGame, PresentationGameOptions } from "@/bridge/model/PresentationGame";
 import { useKeyboardShortcut } from '@/presenter/composables/useKeyboardShortcut';
 import { PassBid } from "@/bridge/model/Bid";
@@ -27,6 +26,7 @@ import GameView from '@/presenter/components/GameView.vue';
 import BiddingHistoryView from '@/presenter/components/BiddingHistoryView.vue';
 import StatusPanel from '@/presenter/components/StatusPanel.vue';
 import ControlPanel from '@/presenter/components/ControlPanel.vue';
+import { makeGameLogEvents } from '../class/debug';
 
 const players = PlayerFactory.makeObservablePlayers();
 const game = useGameRef(new PresentationGame(players, PresentationGameOptions.Default));
@@ -35,16 +35,21 @@ defineProps<{
     options: ConfiguratorOptions;
 }>();
 
-defineExpose({
-    startGame(options: ConfiguratorOptions) {
-        const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew,
-            options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
-        const gm = GameFactory.makeObservableGame(players, gameOpts, options.vulnerability);
+const debug = inject("debug", false);
 
-        game.value = gm;
-        PlayerFactory.putHands(players, options.cards);
-        nextTick(() => game.value.start(options.firstPlayer as Position, options.trumps));
-    }
+function startGame(options: ConfiguratorOptions) {
+    const gameOpts = new PresentationGameOptions(options.bidding, options.fake?.ns, options.fake?.ew,
+        options.contract, options.trumps, options.dummy, options.staticDummyPosition, options.activePositions)
+    const gm = new PresentationGame(players, gameOpts, options.vulnerability);
+
+    game.value = gm;
+    if (debug) makeGameLogEvents(game.value);
+    PlayerFactory.putHands(players, options.cards);
+    nextTick(() => game.value.start(options.firstPlayer as Position, options.trumps));
+}
+
+defineExpose({
+    startGame,
 });
 
 
@@ -88,7 +93,7 @@ const showControlPanel = computed(() => {
 
 </script>
 
-<style  lang="scss">
+<style lang="scss">
 .presenter-view {
     width: 100%;
     height: 100%;
@@ -126,12 +131,12 @@ const showControlPanel = computed(() => {
 }
 
 @keyframes appear {
-  0% { 
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
+    0% {
+        opacity: 0;
+    }
 
+    100% {
+        opacity: 1;
+    }
+}
 </style>
