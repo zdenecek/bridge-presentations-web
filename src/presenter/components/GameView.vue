@@ -1,10 +1,11 @@
 <template>
-  <div ref="gameView" @click="update" :class="{ debug: debug }">
-    <CardProvider :game="game" :dummy="dummy" v-slot="{ cardViews, cardDimensions }">
-      <div class="main-view" ref="mainView">
-        <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
-          :rotation="Orientation.Left" :dummy="dummy === Position.West" :cardViews="cardViews"
-          :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.West)"></OneDimensionalHandView>
+  <div ref="gameView" @click="update" :class="{ debug: debug}" class="game-view">
+    <CardProvider :cards="cards" :game="game" :dummy="dummy" v-slot="{ cardViews, cardDimensions }">
+      <div class="main-view" ref="mainView" :class="{ vertical: verticalCardLayout }">
+        <component :is="verticalCardLayout ? VerticalHandView : OneDimensionalHandView" ref="handViewWest"
+          :hand="game?.players[Position.West].hand" :position="Position.West" :rotation="Orientation.Left"
+          :dummy="dummy === Position.West" :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :reverse="!handsVisible.get(Position.West)" class="hand-west"></component>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
@@ -21,20 +22,25 @@
             <BiddingCenterPanel class="bidding-center-panel-fake" :auction-visible="false">
               <!-- Fake bidding center panel - so that trick view has always expanded position -->
               <CenterNSEWFrame class="center-frame" :showFrame="false">
-                <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews">
+                <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"
+                  :vertical-card-layout="verticalCardLayout">
                 </TrickView>
               </CenterNSEWFrame>
             </BiddingCenterPanel>
           </div>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
-            :position="Position.South" :rotation="Orientation.Up" :dummy="dummy === Position.South"
-            :cardViews="cardViews" :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.South)">
+            :position="Position.South" :rotation="dummy === Position.South ? Orientation.Down : Orientation.Up"
+            :dummy="dummy === Position.South" :cardViews="cardViews" :cardDimensions="cardDimensions"
+            :reverse="!handsVisible.get(Position.South)">
           </OneDimensionalHandView>
         </div>
 
-        <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
-          :rotation="Orientation.Right" :dummy="dummy === Position.East" :cardViews="cardViews"
-          :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.East)"></OneDimensionalHandView>
+        <component :is="verticalCardLayout ? VerticalHandView : OneDimensionalHandView" ref="handViewEast"
+          :hand="game?.players[Position.East].hand" :position="Position.East" :rotation="Orientation.Right"
+          :dummy="dummy === Position.East" :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :reverse="!handsVisible.get(Position.East)" class="hand-east"></component>
+
+
         <DebugView v-if="debug" :game="game" :cardViews="cardViews"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback" :isBidLegal="isBidLegal"></BiddingBox>
@@ -45,7 +51,7 @@
 <script setup lang="ts">
 import { PresentationGame } from "@/bridge/model/PresentationGame";
 import OneDimensionalHandView from "./OneDimensionalHandView.vue";
-import { Position, PositionHelper } from "@/bridge/model/Position";
+import { Position } from "@/bridge/model/Position";
 import { Orientation } from "@/presenter/model/Orientation";
 import CenterNSEWFrame from "./CenterNSEWFrame.vue";
 import {
@@ -65,12 +71,24 @@ import BiddingCenterPanel from "./BiddingCenterPanel.vue";
 import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import { useWaitForClick } from "../composables/usewaitForClick";
+import { Card } from "@/bridge/model/Card";
+import VerticalHandView from "./VerticalHandView.vue";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   game: PresentationGame;
-  handsVisible: Map<Position, boolean>;
+  handsVisible?: Map<Position, boolean>;
   endMessage?: string;
-}>();
+  verticalCardLayout?: boolean;
+}>(), {
+  verticalCardLayout: false,
+});
+
+const handsVisible = computed(() => props.handsVisible ?? new Map([
+  [Position.North, true],
+  [Position.East, true],
+  [Position.South, true],
+  [Position.West, true],
+]));
 
 /** 
  * BIDDING BOX
@@ -209,29 +227,18 @@ watch(() => props.game, (game) => {
 }, { deep: false, immediate: true });
 
 
-/**
- * DUMMY LOGIC
- */
+const dummy = computed(() => auctionVisible.value ? undefined : props.game.dummy);
+const cards = ref<Set<Card>>(new Set());
 
-const dummy = computed(() => {
-  if (props.game?.options.dummy === "auto") {
-    if (auctionVisible.value) return undefined;
-    if (props.game.auction?.finalContract == "passed") return undefined;
-    if (props.game.tricks.length === 0 || props.game.tricks[0].cards.length === 0) return undefined;
-    const declarer = props.game.auction?.finalContract?.declarer;
-    if (declarer) return PositionHelper.nextPosition(declarer, 2);
-  }
-  else if (props.game?.options.dummy === "static" && props.game?.options.staticDummyPosition) {
-    return props.game?.options.staticDummyPosition;
-  }
-  else if (props.game?.options.dummy === "none") {
-    return undefined;
-  }
-  else {
-    console.warn("Unknown dummy option", props.game?.options.dummy);
-    return undefined;
-  }
-});
+watch(() => props.game, computeCards, { deep: false, immediate: true });
+
+function computeCards(game: PresentationGame) { // manually computed based only on game.
+  console.debug("calculating cards")
+  if (!game) return;
+  const trickCards = game.tricks.flatMap((trick) => trick.cards.map(c => c.card));
+  const cardsInHands = game.allPlayers.flatMap(player => player.hand?.cards).filter(c => c !== undefined);
+  cards.value = new Set(trickCards.concat(cardsInHands))
+}
 
 const debug = inject("debug", false);
 </script>
@@ -257,6 +264,17 @@ const debug = inject("debug", false);
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
+  }
+
+  &.vertical {
+    .hand-west {
+      margin-top: variables.$card-height;
+      margin-bottom: variables.$card-height;
+    }
+    .hand-east {
+      margin-top: variables.$card-height;
+      margin-bottom: variables.$card-height;
+    }
   }
 
   .center-frame-container {

@@ -4,9 +4,8 @@
   ref="root">
   <template v-if="debug">
     <div class="debug-item">
-      <div class="debug-item-value">Offset: {{ _offset }}</div>
-      <div class="debug-item-value">Height: {{ _height }}</div>
-      <div class="debug-item-value">Width: {{ _width }}</div>
+      <div class="debug-item-value">Height: {{ height }}</div>
+      <div class="debug-item-value">Width: {{ width }}</div>
       <button @click="() => {_debug_dummy = !_debug_dummy; update(); }">Dummy</button>
     </div>
   </template>
@@ -23,9 +22,9 @@ import { Position } from "../../bridge/model/Position";
 import { Suit } from "../../bridge/model/Suit";
 import { Orientation, isHorizontal } from "../model/Orientation";
 import { Vector } from "../model/Vector";
-import { Point } from "../model/Point";
-import { getOffset } from '../utils/offset';
+import { getElementOffset } from '../utils/offset';
 import { CardViewData } from './CardViewData';
+import { useElementSize } from '../composables/useElementSize';
 
 // Props
 const props = withDefaults(defineProps<{
@@ -63,17 +62,13 @@ const componentStyle = computed(() => {
     maxWidth: props.cardDimensions.height + 'px'
   };
 });
+const root = useTemplateRef<HTMLDivElement>('root');
 
-const _offset = ref(Point.Origin);
-const _width = ref(0);
-const _height = ref(0);
+const {width, height} = useElementSize(root);
 const _debug_dummy = ref(false);
 
 const update = (): void => {
     nextTick(() => {
-      _offset.value = getStart();
-      _width.value = getWidth();
-      _height.value = getHeight();
       
       if (!props.hand) return;
 
@@ -100,21 +95,7 @@ const effectiveDummyCardOffset = computed(() => {
   return props.dummyCardOffset ?? props.cardDimensions.width / 4;
 });
 
-const root = useTemplateRef<HTMLDivElement>('root');
 
-const getWidth = () => {
-  return root.value?.clientWidth ?? 0;
-};
-const getHeight = () => {
-  return root.value?.clientHeight ?? 0;
-};
-
-
-function getStart(): Point {
-  if (!root.value) return Point.Origin;
-  const c = getOffset(root.value);
-  return new Point(c.left, c.top);
-}
 
 // Computed properties
 const primaryDimension = computed((): "x" | "y" => {
@@ -122,7 +103,7 @@ const primaryDimension = computed((): "x" | "y" => {
 });
 
 function getPrimaryDimensionSize(): number {
-  return isHorizontal(props.rotation) ? getWidth() : getHeight();
+  return isHorizontal(props.rotation) ? width.value : height.value;
 }
 
 // Helper methods
@@ -157,7 +138,7 @@ const getHandSuits = (): Array<Suit> => {
 
 // Update methods
 const updateNonDummy = (): void => {
-  const start = getStart();
+  const start = getElementOffset(root.value);
   if (!props.hand || !start) return;
 
 
@@ -166,8 +147,8 @@ const updateNonDummy = (): void => {
   const primarySize = props.cardDimensions.width + offsetVector[primaryDimension.value] * (props.hand.cards.length - 1);
 
 
-  const center = start.moveBy(make1DVector(getPrimaryDimensionSize() / 2));
-  let currentPosition = center.moveBy(make1DVector(-primarySize / 2));
+  const center = start.moveByVec(make1DVector(getPrimaryDimensionSize() / 2));
+  let currentPosition = center.moveByVec(make1DVector(-primarySize / 2));
 
   const cards = [...props.hand.cards];
   const reverseZIndex = props.rotation === Orientation.Left;
@@ -187,21 +168,21 @@ const updateNonDummy = (): void => {
     view.position = currentPosition;
     view.hidden = false;
     view.z = reverseZIndex ? cards.length - index : index;
-    currentPosition = currentPosition.moveBy(offsetVector);
+    currentPosition = currentPosition.moveByVec(offsetVector);
   });
 };
 
 const updateDummy = (): void => {
 
-  const start = getStart();
+  const start = getElementOffset(root.value);
   if (!props.hand || !start) return;
 
   const suits = getHandSuits();
   const suitCount = suits.length;
   const primarySize = (props.cardDimensions.width + effectiveDummySuitOffset.value) * suitCount - effectiveDummySuitOffset.value;
 
-  const center = start.moveBy(make1DVector(getPrimaryDimensionSize() / 2));
-  let currentPosition = center.moveBy(make1DVector(-primarySize / 2));
+  const center = start.moveByVec(make1DVector(getPrimaryDimensionSize() / 2));
+  let currentPosition = center.moveByVec(make1DVector(-primarySize / 2));
 
   const suitOffset = make1DVector(effectiveDummySuitOffset.value + props.cardDimensions.width);
   let c = effectiveDummyCardOffset.value;
@@ -220,10 +201,10 @@ const updateDummy = (): void => {
       view.reverse = false;
       view.hidden = false;
       view.z = index + suitIndex * 10;
-      currentSuitPos = currentSuitPos.moveBy(cardOffset);
+      currentSuitPos = currentSuitPos.moveByVec(cardOffset);
       index++;
     }
-    currentPosition = currentPosition.moveBy(suitOffset);
+    currentPosition = currentPosition.moveByVec(suitOffset);
   }
 };
 

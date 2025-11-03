@@ -38,8 +38,6 @@ Classes of interest:
   Models the game of bridge. Contains players, hands, and scores.
 - [`PresentationGame`](src/bridge/model/PresentationGame.ts)
   Extends `Game` and adds events to listen to.
-- [`GameFactory`](src/bridge/factory/GameFactory.ts)
-  Factory for creating games.
 - [`PlayerFactory`](src/bridge/factory/PlayerFactory.ts)
   Factory for creating players.
 - [`PresentationPlayer`](src/bridge/model/PresentationPlayer.ts)

@@ -1,13 +1,17 @@
-export function getOffset(element: HTMLElement): { top: number; left: number } {
+import { Point } from "../model/Point";
+
+export function getElementOffset(element?: HTMLElement | null): Point {
+  if (!element) return Point.Origin;
+  
   if (!element.getClientRects().length) {
-    return { top: 0, left: 0 };
+    return Point.Origin;
   }
 
   let rect = element.getBoundingClientRect();
   let win = element.ownerDocument.defaultView;
   if (!win) throw new Error("Window not found");
-  return {
-    top: rect.top + win.pageYOffset,
-    left: rect.left + win.pageXOffset,
-  };
+  return new Point(
+    rect.left + (win?.pageXOffset ?? 0),
+    rect.top + (win?.pageYOffset ?? 0),
+  );
 }
