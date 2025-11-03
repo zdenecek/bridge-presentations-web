@@ -4,8 +4,8 @@
   ref="root">
   <template v-if="debug">
     <div class="debug-item">
-      <div class="debug-item-value">Height: {{ _height }}</div>
-      <div class="debug-item-value">Width: {{ _width }}</div>
+      <div class="debug-item-value">Height: {{ height }}</div>
+      <div class="debug-item-value">Width: {{ width }}</div>
       <button @click="() => {_debug_dummy = !_debug_dummy; update(); }">Dummy</button>
     </div>
   </template>
@@ -22,8 +22,7 @@ import { Position } from "../../bridge/model/Position";
 import { Suit } from "../../bridge/model/Suit";
 import { Orientation, isHorizontal } from "../model/Orientation";
 import { Vector } from "../model/Vector";
-import { Point } from "../model/Point";
-import { getElementOffset, getOffset } from '../utils/offset';
+import { getElementOffset } from '../utils/offset';
 import { CardViewData } from './CardViewData';
 import { useElementSize } from '../composables/useElementSize';
 
