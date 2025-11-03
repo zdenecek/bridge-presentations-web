@@ -47,7 +47,7 @@ jobs:
       - name: FTP Deploy & Remote PHP Unzip
         uses: zdenecek/zip-ftp-php-unzip@v1.0.0
         with:
-          zip_source: "public/*"
+          zip_source: "dist/*"
           ftp_host: ${{ secrets.FTP_SERVER }}
           ftp_user: ${{ secrets.FTP_LOGIN }}
           ftp_password: ${{ secrets.FTP_PASSWORD }}
