@@ -1,10 +1,11 @@
 <template>
-  <div ref="gameView" @click="update" :class="{ debug: debug }">
+  <div ref="gameView" @click="update" :class="{ debug: debug}" class="game-view">
     <CardProvider :cards="cards" :game="game" :dummy="dummy" v-slot="{ cardViews, cardDimensions }">
-      <div class="main-view" ref="mainView">
-        <OneDimensionalHandView ref="handViewWest" :hand="game?.players[Position.West].hand" :position="Position.West"
-          :rotation="Orientation.Left" :dummy="dummy === Position.West" :cardViews="cardViews"
-          :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.West)"></OneDimensionalHandView>
+      <div class="main-view" ref="mainView" :class="{ vertical: verticalCardLayout }">
+        <component :is="verticalCardLayout ? VerticalHandView : OneDimensionalHandView" ref="handViewWest"
+          :hand="game?.players[Position.West].hand" :position="Position.West" :rotation="Orientation.Left"
+          :dummy="dummy === Position.West" :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :reverse="!handsVisible.get(Position.West)" class="hand-west"></component>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
@@ -21,20 +22,25 @@
             <BiddingCenterPanel class="bidding-center-panel-fake" :auction-visible="false">
               <!-- Fake bidding center panel - so that trick view has always expanded position -->
               <CenterNSEWFrame class="center-frame" :showFrame="false">
-                <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews">
+                <TrickView ref="trickView" v-show="!showEndText" :game="game" class="trick-view" :cardViews="cardViews"
+                  :vertical-card-layout="verticalCardLayout">
                 </TrickView>
               </CenterNSEWFrame>
             </BiddingCenterPanel>
           </div>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
-            :position="Position.South" :rotation="dummy === Position.South ? Orientation.Down : Orientation.Up" :dummy="dummy === Position.South"
-            :cardViews="cardViews" :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.South)">
+            :position="Position.South" :rotation="dummy === Position.South ? Orientation.Down : Orientation.Up"
+            :dummy="dummy === Position.South" :cardViews="cardViews" :cardDimensions="cardDimensions"
+            :reverse="!handsVisible.get(Position.South)">
           </OneDimensionalHandView>
         </div>
 
-        <OneDimensionalHandView ref="handViewEast" :hand="game?.players[Position.East].hand" :position="Position.East"
-          :rotation="Orientation.Right" :dummy="dummy === Position.East" :cardViews="cardViews"
-          :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.East)"></OneDimensionalHandView>
+        <component :is="verticalCardLayout ? VerticalHandView : OneDimensionalHandView" ref="handViewEast"
+          :hand="game?.players[Position.East].hand" :position="Position.East" :rotation="Orientation.Right"
+          :dummy="dummy === Position.East" :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :reverse="!handsVisible.get(Position.East)" class="hand-east"></component>
+
+
         <DebugView v-if="debug" :game="game" :cardViews="cardViews"></DebugView>
       </div>
       <BiddingBox v-show="game?.state === 'bidding'" @bid="biddingBoxCallback" :isBidLegal="isBidLegal"></BiddingBox>
@@ -66,12 +72,16 @@ import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import { useWaitForClick } from "../composables/usewaitForClick";
 import { Card } from "@/bridge/model/Card";
+import VerticalHandView from "./VerticalHandView.vue";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   game: PresentationGame;
   handsVisible?: Map<Position, boolean>;
   endMessage?: string;
-}>();
+  verticalCardLayout?: boolean;
+}>(), {
+  verticalCardLayout: false,
+});
 
 const handsVisible = computed(() => props.handsVisible ?? new Map([
   [Position.North, true],
@@ -217,7 +227,7 @@ watch(() => props.game, (game) => {
 }, { deep: false, immediate: true });
 
 
-const dummy = computed(() => auctionVisible.value ? undefined : props.game.dummy );
+const dummy = computed(() => auctionVisible.value ? undefined : props.game.dummy);
 const cards = ref<Set<Card>>(new Set());
 
 watch(() => props.game, computeCards, { deep: false, immediate: true });
@@ -254,6 +264,17 @@ const debug = inject("debug", false);
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
+  }
+
+  &.vertical {
+    .hand-west {
+      margin-top: variables.$card-height;
+      margin-bottom: variables.$card-height;
+    }
+    .hand-east {
+      margin-top: variables.$card-height;
+      margin-bottom: variables.$card-height;
+    }
   }
 
   .center-frame-container {

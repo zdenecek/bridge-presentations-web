@@ -1,10 +1,10 @@
 <template>
   <div ref="element">
     <div id="cards">
-      <CardView v-for="card in cardViews.values()" :data="card" :key="card.card.toString()"
-        :dimensions="cardDimensions"></CardView>
+      <card-view v-for="card in cardViews.values()" :data="card" :key="card.card.toString()"
+        :dimensions="cardDimensions"></card-view>
     </div>
-    <slot :cardViews="cardViews" :cardDimensions="cardDimensions"></slot>
+    <slot :card-views="cardViews" :card-dimensions="cardDimensions"></slot>
   </div>
 </template>
 
@@ -37,10 +37,13 @@ import { PresentationPlayer } from '@/bridge/model/PresentationPlayer';
 import { onMounted, onUnmounted, provide, reactive, ref, useTemplateRef, watch } from 'vue';
 
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   cards: Set<Card>;
   game?: PresentationGame;
-}>();
+  verticalCardLayout?: boolean;
+}>(), {
+  verticalCardLayout: false,
+});
 
 const cardViews = ref<Map<Card, CardViewData>>(new Map<Card, CardViewData>());
 // Reactive card dimensions - computed from CSS

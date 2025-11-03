@@ -23,8 +23,12 @@ class Point {
     return new Point(this.x, this.y);
   }
 
-  moveBy(vector: Vector): Point {
+  moveByVec(vector: Vector): Point {
     return new Point(this.x + vector.x, this.y + vector.y);
+  }
+
+  moveBy(x: number, y: number): Point {
+    return new Point(this.x + x, this.y + y);
   }
 
   toString(): string {

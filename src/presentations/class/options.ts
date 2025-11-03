@@ -5,6 +5,7 @@ import { Vulnerability } from "@/bridge/model/Vulnerability";
 import { DummyOptions } from "@/bridge/model/PresentationGame";
 export interface UIOptions {
   endMessage?: string;
+  verticalLayout?: boolean;
 }
 
 export interface ConfiguratorOptions {
@@ -45,14 +46,15 @@ export function getDefaultConfiguratorOptions(): ConfiguratorOptions {
     activePositions: PositionHelper.all(),
     uiOptions: {
       endMessage: "Well done!",
+      verticalLayout: false,
     },
   };
 }
 
 export function normalizeConfiguratorOptions(
-  obj: unknown,
+  obj: unknown
 ): ConfiguratorOptions {
-  const result = {
+  let result = {
     cards: {
       north: "",
       east: "",
@@ -70,15 +72,22 @@ export function normalizeConfiguratorOptions(
     activePositions: PositionHelper.all(),
     uiOptions: {
       endMessage: undefined,
+      verticalLayout: false,
     },
   };
 
   Object.assign(result, obj);
+  (result.uiOptions = {
+    endMessage: undefined,
+    verticalLayout: false,
+  }),
+    Object.assign(result, obj);
+
   return result;
 }
 
 export function validateConfiguratorOptions(
-  opts: ConfiguratorOptions,
+  opts: ConfiguratorOptions
 ): Record<string, string | Record<string, string>> {
   const errors = [] as Array<Record<string, string | Record<string, string>>>;
 

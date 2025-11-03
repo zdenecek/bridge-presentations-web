@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Debug App</h1>
-    <game-view :game="game" />
+    <game-view :game="game" :vertical-card-layout="true" />
   </div>
 </template>
 

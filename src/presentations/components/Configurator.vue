@@ -108,6 +108,27 @@
                                 placeholder="Custom message to show at game end"
                                 class="input"
                             />
+                            <label for="rotation">Layout</label>
+                            <div class="radio-group" id="vertical-layout">
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="vertical-layout"
+                                        :value="true"
+                                        v-model="options.uiOptions.verticalLayout"
+                                    />
+                                    Vertical
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="vertical-layout"
+                                        :value="false"
+                                        v-model="options.uiOptions.verticalLayout"
+                                    />
+                                    Cross (original)
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -751,6 +772,56 @@ watch(fakeAuction, () => {
         &:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        }
+    }
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+    margin-top: 8px;
+
+    label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #ccc;
+        font-size: 0.85rem;
+
+        input[type="radio"] {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            appearance: none;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:checked {
+                border-color: #4a9eff;
+                background: rgba(255, 255, 255, 0.05);
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: #4a9eff;
+                }
+            }
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+            }
         }
     }
 }

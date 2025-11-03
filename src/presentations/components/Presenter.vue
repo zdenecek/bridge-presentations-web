@@ -1,7 +1,7 @@
 <template>
     <div class="presenter-view">
         <game-view :game="game" :handsVisible="handsVisible" class="game-view"
-            :endMessage="options.uiOptions.endMessage" />
+            :endMessage="options.uiOptions.endMessage" :vertical-card-layout="options.uiOptions.verticalLayout" />
         <div class="side-panel">
             <status-panel :game="game" :class="{ 'appear': game.bidding }" />
             <bidding-history-view :auction="game?.auction" v-show="showBiddingHistory" class="appear" />

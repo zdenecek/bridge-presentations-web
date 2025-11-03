@@ -1,6 +1,6 @@
 <template>
-  <div class="trick-view" ref="element">
-    <span class="absolute" v-show="debug">{{ trick }}</span>
+  <div class="trick-view" :class="{ 'vertical': verticalCardLayout }" ref="element">
+    <span class="absolute" v-show="debug">{{ trick }} </span>
     <div v-for="position in PositionHelper.all()" :key="position"
       :class="`trick-view-origin trick-view-origin-${position}`" :ref="el => setOriginRef(position, el)">
       <div>
@@ -17,17 +17,20 @@ import { CardInTrick, Trick } from "../../bridge/model/Trick";
 import { Card } from "../../bridge/model/Card";
 import { Position, PositionHelper } from "../../bridge/model/Position";
 import { Point } from "../model/Point";
-import { getOffset } from '../utils/offset';
 import { PresentationGame } from '../../bridge/model/PresentationGame';
+import { getElementOffset } from '../utils/offset';
 
 
 const trick = shallowRef<Trick | undefined>(undefined);
 const element = useTemplateRef<HTMLDivElement>('element');
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   game?: PresentationGame;
   cardViews: Map<Card, CardViewData>;
-}>();
+  verticalCardLayout?: boolean;
+}>(), {
+  verticalCardLayout: false,
+});
 const debug = inject('debug', false);
 
 // Update method for external calls
@@ -101,8 +104,7 @@ const positionTrick = (trick: Trick) => {
     }
 
     // Get the position from the origin element
-    const offset = getOffset(originEl);
-    view.position = new Point(offset.left, offset.top);
+    view.position = getElementOffset(originEl);
   });
 };
 
@@ -226,6 +228,22 @@ defineExpose({
   div {
     width: variables.$card-height;
     height: variables.$card-width;
+  }
+}
+
+.vertical.trick-view {
+  .trick-view-origin-west {
+    div {
+      width: variables.$card-width;
+      height: variables.$card-height;
+    }
+  }
+
+  .trick-view-origin-east {
+    div {
+      width: variables.$card-width;
+      height: variables.$card-height;
+    }
   }
 }
 
