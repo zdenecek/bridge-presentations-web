@@ -4,11 +4,13 @@
       <div class="main-view" ref="mainView" :class="{ vertical: verticalCardLayout }">
         <component :is="verticalCardLayout ? VerticalHandView : OneDimensionalHandView" ref="handViewWest"
           :hand="game?.players[Position.West].hand" :position="Position.West" :rotation="Orientation.Left"
-          :dummy="dummy === Position.West" :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :dummy="dummy === Position.West" :prioritizedSuit="dummy === Position.West ? getTrumpSuit() : undefined"
+          :cardViews="cardViews" :cardDimensions="cardDimensions"
           :reverse="!handsVisible.get(Position.West)" class="hand-west"></component>
         <div class="center-column">
           <OneDimensionalHandView ref="handViewNorth" :hand="game?.players[Position.North].hand"
             :position="Position.North" :rotation="Orientation.Up" :dummy="dummy === Position.North"
+            :prioritizedSuit="dummy === Position.North ? getTrumpSuit() : undefined"
             :cardViews="cardViews" :cardDimensions="cardDimensions" :reverse="!handsVisible.get(Position.North)">
           </OneDimensionalHandView>
           <div class="filler"></div>
@@ -30,14 +32,16 @@
           </div>
           <OneDimensionalHandView ref="handViewSouth" :hand="game?.players[Position.South].hand"
             :position="Position.South" :rotation="dummy === Position.South ? Orientation.Down : Orientation.Up"
-            :dummy="dummy === Position.South" :cardViews="cardViews" :cardDimensions="cardDimensions"
+            :dummy="dummy === Position.South" :prioritizedSuit="dummy === Position.South ? getTrumpSuit() : undefined"
+            :cardViews="cardViews" :cardDimensions="cardDimensions"
             :reverse="!handsVisible.get(Position.South)">
           </OneDimensionalHandView>
         </div>
 
         <component :is="verticalCardLayout ? VerticalHandView : OneDimensionalHandView" ref="handViewEast"
           :hand="game?.players[Position.East].hand" :position="Position.East" :rotation="Orientation.Right"
-          :dummy="dummy === Position.East" :cardViews="cardViews" :cardDimensions="cardDimensions"
+          :dummy="dummy === Position.East" :prioritizedSuit="dummy === Position.East ? getTrumpSuit() : undefined"
+          :cardViews="cardViews" :cardDimensions="cardDimensions"
           :reverse="!handsVisible.get(Position.East)" class="hand-east"></component>
 
 
@@ -72,6 +76,7 @@ import { Bid } from "@/bridge/model/Bid";
 import { PresentationPlayer } from "@/bridge/model/PresentationPlayer";
 import { useWaitForClick } from "../composables/usewaitForClick";
 import { Card } from "@/bridge/model/Card";
+import { Suit } from "@/bridge/model/Suit";
 import VerticalHandView from "./VerticalHandView.vue";
 
 const props = withDefaults(defineProps<{
@@ -228,6 +233,11 @@ watch(() => props.game, (game) => {
 
 
 const dummy = computed(() => auctionVisible.value ? undefined : props.game.dummy);
+
+function getTrumpSuit(): Suit | undefined {
+  const t = props.game?.trumps;
+  return t !== undefined && t !== Suit.Notrump ? t : undefined;
+}
 const cards = ref<Set<Card>>(new Set());
 
 watch(() => props.game, computeCards, { deep: false, immediate: true });

@@ -6,7 +6,6 @@
     <div class="debug-item">
       <div class="debug-item-value">Height: {{ height }}</div>
       <div class="debug-item-value">Width: {{ width }}</div>
-      <button @click="() => {_debug_dummy = !_debug_dummy; update(); }">Dummy</button>
     </div>
   </template>
   </div>
@@ -14,7 +13,7 @@
 
 
 <script setup lang="ts">
-import { watch, computed, nextTick, useTemplateRef, inject, ref, onMounted, onUnmounted } from 'vue';
+import { watch, computed, nextTick, useTemplateRef, inject, onMounted, onUnmounted } from 'vue';
 import { sortCards, sortCardsByPrioritizedSuit, sortSuits } from "@/bridge/utils/CardSorter";
 import { Card } from "../../bridge/model/Card";
 import { Hand } from "../../bridge/model/Hand";
@@ -65,7 +64,6 @@ const componentStyle = computed(() => {
 const root = useTemplateRef<HTMLDivElement>('root');
 
 const {width, height} = useElementSize(root);
-const _debug_dummy = ref(false);
 
 const update = (): void => {
     nextTick(() => {
@@ -178,6 +176,10 @@ const updateDummy = (): void => {
   if (!props.hand || !start) return;
 
   const suits = getHandSuits();
+  if (props.prioritizedSuit !== undefined && suits.includes(props.prioritizedSuit)) {
+    suits.splice(suits.indexOf(props.prioritizedSuit), 1);
+    suits.push(props.prioritizedSuit);
+  }
   const suitCount = suits.length;
   const primarySize = (props.cardDimensions.width + effectiveDummySuitOffset.value) * suitCount - effectiveDummySuitOffset.value;
 
